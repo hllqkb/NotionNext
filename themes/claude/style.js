@@ -157,13 +157,13 @@ const Style = () => {
         --claude-year-filter-text: var(--claude-gh-fg-muted);
         --claude-year-filter-text-active: #fff;
         --claude-activity-empty-color: var(--claude-gh-fg-muted);
-        --claude-gh-font-family: -apple-system, system-ui, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+        --claude-gh-font-family: var(--claude-body-font);
         --claude-timeline-line: rgba(209, 217, 224, 0.7);
         --claude-badge-bg: rgb(246, 248, 250);
         --claude-badge-border: rgb(255, 255, 255);
         --claude-subpage-bg-light: rgb(253 253 247);
-        --claude-heading-font: 'Anthropic Serif Display', Georgia, 'Times New Roman', serif;
-        --claude-body-font: 'Anthropic Sans Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+        --claude-heading-font: 'Anthropic Serif Display', 'Songti SC', 'Noto Serif CJK SC', Georgia, serif;
+        --claude-body-font: 'Anthropic Sans Text', 'PingFang SC', 'Microsoft YaHei', -apple-system, system-ui, sans-serif;
         --font-jetbrains-mono: "JetBrains Mono", "JetBrains Mono Fallback", SF Mono, SFMono-Regular, Menlo, Monaco, Cascadia Mono, Segoe UI Mono, Roboto Mono, Oxygen Mono, Ubuntu Monospace, Source Code Pro, Fira Mono, Droid Sans Mono, Consolas, Courier New, monospace;
         --claude-mono-font: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
         --claude-terminal-bg: #ffffff;
@@ -419,7 +419,7 @@ const Style = () => {
         box-sizing: border-box;
         color: var(--claude-profile-name);
         display: block;
-        font-family: -apple-system, system-ui, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+        font-family: var(--claude-body-font);
         font-size: 24px;
         font-weight: 600;
         height: 30px;
@@ -437,7 +437,7 @@ const Style = () => {
         box-sizing: border-box;
         color: var(--claude-profile-name);
         display: block;
-        font-family: 'PingFang SC', -apple-system, system-ui, 'Hiragino Sans GB', 'Microsoft YaHei', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Segoe UI', 'Noto Sans SC', HarmonyOS_Regular, 'Helvetica Neue', Helvetica, 'Source Han Sans SC', Arial, sans-serif, 'Apple Color Emoji', 'Noto Sans CJK SC', 'Noto Sans SC';
+        font-family: var(--claude-body-font);
         font-feature-settings: normal;
         font-size: 15px;
         font-variation-settings: normal;
@@ -466,7 +466,7 @@ const Style = () => {
         column-gap: 4px;
         display: flex;
         flex-direction: column;
-        font-family: -apple-system, system-ui, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+        font-family: var(--claude-body-font);
         font-size: 14px;
         font-weight: 400;
         height: auto;
@@ -916,6 +916,7 @@ const Style = () => {
         --borderColor-neutral-muted: var(--borderColor-muted);
       }
       #theme-claude .claude-readme-card .markdown-body {
+        font-family: var(--claude-body-font);
         background-color: transparent !important;
       }
       #theme-claude .claude-readme-card .markdown-body pre,
@@ -931,18 +932,7 @@ const Style = () => {
       #theme-claude .claude-readme-card .markdown-body h5,
       #theme-claude .claude-readme-card .markdown-body h6 {
         color: var(--fgColor-default) !important;
-        font-family: var(
-          --fontStack-sansSerif,
-          -apple-system,
-          BlinkMacSystemFont,
-          'Segoe UI',
-          'Noto Sans',
-          Helvetica,
-          Arial,
-          sans-serif,
-          'Apple Color Emoji',
-          'Segoe UI Emoji'
-        ) !important;
+        font-family: var(--claude-heading-font) !important;
         letter-spacing: normal !important;
       }
       #theme-claude .claude-readme-card .markdown-body table th,

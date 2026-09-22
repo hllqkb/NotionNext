@@ -619,8 +619,30 @@ export default function ProfileHome(props) {
               className='markdown-body'
               dangerouslySetInnerHTML={{ __html: readmeHtml }}
             />
-          ) : (
+          ) : readmeExcerpt ? (
             <p className='claude-readme-card-excerpt'>{readmeExcerpt}</p>
+          ) : (
+            <div className='markdown-body'>
+              <h2>Hi, I’m hllqkb</h2>
+              <p>全栈开发者，专注大模型与 AI 应用开发。</p>
+              <p>
+                正在探索 RAG、AI Agent、知识图谱和 AI 音乐电台，
+                也关注计算机视觉与自动化。
+              </p>
+              <p>
+                常用技术：Python、Java、JavaScript / TypeScript、PyTorch、
+                FastAPI、Spring、LangChain、Neo4j。
+              </p>
+              <p>
+                <a href='https://github.com/hllqkb/Claudio'>Claudio</a>
+                {' · '}
+                <a href='https://github.com/hllqkb/Spring-AI-Ailibaba-Best-Practices'>
+                  Spring AI 实践
+                </a>
+                {' · '}
+                <a href='https://github.com/hllqkb'>GitHub</a>
+              </p>
+            </div>
           )}
         </div>
 
