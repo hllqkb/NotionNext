@@ -2,18 +2,37 @@
 
 import NotionPage from '@/components/NotionPage'
 import dynamic from 'next/dynamic'
-import SmartLink from '@/components/SmartLink'
 import { siteConfig } from '@/lib/config'
 import { isBrowser } from '@/lib/utils'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
-import { CategoryChips, LockIcon, Masthead, Seal, SiteFooter, WritingStreak, YearGroups, filterByCategory, hasCover, postDay, useReveal } from './components/Frame'
+import { useEffect, useRef, useState } from 'react'
+import { CategoryChips, LockIcon, Masthead, PageLink, Seal, SiteFooter, WritingStreak, YearGroups, filterByCategory, hasCover, postDay, useReveal } from './components/Frame'
 import Gallery, { galleryImages } from './components/Gallery'
 
 const Comment = dynamic(() => import('@/components/Comment'), { ssr: false })
 import Toc from './components/Toc'
 import CONFIG from './config'
 import { Style } from './style'
+
+/**
+ * 评论区离视口还有一屏时才挂 Comment，连它的分包也不提前下载
+ */
+const LazyComment = ({ post }) => {
+  const ref = useRef(null)
+  const [show, setShow] = useState(false)
+  useEffect(() => {
+    if (show || !ref.current) return
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries.some(e => e.isIntersecting)) setShow(true)
+      },
+      { rootMargin: '600px 0px' }
+    )
+    observer.observe(ref.current)
+    return () => observer.disconnect()
+  }, [show])
+  return <div ref={ref}>{show ? <Comment frontMatter={post} /> : <p className='comments-hint'>评论加载中…</p>}</div>
+}
 
 /**
  * 基础框架：文章页自己排版（左目录右正文），其余页面放进 .page 版心
@@ -65,10 +84,10 @@ const SearchBox = ({ keyword = '' }) => {
 const LeadStory = ({ post }) => (
   <article className={`lead-story reveal${hasCover(post) ? ' has-cover' : ''}`}>
     {hasCover(post) && (
-      <SmartLink href={post.href} className='lead-cover' tabIndex={-1} aria-hidden='true'>
+      <PageLink href={post.href} className='lead-cover' tabIndex={-1} aria-hidden='true'>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={post.pageCoverThumbnail} alt='' loading='lazy' />
-      </SmartLink>
+      </PageLink>
     )}
     <div className='lead-meta'>
       <span>最近一篇</span>
@@ -76,16 +95,16 @@ const LeadStory = ({ post }) => (
       {post.category && <span>{post.category}</span>}
     </div>
     <h2>
-      <SmartLink href={post.href}>
+      <PageLink href={post.href}>
         {post.password && <LockIcon />}
         {post.title}
-      </SmartLink>
+      </PageLink>
     </h2>
     <div className='lead-row'>
       <p>{post.summary}</p>
-      <SmartLink className='read-link' href={post.href} aria-label={`阅读：${post.title}`}>
+      <PageLink className='read-link' href={post.href} aria-label={`阅读：${post.title}`}>
         阅读全文<span aria-hidden='true'>↗</span>
-      </SmartLink>
+      </PageLink>
     </div>
   </article>
 )
@@ -134,7 +153,7 @@ const LayoutIndex = props => {
       {postCount > posts.length && (
         <div className='pager'>
           <span />
-          <SmartLink href='/archive'>查看全部文章 →</SmartLink>
+          <PageLink href='/archive'>查看全部文章 →</PageLink>
         </div>
       )}
     </>
@@ -159,8 +178,8 @@ const LayoutPostList = props => {
       <YearGroups posts={posts} />
       {totalPage > 1 && (
         <div className='pager'>
-          {page > 1 ? <SmartLink href={page - 1 === 1 ? base || '/' : `${base}/page/${page - 1}`}>← 上一页</SmartLink> : <span />}
-          {page < totalPage ? <SmartLink href={`${base}/page/${page + 1}`}>下一页 →</SmartLink> : <span />}
+          {page > 1 ? <PageLink href={page - 1 === 1 ? base || '/' : `${base}/page/${page - 1}`}>← 上一页</PageLink> : <span />}
+          {page < totalPage ? <PageLink href={`${base}/page/${page + 1}`}>下一页 →</PageLink> : <span />}
         </div>
       )}
     </>
@@ -244,9 +263,9 @@ const LayoutSlug = props => {
   return (
     <div className='reading-shell'>
       <aside className='sidebar' aria-label='阅读导航'>
-        <SmartLink className='all-articles' href='/'>
+        <PageLink className='all-articles' href='/'>
           全部文章
-        </SmartLink>
+        </PageLink>
         {!lock && <Toc toc={post.toc} />}
         <div className='sidebar-note'>
           <p>{siteConfig('READING_SIDEBAR_NOTE', null, CONFIG)}</p>
@@ -268,9 +287,9 @@ const LayoutSlug = props => {
               </span>
             )}
             {(post.tags || []).map(t => (
-              <SmartLink key={t} href={`/tag/${encodeURIComponent(t)}`}>
+              <PageLink key={t} href={`/tag/${encodeURIComponent(t)}`}>
                 #{t}
-              </SmartLink>
+              </PageLink>
             ))}
           </div>
         </header>
@@ -315,26 +334,26 @@ const LayoutSlug = props => {
         {isArticle && (prev || next) && (
           <nav className='post-around reveal' aria-label='上一篇和下一篇'>
             {prev ? (
-              <SmartLink href={prev.href || `/${prev.slug}`}>
+              <PageLink href={prev.href || `/${prev.slug}`}>
                 <small>上一篇</small>
                 {prev.title}
-              </SmartLink>
+              </PageLink>
             ) : <span />}
             {next ? (
-              <SmartLink href={next.href || `/${next.slug}`} className='next'>
+              <PageLink href={next.href || `/${next.slug}`} className='next'>
                 <small>下一篇</small>
                 {next.title}
-              </SmartLink>
+              </PageLink>
             ) : <span />}
           </nav>
         )}
         {!lock && siteConfig('READING_COMMENTS', false, CONFIG) && (
           <section className='comments reveal' aria-label='评论'>
-            <Comment frontMatter={post} />
+            <LazyComment post={post} />
           </section>
         )}
         <footer className='article-footer'>
-          <SmartLink href='/'>返回文章列表</SmartLink>
+          <PageLink href='/'>返回文章列表</PageLink>
           <a href='#content' onClick={e => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>
             回到页首
           </a>
@@ -356,10 +375,10 @@ const LayoutCategoryIndex = props => {
       </header>
       <div className='chips'>
         {categoryOptions.map(c => (
-          <SmartLink key={c.name} className='chip' href={`/category/${c.name}`}>
+          <PageLink key={c.name} className='chip' href={`/category/${c.name}`}>
             {c.name}
             <span>{c.count}</span>
-          </SmartLink>
+          </PageLink>
         ))}
       </div>
     </>
@@ -378,10 +397,10 @@ const LayoutTagIndex = props => {
       </header>
       <div className='chips'>
         {tagOptions.map(t => (
-          <SmartLink key={t.name} className='chip' href={`/tag/${encodeURIComponent(t.name)}`}>
+          <PageLink key={t.name} className='chip' href={`/tag/${encodeURIComponent(t.name)}`}>
             #{t.name}
             {t.count ? <span>{t.count}</span> : null}
-          </SmartLink>
+          </PageLink>
         ))}
       </div>
     </>
@@ -395,7 +414,7 @@ const Layout404 = () => (
       这一页不存在<span className='title-period'>。</span>
     </h1>
     <p className='intro-text'>
-      可能是链接写错了，或者文章换了地址。<SmartLink href='/'>回到文章列表</SmartLink>
+      可能是链接写错了，或者文章换了地址。<PageLink href='/'>回到文章列表</PageLink>
     </p>
   </header>
 )
