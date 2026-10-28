@@ -32,6 +32,7 @@ const Search = props => {
 
   props = {
     ...props,
+    allPosts: posts || [],
     posts: filteredPosts,
     postCount: filteredPosts.length,
     keyword: keyword || ''

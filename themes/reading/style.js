@@ -477,6 +477,15 @@ const Style = () => {
         #theme-reading .project-card { padding: 18px 18px 16px; }
         #theme-reading .card-top h2 { font-size: 21px; }
         #theme-reading .album-grid { gap: 20px 14px; }
+
+      /* pagefind */
+      #theme-reading #posts-wrapper + .body-hits { border-top: 1px solid var(--line); }
+      #theme-reading .body-hit a { flex-direction: column; align-items: stretch; gap: 4px; }
+      #theme-reading .body-hit-head { display: flex; align-items: baseline; justify-content: space-between; gap: 32px; }
+      #theme-reading .body-hit-excerpt { margin: 0; font-size: 15px; line-height: 1.75; color: var(--muted); overflow-wrap: anywhere; }
+      #theme-reading .body-hit-excerpt mark { background: none; color: var(--accent); border-bottom: 1px solid currentColor; padding: 0 1px; }
+      @media (max-width: 520px) {
+        #theme-reading .body-hit-head { flex-direction: column; gap: 2px; }
       }
     `}</style>
   )
