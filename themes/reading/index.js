@@ -267,7 +267,7 @@ const LayoutSlug = props => {
             <NotionPage post={post} />
           </article>
         )}
-        {!lock && (
+        {!lock && siteConfig('READING_COMMENTS', false, CONFIG) && (
           <section className='comments reveal' aria-label='评论'>
             <Comment frontMatter={post} />
           </section>

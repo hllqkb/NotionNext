@@ -10,6 +10,9 @@ const CONFIG = {
   READING_VERTICAL_TITLE: '写字的人，做工具的人', // 首页右侧竖排的一句话
   READING_SEAL: '水啊', // 印章文字（最多两个字），留空用作者名前两个字
   READING_GALLERY_TAG: '摄影集', // 带这个标签的文章按摄影集版式展示（图片网格 + 大图浏览）
-  READING_STREAK: true // 首页显示写作打卡点阵
+  READING_STREAK: true, // 首页显示写作打卡点阵
+  // 文章底部评论区（Giscus）。需先在 GitHub 给 hllqkb/NotionNext 安装 giscus App：
+  // https://github.com/apps/giscus/installations/new ；装好后在 Notion 配置表加一行 READING_COMMENTS = true 即可打开
+  READING_COMMENTS: false
 }
 export default CONFIG
