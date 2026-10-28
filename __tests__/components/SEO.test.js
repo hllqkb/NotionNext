@@ -149,6 +149,117 @@ describe('SEO RSS discovery', () => {
   })
 })
 
+describe('SEO share image and canonical', () => {
+  const router = require('next/router')
+
+  const renderWith = (config, props, route = '/') => {
+    siteConfig.mockImplementation((key, defaultVal) => {
+      if (Object.prototype.hasOwnProperty.call(config, key)) return config[key]
+      return Object.prototype.hasOwnProperty.call(baseSiteConfig, key)
+        ? baseSiteConfig[key]
+        : defaultVal
+    })
+    jest
+      .spyOn(router, 'useRouter')
+      .mockReturnValue({ route, pathname: route, query: {}, asPath: route })
+    return render(
+      <SEO
+        siteInfo={{
+          title: 'Example Blog',
+          description: 'Example description',
+          pageCover: 'https://www.notion.so/images/page-cover/nasa.jpg',
+          link: 'https://example.com'
+        }}
+        {...props}
+      />
+    )
+  }
+  const attr = (container, selector, name) =>
+    container.querySelector(selector)?.getAttribute(name)
+
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+
+  it('uses the site default share image instead of the Notion cover', () => {
+    const { container } = renderWith({ SEO_OG_IMAGE: '/og-default.png' })
+    expect(attr(container, 'meta[property="og:image"]', 'content')).toBe(
+      'https://example.com/og-default.png'
+    )
+    expect(attr(container, 'link[rel="canonical"]', 'href')).toBe(
+      'https://example.com'
+    )
+  })
+
+  it('falls back to the Notion cover when no default image is set', () => {
+    const { container } = renderWith({ SEO_OG_IMAGE: '' })
+    expect(attr(container, 'meta[property="og:image"]', 'content')).toBe(
+      'https://www.notion.so/images/page-cover/nasa.jpg'
+    )
+  })
+
+  const post = {
+    type: 'Post',
+    title: 'Hello',
+    slug: 'article/hello',
+    summary: 'sum',
+    ext: {}
+  }
+
+  it('keeps the article cover and self canonical for posts', () => {
+    const { container } = renderWith(
+      { SEO_OG_IMAGE: '/og-default.png' },
+      { post: { ...post, pageCoverThumbnail: 'https://example.com/c.png' } },
+      '/[prefix]/[slug]'
+    )
+    expect(attr(container, 'meta[property="og:image"]', 'content')).toBe(
+      'https://example.com/c.png'
+    )
+    expect(attr(container, 'link[rel="canonical"]', 'href')).toBe(
+      'https://example.com/article/hello'
+    )
+  })
+
+  it('uses the default image for posts without a cover', () => {
+    const { container } = renderWith(
+      { SEO_OG_IMAGE: '/og-default.png' },
+      { post: { ...post, pageCoverThumbnail: '' } },
+      '/[prefix]/[slug]'
+    )
+    expect(attr(container, 'meta[property="og:image"]', 'content')).toBe(
+      'https://example.com/og-default.png'
+    )
+  })
+
+  it('honours an absolute canonicalUrl from ext and ignores a relative one', () => {
+    const { container } = renderWith(
+      {},
+      { post: { ...post, ext: { canonicalUrl: 'https://origin.example/a' } } },
+      '/[prefix]/[slug]'
+    )
+    expect(attr(container, 'link[rel="canonical"]', 'href')).toBe(
+      'https://origin.example/a'
+    )
+    expect(attr(container, 'meta[property="og:url"]', 'content')).toBe(
+      'https://example.com/article/hello'
+    )
+
+    const relative = renderWith(
+      {},
+      { post: { ...post, ext: { canonicalUrl: '/elsewhere' } } },
+      '/[prefix]/[slug]'
+    )
+    expect(attr(relative.container, 'link[rel="canonical"]', 'href')).toBe(
+      'https://example.com/article/hello'
+    )
+  })
+
+  it('omits canonical on the 404 page', () => {
+    const { container } = renderWith({}, {}, '/404')
+    expect(container.querySelector('link[rel="canonical"]')).toBeNull()
+  })
+})
+
 describe('SEO font resource hints', () => {
   it('omits Google Fonts hints for non-Google font URLs', () => {
     const { container } = renderSeo(

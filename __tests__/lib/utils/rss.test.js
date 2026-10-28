@@ -1,5 +1,6 @@
 import fs from 'fs'
 import { generateRss, shouldGenerateRssForLocale } from '@/lib/utils/rss'
+import { getFeedPosts } from '@/lib/utils/feedPosts'
 import { getPostBlocks } from '@/lib/db/SiteDataApi'
 import { formatNotionBlock } from '@/lib/db/notion/getPostBlocks'
 import { adapterNotionBlockMap } from '@/lib/utils/notion.util'
@@ -87,9 +88,11 @@ describe('generateRss', () => {
         description: 'desc',
         link: 'https://example.com'
       },
-      latestPosts: [
+      allPages: [
         {
           id: 'post-1',
+          type: 'Post',
+          status: 'Published',
           slug: 'hello',
           title: 'Hello',
           summary: 'Summary',
@@ -127,9 +130,11 @@ describe('generateRss', () => {
         description: 'desc',
         link: 'https://example.com'
       },
-      latestPosts: [
+      allPages: [
         {
           id: 'post-1',
+          type: 'Post',
+          status: 'Published',
           slug: 'hello',
           title: 'Hello',
           summary: 'Summary',
@@ -148,6 +153,58 @@ describe('generateRss', () => {
       })
     )
     expect(fs.writeFileSync).toHaveBeenCalledTimes(3)
+  })
+
+  it('feeds the newest published posts, not the most recently edited', async () => {
+    await generateRss({
+      NOTION_CONFIG: { RSS_FULL_CONTENT: 'false' },
+      siteInfo: { title: 'site', link: 'https://example.com' },
+      allPages: [
+        {
+          id: 'old',
+          slug: 'old',
+          title: 'Old but edited',
+          type: 'Post',
+          status: 'Published',
+          publishDate: Date.parse('2025-08-21'),
+          lastEditedDate: new Date('2026-10-20')
+        },
+        {
+          id: 'new',
+          slug: 'new',
+          title: 'New',
+          type: 'Post',
+          status: 'Published',
+          publishDate: Date.parse('2026-07-29'),
+          lastEditedDate: new Date('2026-07-29')
+        },
+        {
+          id: 'page',
+          slug: 'about',
+          title: 'About',
+          type: 'Page',
+          status: 'Published',
+          publishDate: Date.parse('2026-10-01')
+        }
+      ]
+    })
+
+    expect(addItemMock.mock.calls.map(([item]) => item.title)).toEqual([
+      'New',
+      'Old but edited'
+    ])
+  })
+
+  it('caps the feed at the requested count', () => {
+    const pages = Array.from({ length: 30 }, (_, i) => ({
+      id: `p${i}`,
+      type: 'Post',
+      status: 'Published',
+      publishDate: i
+    }))
+    const feedPosts = getFeedPosts(pages, 20)
+    expect(feedPosts).toHaveLength(20)
+    expect(feedPosts[0].id).toBe('p29')
   })
 
   it('generates RSS only for the default locale during multi-locale builds', () => {

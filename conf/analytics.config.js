@@ -43,5 +43,13 @@ module.exports = {
   UMAMI_HOST: process.env.NEXT_PUBLIC_UMAMI_HOST || 'https://cloud.umami.is/script.js', // umami的服务地址
   UMAMI_ID: process.env.NEXT_PUBLIC_UMAMI_ID || '', // umami的id
 
+  // Cloudflare Web Analytics https://developers.cloudflare.com/web-analytics/get-started/
+  // 填了 token 才输出 beacon；ENABLE 留作不删 token 时临时关掉的开关。
+  // 若已在 Pages 后台 Metrics 里一键开启（自动注入），这里不要再填 token，避免重复计数
+  ANALYTICS_CLOUDFLARE_ENABLE:
+    process.env.NEXT_PUBLIC_ANALYTICS_CLOUDFLARE_ENABLE || true,
+  ANALYTICS_CLOUDFLARE_TOKEN:
+    process.env.NEXT_PUBLIC_ANALYTICS_CLOUDFLARE_TOKEN || '', // Web Analytics 站点的 token，JS snippet 里 data-cf-beacon 的 token
+
   // <---- 站点统计
 }

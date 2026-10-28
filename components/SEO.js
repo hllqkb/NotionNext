@@ -66,6 +66,9 @@ const SEO = props => {
     url = createSiteUrl(url, meta.slug) || url
     image = getAbsoluteImageUrl(meta.image || '/bg_image.jpg', LINK)
   }
+  // 404 没有自己的地址，不声明 canonical，免得把它归到首页
+  const canonical =
+    router.route === '/404' ? null : getCanonicalUrl(post, url)
   const TITLE = siteConfig('TITLE')
   const title = meta?.title || TITLE
   const description = meta?.description || `${siteInfo?.description}`
@@ -180,7 +183,7 @@ const SEO = props => {
       )}
 
       {/* 基础SEO元数据 */}
-      <link rel='canonical' href={url} />
+      {canonical && <link rel='canonical' href={canonical} />}
       {/* RSS 自动发现：浏览器地址栏与阅读器依赖此声明 */}
       {ENABLE_RSS && rssUrl && (
         <link
@@ -393,6 +396,17 @@ const getAbsoluteImageUrl = (image, siteUrl) => {
   return createSiteUrl(siteUrl, rawImage) || rawImage
 }
 
+/**
+ * 文章可在 Notion 的 ext 里写 {"canonicalUrl": "https://..."} 指向原文（授权转载）；
+ * 没写就是本页地址。只接受 http(s) 绝对地址，写错时回退本页，不输出相对路径
+ */
+const getCanonicalUrl = (post, url) => {
+  const custom = post?.ext?.canonicalUrl
+  return typeof custom === 'string' && isHttpLink(custom.trim())
+    ? custom.trim()
+    : url
+}
+
 const getIsoTime = value => {
   if (!value) return undefined
 
@@ -408,8 +422,11 @@ const getIsoTime = value => {
  * @param {*} router
  */
 const getSEOMeta = (props, router, locale) => {
-  const { post, siteInfo, tag, category, page } = props
+  const { post, siteInfo, tag, category, page, NOTION_CONFIG } = props
   const keyword = router?.query?.s
+  // 非文章页和无封面文章的分享图；不配置时沿用 Notion 站点封面
+  const siteImage =
+    siteConfig('SEO_OG_IMAGE', '', NOTION_CONFIG) || `${siteInfo?.pageCover}`
 
   const TITLE = siteConfig('TITLE')
   switch (router.route) {
@@ -417,7 +434,7 @@ const getSEOMeta = (props, router, locale) => {
       return {
         title: `${siteInfo?.title} | ${siteInfo?.description}`,
         description: `${siteInfo?.description}`,
-        image: `${siteInfo?.pageCover}`,
+        image: siteImage,
         slug: '',
         type: 'website'
       }
@@ -425,7 +442,7 @@ const getSEOMeta = (props, router, locale) => {
       return {
         title: `${locale.NAV.ARCHIVE} | ${siteInfo?.title}`,
         description: `${siteInfo?.description}`,
-        image: `${siteInfo?.pageCover}`,
+        image: siteImage,
         slug: 'archive',
         type: 'website'
       }
@@ -433,7 +450,7 @@ const getSEOMeta = (props, router, locale) => {
       return {
         title: `${page} | Page | ${siteInfo?.title}`,
         description: `${siteInfo?.description}`,
-        image: `${siteInfo?.pageCover}`,
+        image: siteImage,
         slug: 'page/' + page,
         type: 'website'
       }
@@ -442,7 +459,7 @@ const getSEOMeta = (props, router, locale) => {
         title: `${category} | ${locale.COMMON.CATEGORY} | ${siteInfo?.title}`,
         description: `${siteInfo?.description}`,
         slug: 'category/' + category,
-        image: `${siteInfo?.pageCover}`,
+        image: siteImage,
         type: 'website'
       }
     case '/category/[category]/page/[page]':
@@ -450,7 +467,7 @@ const getSEOMeta = (props, router, locale) => {
         title: `${category} | ${locale.COMMON.CATEGORY} | ${siteInfo?.title}`,
         description: `${siteInfo?.description}`,
         slug: 'category/' + category,
-        image: `${siteInfo?.pageCover}`,
+        image: siteImage,
         type: 'website'
       }
     case '/tag/[tag]':
@@ -458,7 +475,7 @@ const getSEOMeta = (props, router, locale) => {
       return {
         title: `${tag} | ${locale.COMMON.TAGS} | ${siteInfo?.title}`,
         description: `${siteInfo?.description}`,
-        image: `${siteInfo?.pageCover}`,
+        image: siteImage,
         slug: 'tag/' + tag,
         type: 'website'
       }
@@ -466,7 +483,7 @@ const getSEOMeta = (props, router, locale) => {
       return {
         title: `${keyword || ''}${keyword ? ' | ' : ''}${locale.NAV.SEARCH} | ${siteInfo?.title}`,
         description: `${siteInfo?.description}`,
-        image: `${siteInfo?.pageCover}`,
+        image: siteImage,
         slug: 'search',
         type: 'website'
       }
@@ -475,20 +492,20 @@ const getSEOMeta = (props, router, locale) => {
       return {
         title: `${keyword || ''}${keyword ? ' | ' : ''}${locale.NAV.SEARCH} | ${siteInfo?.title}`,
         description: TITLE,
-        image: `${siteInfo?.pageCover}`,
+        image: siteImage,
         slug: 'search/' + (keyword || ''),
         type: 'website'
       }
     case '/404':
       return {
         title: `${siteInfo?.title} | ${locale.NAV.PAGE_NOT_FOUND}`,
-        image: `${siteInfo?.pageCover}`
+        image: siteImage
       }
     case '/tag':
       return {
         title: `${locale.COMMON.TAGS} | ${siteInfo?.title}`,
         description: `${siteInfo?.description}`,
-        image: `${siteInfo?.pageCover}`,
+        image: siteImage,
         slug: 'tag',
         type: 'website'
       }
@@ -496,7 +513,7 @@ const getSEOMeta = (props, router, locale) => {
       return {
         title: `${locale.COMMON.CATEGORY} | ${siteInfo?.title}`,
         description: `${siteInfo?.description}`,
-        image: `${siteInfo?.pageCover}`,
+        image: siteImage,
         slug: 'category',
         type: 'website'
       }
@@ -511,7 +528,7 @@ const getSEOMeta = (props, router, locale) => {
         description: post?.summary,
         type: post?.type,
         slug: post?.slug,
-        image: post?.pageCoverThumbnail || `${siteInfo?.pageCover}`,
+        image: post?.pageCoverThumbnail || siteImage,
         category,
         tags: post?.tags,
         publishDay: post?.publishDay,

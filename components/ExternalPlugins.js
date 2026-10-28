@@ -142,6 +142,9 @@ const ExternalPlugin = props => {
 
   const UMAMI_HOST = siteConfig('UMAMI_HOST', null, NOTION_CONFIG)
   const UMAMI_ID = siteConfig('UMAMI_ID', null, NOTION_CONFIG)
+  const ANALYTICS_CLOUDFLARE_TOKEN =
+    siteConfig('ANALYTICS_CLOUDFLARE_ENABLE', true, NOTION_CONFIG) &&
+    siteConfig('ANALYTICS_CLOUDFLARE_TOKEN', null, NOTION_CONFIG)
 
   const externalCssList = useMemo(() => {
     return Array.isArray(CUSTOM_EXTERNAL_CSS)
@@ -467,6 +470,16 @@ const ExternalPlugin = props => {
       {/* UMAMI 统计 */}
       {UMAMI_ID && (
         <script async defer src={UMAMI_HOST} data-website-id={UMAMI_ID}></script>
+      )}
+
+      {/* Cloudflare Web Analytics */}
+      {ANALYTICS_CLOUDFLARE_TOKEN && (
+        <script
+          defer
+          src='https://static.cloudflareinsights.com/beacon.min.js'
+          data-cf-beacon={JSON.stringify({
+            token: ANALYTICS_CLOUDFLARE_TOKEN
+          })}></script>
       )}
 
       {/* 谷歌统计 */}
