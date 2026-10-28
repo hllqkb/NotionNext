@@ -1,0 +1,176 @@
+/* eslint-disable react/no-unknown-property */
+/**
+ * reading 主题样式：纸色底、墨色字、赭红点缀，霞鹜文楷（字体由 FONT_URL 加载）
+ * 只作用于 #theme-reading 内部
+ */
+const Style = () => {
+  return (
+    <style jsx global>{`
+      #theme-reading {
+        --paper: #f7f6f0;
+        --sidebar: #f0eee7;
+        --ink: #34352e;
+        --muted: #78786e;
+        --line: #dfdfd4;
+        --line-soft: #e8e7df;
+        --accent: #aa533b;
+        --quote-bg: #f0ede5;
+        --code-bg: #eeece5;
+        --font: 'LXGW WenKai', 'Kaiti SC', KaiTi, serif;
+        background: var(--paper);
+        color: var(--ink);
+        font: 400 18px/1.8 var(--font);
+        min-height: 100vh;
+      }
+      .dark #theme-reading {
+        --paper: #1c1b18;
+        --sidebar: #24221e;
+        --ink: #e6e2d8;
+        --muted: #a29d91;
+        --line: #3a3832;
+        --line-soft: #2f2d28;
+        --accent: #e0896e;
+        --quote-bg: #26241f;
+        --code-bg: #2a2823;
+      }
+      .dark body { background: #1c1b18; }
+      body { background: #f7f6f0; }
+
+      #theme-reading a { color: inherit; text-decoration: none; }
+      #theme-reading a:hover { color: var(--accent); }
+      #theme-reading ::selection { background: #e4cebc; }
+      #theme-reading .page { max-width: 1080px; margin: auto; padding: 0 56px; }
+
+      /* 页头 */
+      #theme-reading .masthead { display: flex; justify-content: space-between; align-items: center; padding: 26px 0; border-bottom: 1px solid var(--line); gap: 24px; }
+      #theme-reading .brand { display: flex; align-items: center; gap: 10px; font-size: 23px; white-space: nowrap; }
+      #theme-reading .brand-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); margin-top: 3px; }
+      #theme-reading .masthead nav { display: flex; gap: 28px; font-size: 16px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+      #theme-reading .masthead nav .active { color: var(--accent); }
+      #theme-reading .masthead button { background: none; border: 0; color: inherit; font: inherit; cursor: pointer; padding: 0; }
+
+      /* 首页大标题 */
+      #theme-reading .intro { display: flex; align-items: flex-end; justify-content: space-between; gap: 40px; padding: 46px 0 36px; }
+      #theme-reading .eyebrow { margin: 0 0 14px; color: var(--muted); font-size: 14px; letter-spacing: .12em; }
+      #theme-reading .intro h1 { font-size: 76px; font-weight: 400; line-height: 1.2; margin: 0 0 18px; letter-spacing: -.05em; }
+      #theme-reading .title-period { color: var(--accent); font-size: .78em; }
+      #theme-reading .intro-text { margin: 0; font-size: 20px; color: var(--muted); }
+      #theme-reading .collection-note { font-size: 15px; line-height: 1.9; text-align: right; margin: 0 0 3px; color: var(--muted); }
+
+      /* 计数 + 搜索 */
+      #theme-reading .collection-bar { display: flex; align-items: flex-start; justify-content: space-between; gap: 32px; padding: 18px 0; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--line); font-size: 14px; color: var(--muted); }
+      #theme-reading .collection-bar p { margin: 0; padding-top: 3px; }
+      #theme-reading .search-box { max-width: 340px; flex: 1; }
+      #theme-reading .search-box input { width: 100%; padding: 9px 14px; border: 1px solid var(--line); border-radius: 6px; background: transparent; font: 400 16px/1.5 var(--font); color: var(--ink); }
+
+      /* 最近一篇 */
+      #theme-reading .lead-story { padding: 28px 0 32px; border-bottom: 1px solid var(--line); }
+      #theme-reading .lead-meta { display: flex; gap: 18px; align-items: center; font-size: 14px; color: var(--muted); margin-bottom: 14px; }
+      #theme-reading .lead-meta > span { color: var(--accent); }
+      #theme-reading .lead-story h2 { font-weight: 400; font-size: 30px; line-height: 1.5; margin: 0 0 8px; }
+      #theme-reading .lead-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 36px; align-items: end; }
+      #theme-reading .lead-story p { font-size: 17px; line-height: 1.9; color: var(--muted); margin: 0; }
+      #theme-reading .read-link { font-size: 14px; white-space: nowrap; display: flex; align-items: center; gap: 20px; }
+      #theme-reading .read-link > span { font-family: Georgia, serif; font-size: 23px; color: var(--accent); transition: transform .2s; }
+      #theme-reading .read-link:hover > span { transform: translate(2px, -2px); }
+
+      /* 按年分组 */
+      #theme-reading .year-group { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 24px; padding: 30px 0 22px; border-bottom: 1px solid var(--line); }
+      #theme-reading .year-group:last-child { border-bottom: 0; }
+      #theme-reading .year-label { font-weight: 400; font-size: 29px; line-height: 1.4; margin: 15px 0; color: var(--muted); font-variant-numeric: tabular-nums; }
+      #theme-reading .year-group ul { list-style: none; margin: 0; padding: 0; }
+      #theme-reading .essay-row a { display: flex; align-items: baseline; justify-content: space-between; gap: 32px; padding: 16px 0; }
+      #theme-reading .essay-row h3 { font-size: 21px; font-weight: 400; line-height: 1.65; margin: 0; overflow-wrap: anywhere; }
+      #theme-reading .essay-row time { font-size: 14px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+      #theme-reading .essay-row + .essay-row { border-top: 1px solid var(--line-soft); }
+      #theme-reading .empty { padding: 50px 0; color: var(--muted); }
+      #theme-reading .pager { display: flex; justify-content: space-between; padding: 24px 0; font-size: 16px; }
+
+      /* 分类 / 标签云 */
+      #theme-reading .chips { display: flex; flex-wrap: wrap; gap: 12px; padding: 30px 0; }
+      #theme-reading .chip { border: 1px solid var(--line); border-radius: 999px; padding: 4px 14px; font-size: 16px; }
+      #theme-reading .chip span { color: var(--muted); font-size: 13px; margin-left: 6px; }
+      #theme-reading .list-head { padding: 40px 0 10px; }
+      #theme-reading .list-head h1 { font-size: 44px; font-weight: 400; margin: 0; }
+
+      /* 文章页 */
+      #theme-reading .reading-shell { display: grid; grid-template-columns: 216px minmax(0, 744px); gap: 76px; max-width: 1180px; margin: 60px auto 0; padding: 0 40px; align-items: start; }
+      #theme-reading .sidebar { position: sticky; top: 30px; padding: 20px 18px; background: var(--sidebar); border-radius: 12px; color: var(--muted); font-size: 15px; }
+      #theme-reading .all-articles { display: block; color: var(--ink); font-size: 17px; padding: 0 0 16px; }
+      #theme-reading .chapter-menu { border-top: 1px solid var(--line); padding-top: 16px; }
+      #theme-reading .chapter-menu summary { cursor: pointer; color: var(--ink); }
+      #theme-reading .toc { display: flex; flex-direction: column; gap: 10px; padding: 18px 2px 4px; max-height: 55vh; overflow: auto; }
+      #theme-reading .toc a { line-height: 1.65; overflow-wrap: anywhere; cursor: pointer; }
+      #theme-reading .toc .level-1 { padding-left: 12px; font-size: 14px; }
+      #theme-reading .toc .level-2 { padding-left: 24px; font-size: 13px; }
+      #theme-reading .sidebar-note { border-top: 1px solid var(--line); margin-top: 22px; padding-top: 16px; font-size: 13px; }
+      #theme-reading .sidebar-note p { font-size: 16px; color: var(--ink); margin: 0 0 10px; }
+      #theme-reading .article-head { padding: 0 0 42px; margin-bottom: 38px; border-bottom: 1px solid var(--line); }
+      #theme-reading .kicker { display: flex; align-items: baseline; flex-wrap: wrap; gap: 12px; color: var(--accent); font-size: 15px; margin: 0 0 20px; }
+      #theme-reading .article-head h1 { font-size: 46px; font-weight: 400; line-height: 1.4; letter-spacing: -.02em; margin: 0 0 26px; overflow-wrap: anywhere; }
+      #theme-reading .byline { display: flex; flex-wrap: wrap; gap: 10px; color: var(--muted); font-size: 15px; }
+      #theme-reading .article-footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 24px; font-size: 16px; }
+      #theme-reading .site-footer { max-width: 1080px; margin: 80px auto 0; padding: 24px 56px 32px; display: flex; justify-content: space-between; gap: 18px; font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); }
+
+      /* Notion 正文：沿用阅读版式 */
+      #theme-reading .prose { font-size: 20px; line-height: 1.9; }
+      #theme-reading .prose .notion,
+      #theme-reading .prose .notion-page { font-family: var(--font); color: var(--ink); font-size: inherit; line-height: inherit; width: 100%; padding: 0; }
+      #theme-reading .prose .notion-text { padding: 0; margin: 0 0 1.1em; }
+      #theme-reading .prose .notion-h { font-weight: 400; line-height: 1.5; }
+      #theme-reading .prose .notion-h1 { font-size: 32px; margin: 1.8em 0 .8em; padding-top: 20px; border-top: 1px solid var(--line); }
+      #theme-reading .prose .notion-h2 { font-size: 28px; margin: 1.7em 0 .8em; }
+      #theme-reading .prose .notion-h3 { font-size: 24px; margin: 1.5em 0 .7em; }
+      #theme-reading .prose .notion-quote { border: 0; margin: 0 0 1.6em; padding: 20px 24px; background: var(--quote-bg); border-radius: 8px; color: var(--muted); font-size: inherit; }
+      #theme-reading .prose b, #theme-reading .prose strong { font-weight: 600; color: var(--accent); }
+      #theme-reading .prose .notion-link { color: var(--accent); border-bottom: 1px solid currentColor; opacity: 1; }
+      #theme-reading .prose .notion-list { padding-left: 1.5em; margin: 0 0 1.2em; }
+      #theme-reading .prose .notion-hr { border-top: 1px solid var(--line); margin: 36px 0; }
+      #theme-reading .prose .notion-asset-wrapper img { border-radius: 8px; }
+      #theme-reading .prose .notion-code { background: var(--code-bg) !important; border: 1px solid var(--line); border-radius: 8px; font-size: 15px; }
+      #theme-reading .prose .notion-inline-code { background: var(--code-bg); color: var(--ink); padding: 2px 5px; border-radius: 4px; }
+      #theme-reading .prose .notion-callout { background: var(--quote-bg); border: 0; border-radius: 8px; }
+      #theme-reading .prose .notion-table { font-size: 17px; }
+
+      @media (max-width: 1050px) {
+        #theme-reading .reading-shell { grid-template-columns: 190px minmax(0, 1fr); gap: 38px; padding: 0 30px; }
+      }
+      @media (max-width: 800px) {
+        #theme-reading .page { padding: 0 24px; }
+        #theme-reading .intro h1 { font-size: 60px; }
+        #theme-reading .collection-note { display: none; }
+        #theme-reading .reading-shell { display: flex; flex-direction: column; margin-top: 26px; gap: 30px; padding: 0 24px; }
+        #theme-reading .sidebar { width: 100%; position: static; padding: 14px 18px; }
+        #theme-reading .all-articles, #theme-reading .sidebar-note { display: none; }
+        #theme-reading .chapter-menu { border: 0; padding: 0; }
+        #theme-reading .article-head h1 { font-size: 34px; }
+        #theme-reading .year-group { grid-template-columns: 74px minmax(0, 1fr); gap: 20px; }
+        #theme-reading .site-footer { padding-inline: 24px; }
+      }
+      @media (max-width: 520px) {
+        #theme-reading { font-size: 17px; }
+        #theme-reading .page { padding: 0 20px; }
+        #theme-reading .masthead { padding: 17px 0; }
+        #theme-reading .brand { font-size: 21px; }
+        #theme-reading .masthead nav { gap: 16px; font-size: 14px; }
+        #theme-reading .intro { padding: 36px 0 26px; }
+        #theme-reading .intro h1 { font-size: 56px; }
+        #theme-reading .intro-text { font-size: 17px; }
+        #theme-reading .collection-bar { flex-direction: column; gap: 10px; }
+        #theme-reading .search-box { max-width: none; width: 100%; }
+        #theme-reading .lead-row { display: block; }
+        #theme-reading .lead-story h2 { font-size: 25px; }
+        #theme-reading .read-link { justify-content: flex-end; margin-top: 12px; }
+        #theme-reading .year-group { display: block; padding: 24px 0 12px; }
+        #theme-reading .year-label { font-size: 24px; margin: 0 0 6px; }
+        #theme-reading .essay-row h3 { font-size: 19px; }
+        #theme-reading .essay-row a { gap: 16px; padding: 14px 0; }
+        #theme-reading .prose { font-size: 18px; }
+        #theme-reading .article-head h1 { font-size: 30px; }
+        #theme-reading .site-footer { flex-direction: column; gap: 4px; padding-inline: 20px; }
+      }
+    `}</style>
+  )
+}
+
+export { Style }
