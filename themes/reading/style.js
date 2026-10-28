@@ -131,8 +131,37 @@ const Style = () => {
       #theme-reading .lightbox-bar { display: flex; align-items: center; gap: 18px; color: #e6e2d8; font-size: 15px; margin: 0; }
       #theme-reading .lightbox-bar button { background: none; border: 1px solid rgba(230, 226, 216, .4); color: inherit; border-radius: 999px; width: 36px; height: 36px; cursor: pointer; font-size: 16px; }
 
-      /* 评论 */
-      #theme-reading .comments { margin-top: 56px; padding-top: 28px; border-top: 1px solid var(--line); }
+      /* 评论（Waline）：配色跟主题走 */
+      #theme-reading .comments { margin-top: 48px; padding-top: 28px; border-top: 1px solid var(--line); }
+      #theme-reading .comments [data-waline] {
+        --waline-font-size: 16px; --waline-white: var(--paper); --waline-light-grey: var(--muted);
+        --waline-dark-grey: var(--muted); --waline-theme-color: var(--accent); --waline-active-color: var(--accent);
+        --waline-color: var(--ink); --waline-bg-color: var(--paper); --waline-bg-color-light: var(--sidebar);
+        --waline-bg-color-hover: var(--sidebar); --waline-border-color: var(--line); --waline-disable-bg-color: var(--sidebar);
+        --waline-info-bg-color: var(--sidebar); --waline-info-color: var(--muted); --waline-badge-color: var(--accent);
+        font-family: var(--font);
+      }
+
+      /* 文末版权 + 上一篇下一篇 */
+      #theme-reading .post-license { margin-top: 48px; padding: 18px 22px; background: var(--sidebar); border-radius: 10px; border-left: 3px solid var(--accent); font-size: 15px; color: var(--muted); }
+      #theme-reading .post-license p { margin: 4px 0; overflow-wrap: anywhere; }
+      #theme-reading .post-license span { display: inline-block; min-width: 3em; color: var(--ink); margin-right: 10px; }
+      #theme-reading .post-license a { color: var(--accent); }
+      #theme-reading .post-around { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 28px; }
+      #theme-reading .post-around a { display: block; padding: 14px 18px; border: 1px solid var(--line); border-radius: 10px; font-size: 17px; line-height: 1.6; transition: border-color .2s; }
+      #theme-reading .post-around a:hover { border-color: var(--accent); }
+      #theme-reading .post-around a.next { text-align: right; }
+      #theme-reading .post-around small { display: block; font-size: 13px; color: var(--muted); }
+
+      /* 代码块：NotionNext 的 Mac 窗口样式默认是深色底，这里改成跟纸色一致，按钮和语言标签用深色字 */
+      #theme-reading .code-toolbar { background: var(--code-bg); border: 1px solid var(--line); border-radius: 10px; box-shadow: none; margin: 1.2em 0; }
+      #theme-reading .code-toolbar pre.notion-code { background: transparent !important; border: 0 !important; margin: 0 !important; }
+      #theme-reading .code-toolbar > .toolbar { height: 34px; opacity: .85; }
+      #theme-reading .code-toolbar .toolbar-item > button,
+      #theme-reading .code-toolbar .toolbar-item > span { font-family: var(--font) !important; font-size: 12px !important; color: var(--muted) !important; background: var(--paper) !important; border: 1px solid var(--line) !important; border-radius: 999px !important; padding: 4px 10px !important; }
+      #theme-reading .code-toolbar .toolbar-item > button:hover { color: var(--accent) !important; border-color: var(--accent) !important; }
+      #theme-reading .code-toolbar .pre-mac > span { width: 9px; height: 9px; opacity: .75; }
+      #theme-reading .notion-code-copy { display: none; }
 
       /* 分类筛选 */
       #theme-reading .filter-chips { display: flex; flex-wrap: wrap; gap: 10px; padding: 18px 0 4px; }
@@ -236,6 +265,8 @@ const Style = () => {
         #theme-reading .intro-side { display: none; }
         #theme-reading .dot { width: 9px; height: 9px; }
         #theme-reading .photo-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        #theme-reading .post-around { grid-template-columns: 1fr; }
+        #theme-reading .post-around a.next { text-align: left; }
         #theme-reading .prose { font-size: 18px; }
         #theme-reading .article-head h1 { font-size: 30px; }
         #theme-reading .site-footer { flex-direction: column; gap: 4px; padding-inline: 20px; }
