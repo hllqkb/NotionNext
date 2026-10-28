@@ -1,6 +1,7 @@
 import { siteConfig } from '@/lib/config'
 import { compressImage, mapImgUrl } from '@/lib/db/notion/mapImage'
 import NotionEmbed from '@/components/NotionEmbed'
+import NotionImage from '@/components/NotionImage'
 import NotionLink from '@/components/NotionLink'
 import { isBrowser, loadExternalResource } from '@/lib/utils'
 import mediumZoom from '@fisch0920/medium-zoom'
@@ -167,11 +168,14 @@ const NotionPage = ({ post, className }) => {
         recordMap={post?.blockMap}
         mapPageUrl={mapPageUrl}
         mapImageUrl={mapImgUrl}
+        // 图片统一走 NotionImage：本站托管图换 WebP srcset 并补宽高
+        forceCustomImages
         components={{
           Code,
           Collection,
           Embed: NotionEmbed,
           Equation,
+          Image: NotionImage,
           Link: NotionLink,
           Modal,
           Pdf,
