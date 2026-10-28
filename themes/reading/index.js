@@ -201,8 +201,20 @@ const LayoutArchive = props => {
 }
 
 /** 文章页：左侧目录，右侧正文 */
+/** 正文字数与阅读时长：按 Notion 块里的文字算，中文约每分钟 400 字 */
+const readingStats = post => {
+  const blocks = post?.blockMap?.block || {}
+  let chars = 0
+  for (const x of Object.values(blocks)) {
+    const b = x?.value?.value || x?.value
+    if (!b || b.type === 'page' || b.type === 'code') continue
+    for (const seg of b.properties?.title || []) chars += String(seg[0] || '').replace(/\s/g, '').length
+  }
+  return { chars, minutes: Math.max(1, Math.round(chars / 400)) }
+}
+
 const LayoutSlug = props => {
-  const { post, lock, validPassword } = props
+  const { post, lock, validPassword, prev, next } = props
   const router = useRouter()
   const [password, setPassword] = useState('')
 
@@ -219,6 +231,9 @@ const LayoutSlug = props => {
   if (!post) return null
   const day = postDay(post)
   const isGallery = (post.tags || []).includes(siteConfig('READING_GALLERY_TAG', null, CONFIG))
+  const stats = readingStats(post)
+  const isArticle = post.type === 'Post'
+  const pageUrl = `${siteConfig('LINK')}/${post.slug}`
   return (
     <div className='reading-shell'>
       <aside className='sidebar' aria-label='阅读导航'>
@@ -239,15 +254,18 @@ const LayoutSlug = props => {
             {day && <time dateTime={day}>{String(day).replaceAll('-', ' / ')}</time>}
           </p>
           <h1>{post.title}</h1>
-          {post.tags?.length > 0 && (
-            <div className='byline'>
-              {post.tags.map(t => (
-                <SmartLink key={t} href={`/tag/${encodeURIComponent(t)}`}>
-                  #{t}
-                </SmartLink>
-              ))}
-            </div>
-          )}
+          <div className='byline'>
+            {stats.chars > 0 && !lock && (
+              <span>
+                {stats.chars.toLocaleString()} 字 · 约 {stats.minutes} 分钟
+              </span>
+            )}
+            {(post.tags || []).map(t => (
+              <SmartLink key={t} href={`/tag/${encodeURIComponent(t)}`}>
+                #{t}
+              </SmartLink>
+            ))}
+          </div>
         </header>
         {lock ? (
           <form
@@ -266,6 +284,42 @@ const LayoutSlug = props => {
           <article id='article-wrapper' className='prose'>
             <NotionPage post={post} />
           </article>
+        )}
+        {!lock && isArticle && (
+          <aside className='post-license reveal' aria-label='版权声明'>
+            <p>
+              <span>作者</span>
+              {siteConfig('AUTHOR')}
+            </p>
+            <p>
+              <span>链接</span>
+              <a href={pageUrl}>{pageUrl}</a>
+            </p>
+            <p>
+              <span>许可</span>
+              转载请注明出处，采用{' '}
+              <a href={siteConfig('READING_LICENSE_URL', null, CONFIG)} target='_blank' rel='noopener noreferrer license'>
+                {siteConfig('READING_LICENSE', null, CONFIG)}
+              </a>{' '}
+              协议
+            </p>
+          </aside>
+        )}
+        {isArticle && (prev || next) && (
+          <nav className='post-around reveal' aria-label='上一篇和下一篇'>
+            {prev ? (
+              <SmartLink href={prev.href || `/${prev.slug}`}>
+                <small>上一篇</small>
+                {prev.title}
+              </SmartLink>
+            ) : <span />}
+            {next ? (
+              <SmartLink href={next.href || `/${next.slug}`} className='next'>
+                <small>下一篇</small>
+                {next.title}
+              </SmartLink>
+            ) : <span />}
+          </nav>
         )}
         {!lock && siteConfig('READING_COMMENTS', false, CONFIG) && (
           <section className='comments reveal' aria-label='评论'>
