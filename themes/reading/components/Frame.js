@@ -76,12 +76,16 @@ export const hasCover = post => {
   return !!src && !/bg_image|HOME_BANNER/.test(src) && src !== siteConfig('HOME_BANNER_IMAGE')
 }
 
-/** 印章：作者名第一个字，朱红方印 */
-export const Seal = ({ text }) => (
-  <span className='seal' aria-hidden='true'>
-    {String(text || '').slice(0, 2)}
-  </span>
-)
+/** 印章：朱红方印。中文取前两个字竖排，英文（如 hllqk）横排 */
+export const Seal = ({ text }) => {
+  const raw = String(text || '').trim()
+  const latin = /^[\x00-\x7F]+$/.test(raw)
+  return (
+    <span className={`seal${latin ? ' seal-latin' : ''}`} aria-hidden='true'>
+      {latin ? raw.slice(0, 8) : raw.slice(0, 2)}
+    </span>
+  )
+}
 
 /** 写作打卡：最近 26 周，每周一个点，写过文章的周点亮，颜色随篇数加深 */
 export const WritingStreak = ({ pages = [] }) => {

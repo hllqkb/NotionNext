@@ -98,8 +98,11 @@ const Style = () => {
 
       /* 首页右侧：竖排一句话 + 朱红印章 */
       #theme-reading .intro-side { display: flex; align-items: flex-end; gap: 18px; align-self: stretch; }
-      #theme-reading .vertical-title { writing-mode: vertical-rl; margin: 0; font-size: 17px; letter-spacing: .28em; color: var(--muted); line-height: 1.6; white-space: nowrap; }
+      #theme-reading .vertical-title { margin: 0; display: flex; flex-direction: row-reverse; gap: 14px; font-size: 17px; color: var(--muted); }
+      #theme-reading .vertical-title span { writing-mode: vertical-rl; letter-spacing: .3em; line-height: 1; white-space: nowrap; }
+      #theme-reading .vertical-title span:first-child { color: var(--ink); }
       #theme-reading .seal { display: inline-flex; align-items: center; justify-content: center; width: 54px; height: 54px; border: 2px solid var(--accent); border-radius: 6px; color: var(--accent); font-size: 21px; line-height: 1; letter-spacing: .05em; writing-mode: vertical-rl; transform: rotate(-4deg); box-shadow: inset 0 0 0 3px var(--paper), inset 0 0 0 4px var(--accent); opacity: .9; }
+      #theme-reading .seal-latin { writing-mode: horizontal-tb; width: auto; height: 34px; padding: 0 12px; font-size: 17px; letter-spacing: .08em; font-family: Georgia, 'Times New Roman', serif; font-style: italic; }
 
       /* 写作打卡点阵 */
       #theme-reading .streak { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 0 0 26px; flex-wrap: wrap; }
@@ -233,6 +236,7 @@ const Style = () => {
         #theme-reading .collection-note { display: none; }
         #theme-reading .vertical-title { display: none; }
         #theme-reading .seal { width: 46px; height: 46px; font-size: 18px; }
+        #theme-reading .seal-latin { width: auto; height: 30px; font-size: 15px; }
         #theme-reading .reading-shell { display: flex; flex-direction: column; margin-top: 26px; gap: 30px; padding: 0 24px; }
         #theme-reading .sidebar { width: 100%; position: static; padding: 14px 18px; }
         #theme-reading .all-articles, #theme-reading .sidebar-note { display: none; }
