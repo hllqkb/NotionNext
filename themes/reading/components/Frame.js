@@ -18,7 +18,7 @@ export const Masthead = ({ siteInfo }) => {
   return (
     <header className='masthead'>
       <SmartLink className='brand' href='/'>
-        {siteInfo?.title || siteConfig('TITLE')}
+        {siteConfig('TITLE') || siteInfo?.title}
         <span className='brand-dot' aria-hidden='true' />
       </SmartLink>
       <nav aria-label='主导航'>
@@ -39,7 +39,7 @@ export const Masthead = ({ siteInfo }) => {
 export const SiteFooter = ({ siteInfo }) => (
   <footer className='site-footer'>
     <span>
-      {siteInfo?.title || siteConfig('TITLE')} · © {new Date().getFullYear()} {siteConfig('AUTHOR')}
+      {siteConfig('TITLE') || siteInfo?.title} · © {new Date().getFullYear()} {siteConfig('AUTHOR')}
     </span>
     <span>{siteConfig('READING_FOOTER_RIGHT', null, CONFIG)}</span>
   </footer>
