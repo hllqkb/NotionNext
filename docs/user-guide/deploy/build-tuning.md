@@ -31,6 +31,7 @@ Sending SIGTERM signal to Next.js build worker due to timeout of 300 seconds
 | `BUILD_PREFETCH_CONCURRENCY` | `8` | 预热时的并发数（1–32）。Notion API 慢时可降到 `2`～`4` |
 | `NOTION_BUILD_RATE_MAX_PER_MINUTE` | `50` | 构建期每分钟最多向 Notion 发起的请求数（1–600） |
 | `NOTION_BUILD_RATE_MIN_INTERVAL_MS` | `300` | 构建期两次请求之间的最小间隔（毫秒，0–60000）。**数值越大越慢、越不易触发限流** |
+| `NOTION_BUILD_CONCURRENCY` | `1` | 构建期所有 worker 合计同时在途的 Notion 请求数（1–8）。默认 `1` 为全局串行；缓存全失效（大批文章重导入、构建缓存 7 天未读被清）时设 `3` 可把拉取阶段缩到约 1/3 |
 | `STATIC_PAGE_GENERATION_TIMEOUT` | `300` | Next.js **单页**静态生成超时（秒，60–3600）。文章特别大或 API 慢时可设为 `600` 及以上 |
 
 ### 如何确认已生效
