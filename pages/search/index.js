@@ -13,21 +13,22 @@ const Search = props => {
   const { posts } = props
 
   const router = useRouter()
-  const keyword = router?.query?.s
+  const keyword = String(router?.query?.s || '').trim()
 
-  let filteredPosts
-  // 静态过滤
-  if (keyword) {
-    filteredPosts = posts.filter(post => {
-      const tagContent = post?.tags ? post?.tags.join(' ') : ''
-      const categoryContent = post.category ? post.category.join(' ') : ''
-      const searchContent =
-        post.title + post.summary + tagContent + categoryContent
-      return searchContent.toLowerCase().includes(keyword.toLowerCase())
-    })
-  } else {
-    filteredPosts = []
-  }
+  // 静态导出后 ?s= 只在客户端可读：在已下发的文章列表里匹配标题、摘要、分类、标签，空格分隔的词都要命中
+  const terms = String(keyword || '')
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(Boolean)
+  const filteredPosts = terms.length
+    ? (posts || []).filter(post => {
+        const text = [post.title, post.summary, [].concat(post.category || []), [].concat(post.tags || [])]
+          .flat()
+          .join(' ')
+          .toLowerCase()
+        return terms.every(t => text.includes(t))
+      })
+    : []
 
   props = {
     ...props,

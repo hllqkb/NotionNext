@@ -53,32 +53,22 @@ const LayoutBase = props => {
   )
 }
 
-/** 搜索框：回车跳到 /search/关键词 */
-const SearchBox = ({ keyword = '' }) => {
-  const router = useRouter()
-  const [value, setValue] = useState(keyword)
-  return (
-    <form
-      className='search-box'
-      role='search'
-      onSubmit={e => {
-        e.preventDefault()
-        const kw = value.trim()
-        router.push(kw ? `/search/${encodeURIComponent(kw)}` : '/')
-      }}>
-      <label htmlFor='reading-search' className='sr-only'>
-        搜索文章
-      </label>
-      <input
-        id='reading-search'
-        type='search'
-        placeholder='搜索标题或内容，回车'
-        value={value}
-        onChange={e => setValue(e.target.value)}
-      />
-    </form>
-  )
-}
+/** 搜索框：原生 GET 表单，回车到 /search?s=关键词，结果页的地址可以直接分享 */
+const SearchBox = ({ keyword = '' }) => (
+  <form className='search-box' role='search' action='/search' method='get'>
+    <label htmlFor='reading-search' className='sr-only'>
+      搜索文章
+    </label>
+    <input
+      key={keyword}
+      id='reading-search'
+      name='s'
+      type='search'
+      placeholder='搜索标题、摘要或标签'
+      defaultValue={keyword}
+    />
+  </form>
+)
 
 /** 最近一篇：大号展示 */
 const LeadStory = ({ post }) => (
@@ -186,7 +176,7 @@ const LayoutPostList = props => {
   )
 }
 
-/** 搜索结果 */
+/** 搜索结果：关键词来自 ?s=，在 pages/search 里过滤好 */
 const LayoutSearch = props => {
   const { keyword, posts = [] } = props
   return (
@@ -197,10 +187,24 @@ const LayoutSearch = props => {
         </h1>
       </header>
       <div className='collection-bar'>
-        <p>{keyword ? `「${keyword}」共 ${posts.length} 篇` : '输入关键词搜索'}</p>
+        <p>
+          {keyword ? `「${keyword}」共 ${posts.length} 篇` : '输入关键词，回车搜索'}
+          {keyword && (
+            <PageLink className='search-clear' href='/search'>
+              清空
+            </PageLink>
+          )}
+        </p>
         <SearchBox keyword={keyword} />
       </div>
-      <YearGroups posts={posts} />
+      {keyword && posts.length === 0 ? (
+        <p className='empty search-empty'>
+          没有找到和「{keyword}」相关的文章。搜索只看标题、摘要、分类和标签，可以换个词，或者去
+          <PageLink href='/archive'>归档</PageLink>、<PageLink href='/tag'>标签</PageLink>里翻翻。
+        </p>
+      ) : (
+        keyword && <YearGroups posts={posts} />
+      )}
     </>
   )
 }
@@ -414,8 +418,11 @@ const Layout404 = () => (
       这一页不存在<span className='title-period'>。</span>
     </h1>
     <p className='intro-text'>
-      可能是链接写错了，或者文章换了地址。<PageLink href='/'>回到文章列表</PageLink>
+      可能是链接写错了，或者文章换了地址。<PageLink href='/'>回到文章列表</PageLink>，或者搜一下：
     </p>
+    <div className='notfound-search'>
+      <SearchBox />
+    </div>
   </header>
 )
 

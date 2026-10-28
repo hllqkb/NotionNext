@@ -309,6 +309,16 @@ const Style = () => {
         #theme-reading .article-head h1 { font-size: 30px; }
         #theme-reading .site-footer { flex-direction: column; gap: 4px; padding-inline: 20px; }
       }
+
+      /* 搜索与订阅 */
+      #theme-reading .search-clear { margin-left: 12px; color: var(--muted); font-size: 13px; }
+      #theme-reading .search-empty a { margin: 0 2px; }
+      #theme-reading .notfound-search { margin-top: 22px; max-width: 340px; }
+      #theme-reading .notfound-search .search-box { max-width: none; }
+      #theme-reading .footer-right { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 14px; }
+      #theme-reading .rss-link { display: inline-flex; align-items: center; gap: 5px; color: inherit; text-decoration: none; }
+      #theme-reading .rss-link:hover { color: var(--ink); }
+      #theme-reading .rss-icon { flex: none; }
     `}</style>
   )
 }
