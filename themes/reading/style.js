@@ -172,14 +172,31 @@ const Style = () => {
       #theme-reading .post-around a.next { text-align: right; }
       #theme-reading .post-around small { display: block; font-size: 13px; color: var(--muted); }
 
-      /* 代码块：NotionNext 的 Mac 窗口样式默认是深色底，这里改成跟纸色一致，按钮和语言标签用深色字 */
-      #theme-reading .code-toolbar { background: var(--code-bg); border: 1px solid var(--line); border-radius: 10px; box-shadow: none; margin: 1.2em 0; }
-      #theme-reading .code-toolbar pre.notion-code { background: transparent !important; border: 0 !important; margin: 0 !important; }
-      #theme-reading .code-toolbar > .toolbar { height: 34px; opacity: .85; }
-      #theme-reading .code-toolbar .toolbar-item > button,
-      #theme-reading .code-toolbar .toolbar-item > span { font-family: var(--font) !important; font-size: 12px !important; color: var(--muted) !important; background: var(--paper) !important; border: 1px solid var(--line) !important; border-radius: 999px !important; padding: 4px 10px !important; }
-      #theme-reading .code-toolbar .toolbar-item > button:hover { color: var(--accent) !important; border-color: var(--accent) !important; }
-      #theme-reading .code-toolbar .pre-mac > span { width: 9px; height: 9px; opacity: .75; }
+      /* 代码块：高亮配色用 prism-themes 的 One Light / One Dark（conf/code.config.js 按深浅色加载）。
+         外框参考 Expressive Code（Astro Starlight / Fuwari 用的代码块）：顶部一条头部，左边语言名、右边复制，
+         下面是可横向滚动的代码。头部是 Prism toolbar 插件生成的 .toolbar，这里只改它的摆放和外观。 */
+      #theme-reading {
+        --code-block-bg: hsl(230, 1%, 98%);
+        --code-block-head: hsl(230, 4%, 94%);
+      }
+      .dark #theme-reading {
+        --code-block-bg: hsl(220, 13%, 18%);
+        --code-block-head: hsl(220, 13%, 15%);
+      }
+      #theme-reading div.code-toolbar { display: flex; flex-direction: column; max-width: 100%; min-width: 0; margin: 1.2em 0; background: var(--code-block-bg); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; box-shadow: none; }
+      #theme-reading div.code-toolbar > .toolbar { order: -1; position: static; opacity: 1; display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 8px 0 16px; background: var(--code-block-head); border-bottom: 1px solid var(--line); }
+      #theme-reading div.code-toolbar > .toolbar > .toolbar-item:last-child { margin-left: auto; }
+      #theme-reading div.code-toolbar > .toolbar > .toolbar-item > span,
+      #theme-reading div.code-toolbar > .toolbar > .toolbar-item > button { font: 13px/1 var(--font); color: var(--muted); background: none; box-shadow: none; border-radius: 6px; padding: 0; }
+      #theme-reading div.code-toolbar > .toolbar > .toolbar-item > button { padding: 5px 10px; border: 1px solid var(--line); cursor: pointer; }
+      #theme-reading div.code-toolbar > .toolbar > .toolbar-item > button:hover,
+      #theme-reading div.code-toolbar > .toolbar > .toolbar-item > button:focus-visible { color: var(--accent); border-color: var(--accent); }
+      /* 纯文本块不显示语言名，只留复制 */
+      #theme-reading div.code-toolbar > pre[class*='language-plain'] ~ .toolbar > .toolbar-item:first-child:not(:last-child) { visibility: hidden; }
+      #theme-reading div.code-toolbar > pre.notion-code { margin: 0 !important; padding: 14px 18px !important; border: 0 !important; border-radius: 0 !important; max-width: 100%; overflow-x: auto; font-size: 14px; line-height: 1.6; scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+      /* Mermaid 图保留 notion.css 里给它的浅色衬底 */
+      #theme-reading div.code-toolbar > pre.notion-code:not([class*='language-mermaid']) { background: transparent !important; }
+      #theme-reading div.code-toolbar > pre.notion-code > code { white-space: pre; word-break: normal; overflow-wrap: normal; }
       #theme-reading .notion-code-copy { display: none; }
 
       /* 分类筛选 */
@@ -264,7 +281,7 @@ const Style = () => {
       #theme-reading .prose .notion-list { padding-left: 1.5em; margin: 0 0 1.2em; }
       #theme-reading .prose .notion-hr { border-top: 1px solid var(--line); margin: 36px 0; }
       #theme-reading .prose .notion-asset-wrapper img { border-radius: 8px; }
-      #theme-reading .prose .notion-code { background: var(--code-bg) !important; border: 1px solid var(--line); border-radius: 8px; font-size: 15px; }
+      #theme-reading .prose .notion-code { background: var(--code-block-bg) !important; border: 1px solid var(--line); border-radius: 10px; font-size: 14px; }
       #theme-reading .prose .notion-inline-code { background: var(--code-bg); color: var(--ink); padding: 2px 5px; border-radius: 4px; }
       #theme-reading .prose .notion-callout { background: var(--quote-bg); border: 0; border-radius: 8px; }
       #theme-reading .prose .notion-table { font-size: 17px; }

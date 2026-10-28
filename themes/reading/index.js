@@ -40,8 +40,14 @@ const LazyComment = ({ post }) => {
 const LayoutBase = props => {
   const { children, siteInfo, post } = props
   const revealReady = useReveal()
+  // data-prismjs-copy*：Prism copy-to-clipboard 插件从祖先元素读这几个属性作为按钮文案
   return (
-    <div id='theme-reading' className={`${siteConfig('FONT_STYLE')} ${revealReady ? 'reveal-ready' : ''}`}>
+    <div
+      id='theme-reading'
+      className={`${siteConfig('FONT_STYLE')} ${revealReady ? 'reveal-ready' : ''}`}
+      data-prismjs-copy='复制'
+      data-prismjs-copy-success='已复制'
+      data-prismjs-copy-error='按 Ctrl+C 复制'>
       <Style />
       <div className='page'>
         <Masthead siteInfo={siteInfo} />
