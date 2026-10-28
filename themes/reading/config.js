@@ -9,6 +9,7 @@ const CONFIG = {
   READING_FOOTER_RIGHT: '霞鹜文楷 · 字里行间', // 页脚右侧
   READING_VERTICAL_TITLE: '天若有情天亦老 人间正道是沧桑', // 首页右侧竖排的句子，空格分成两列（右边是上句）
   READING_SEAL: 'hllqk', // 印章文字：中文最多两个字竖排，英文横排；留空用作者名
+  READING_DEFAULT_CATEGORY: '随笔', // Notion 里没选 category 的文章归到这个分类
   READING_GALLERY_TAG: '摄影集', // 带这个标签的文章按摄影集版式展示（图片网格 + 大图浏览）
   READING_STREAK: true, // 首页显示写作打卡点阵
   READING_COMMENTS: true, // 文章底部评论区（Waline，服务在 talk.hllqk.cn，见 conf/comment.config.js）
