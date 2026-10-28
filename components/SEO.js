@@ -23,7 +23,9 @@ const SEO = props => {
   let image
   const router = useRouter()
   const meta = getSEOMeta(props, router, useGlobal()?.locale)
-  const webFontUrl = siteConfig('FONT_URL')
+  // reading 主题在 _document.js 里直接引用自托管的霞鹜文楷，不走 WebFontLoader
+  const webFontUrl =
+    siteConfig('THEME') === 'reading' ? null : siteConfig('FONT_URL')
   const hasWebFontUrl = Array.isArray(webFontUrl)
     ? webFontUrl.filter(Boolean).length > 0
     : Boolean(webFontUrl)
@@ -131,6 +133,11 @@ const SEO = props => {
   const TWITTER_CREATOR = siteConfig('TWITTER_CREATOR', '', NOTION_CONFIG)
 
   const AUTHOR = siteConfig('AUTHOR')
+  const ANALYTICS_GOOGLE_ID = siteConfig(
+    'ANALYTICS_GOOGLE_ID',
+    null,
+    NOTION_CONFIG
+  )
   return (
     <Head>
       <link rel='icon' href={favicon} />
@@ -271,8 +278,12 @@ const SEO = props => {
       {hasGoogleFontsUrl && (
         <link rel='dns-prefetch' href='//fonts.googleapis.com' />
       )}
-      <link rel='dns-prefetch' href='//www.google-analytics.com' />
-      <link rel='dns-prefetch' href='//www.googletagmanager.com' />
+      {ANALYTICS_GOOGLE_ID && (
+        <>
+          <link rel='dns-prefetch' href='//www.google-analytics.com' />
+          <link rel='dns-prefetch' href='//www.googletagmanager.com' />
+        </>
+      )}
       {hasGoogleFontsUrl && (
         <link
           rel='preconnect'

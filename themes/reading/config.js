@@ -13,6 +13,7 @@ const CONFIG = {
   READING_STREAK: true, // 首页显示写作打卡点阵
   READING_COMMENTS: true, // 文章底部评论区（Waline，服务在 talk.hllqk.cn，见 conf/comment.config.js）
   READING_LICENSE: 'CC BY-NC-SA 4.0', // 文末版权声明里的许可协议
-  READING_LICENSE_URL: 'https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans'
+  READING_LICENSE_URL: 'https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans',
+  CUSTOM_RIGHT_CLICK_CONTEXT_MENU: false // 自定义右键菜单的图标依赖 Font Awesome，本主题不加载，改用浏览器原生菜单
 }
 export default CONFIG

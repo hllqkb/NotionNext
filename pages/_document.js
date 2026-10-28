@@ -6,6 +6,10 @@ const isLocalFontAwesome = BLOG.FONT_AWESOME?.startsWith(
   '/vendor/fontawesome/'
 )
 
+// reading 主题不用 Font Awesome 图标，字体只用自托管的霞鹜文楷
+const isReadingTheme = BLOG.THEME === 'reading'
+const READING_FONT_CSS = '/fonts/lxgw-wenkai/lxgwwenkai.css'
+
 // 预先设置深色模式的脚本内容
 const darkModeScript = `
 (function() {
@@ -47,11 +51,36 @@ class MyDocument extends Document {
     return (
       <Html lang={BLOG.LANG}>
         <Head>
-          <link rel='preconnect' href='https://images.unsplash.com' />
-          <link rel='dns-prefetch' href='//images.unsplash.com' />
+          {!isReadingTheme && (
+            <>
+              <link rel='preconnect' href='https://images.unsplash.com' />
+              <link rel='dns-prefetch' href='//images.unsplash.com' />
+            </>
+          )}
+
+          {/* 霞鹜文楷按 unicode-range 分片，只下载页面用到的字；不阻塞首次渲染 */}
+          {isReadingTheme && (
+            <>
+              <link
+                id='reading-font-css'
+                rel='preload'
+                as='style'
+                href={READING_FONT_CSS}
+              />
+              <script
+                dangerouslySetInnerHTML={{
+                  __html:
+                    "(function(){var l=document.getElementById('reading-font-css');if(l)l.rel='stylesheet'})()"
+                }}
+              />
+              <noscript>
+                <link rel='stylesheet' href={READING_FONT_CSS} />
+              </noscript>
+            </>
+          )}
 
           {/* 预加载字体 */}
-          {BLOG.FONT_AWESOME && (
+          {BLOG.FONT_AWESOME && !isReadingTheme && (
             <>
               {isLocalFontAwesome && (
                 <>
