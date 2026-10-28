@@ -10,6 +10,7 @@ import { CategoryChips, LockIcon, Masthead, PageLink, Seal, SiteFooter, WritingS
 import Gallery, { galleryImages } from './components/Gallery'
 import { LayoutAbout, LayoutBooks, LayoutGallery, LayoutLinks, LayoutProjects, pageLayoutFor } from './components/Pages'
 import { SkillsBoard } from './components/Skills'
+import { RandomPost, ReadingPicks, RecentlyUpdated, wholeSentences } from './components/Home'
 
 const Comment = dynamic(() => import('@/components/Comment'), { ssr: false })
 import Toc, { useActiveHeading } from './components/Toc'
@@ -79,15 +80,9 @@ const SearchBox = ({ keyword = '' }) => (
   </form>
 )
 
-/** 最近一篇：大号展示 */
+/** 最近一篇：先标题和摘要，封面放在后面 */
 const LeadStory = ({ post }) => (
   <article className={`lead-story reveal${hasCover(post) ? ' has-cover' : ''}`}>
-    {hasCover(post) && (
-      <PageLink href={post.href} className='lead-cover' tabIndex={-1} aria-hidden='true'>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={post.pageCoverThumbnail} alt='' fetchPriority='high' />
-      </PageLink>
-    )}
     <div className='lead-meta'>
       <span>最近一篇</span>
       <time dateTime={postDay(post)}>{String(postDay(post)).replaceAll('-', '.')}</time>
@@ -100,11 +95,17 @@ const LeadStory = ({ post }) => (
       </PageLink>
     </h2>
     <div className='lead-row'>
-      <p>{post.summary}</p>
+      <p>{wholeSentences(post.summary)}</p>
       <PageLink className='read-link' href={post.href} aria-label={`阅读：${post.title}`}>
         阅读全文<span aria-hidden='true'>↗</span>
       </PageLink>
     </div>
+    {hasCover(post) && (
+      <PageLink href={post.href} className='lead-cover' tabIndex={-1} aria-hidden='true'>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={post.pageCoverThumbnail} alt='' fetchPriority='high' />
+      </PageLink>
+    )}
   </article>
 )
 
@@ -143,11 +144,15 @@ const LayoutIndex = props => {
       </header>
       {siteConfig('READING_STREAK', true, CONFIG) && <WritingStreak pages={props.allNavPages || posts} buildTime={props.buildTime} />}
       <div className='collection-bar'>
-        <p>全部 {postCount || posts.length} 篇</p>
+        <p>
+          全部 {postCount || posts.length} 篇
+          <RandomPost posts={posts} />
+        </p>
         <SearchBox />
       </div>
       <CategoryChips posts={posts} value={cat} onChange={setCat} />
       {lead && !cat && <LeadStory post={lead} />}
+      {!cat && <ReadingPicks posts={posts} exclude={lead} />}
       <YearGroups posts={listed} />
       {postCount > posts.length && (
         <div className='pager'>
@@ -292,23 +297,38 @@ const LayoutSearch = props => {
   )
 }
 
-/** 归档：全部文章按年 */
+/** 归档：全部文章按年；可切到「最近更新」，按最后编辑时间排 */
 const LayoutArchive = props => {
   const { posts = [] } = props
   const [cat, setCat] = useState('')
+  const [sort, setSort] = useState('published')
+  const shown = filterByCategory(posts, cat)
   return (
     <>
-      <header className='list-head'>
+      <header className='list-head archive-head'>
         <h1>
           归档<span className='title-period'>。</span>
         </h1>
+        <div className='sort-toggle' role='group' aria-label='排序方式'>
+          {[
+            ['published', '按发布'],
+            ['updated', '最近更新']
+          ].map(([key, label]) => (
+            <button key={key} type='button' className={sort === key ? 'active' : ''} aria-pressed={sort === key} onClick={() => setSort(key)}>
+              {label}
+            </button>
+          ))}
+        </div>
       </header>
       <div className='collection-bar'>
-        <p>全部 {posts.length} 篇</p>
+        <p>
+          全部 {posts.length} 篇
+          <RandomPost posts={props.allNavPages?.length ? props.allNavPages : posts} />
+        </p>
         <SearchBox />
       </div>
       <CategoryChips posts={posts} value={cat} onChange={setCat} />
-      <YearGroups posts={filterByCategory(posts, cat)} />
+      {sort === 'updated' ? <RecentlyUpdated posts={shown} /> : <YearGroups posts={shown} />}
     </>
   )
 }
@@ -528,7 +548,7 @@ const LayoutTagIndex = props => {
 const LayoutSkills = props => <SkillsBoard data={props.skillsData} />
 
 /** 404 */
-const Layout404 = () => (
+const Layout404 = props => (
   <header className='list-head'>
     <h1>
       这一页不存在<span className='title-period'>。</span>
@@ -539,6 +559,9 @@ const Layout404 = () => (
     <div className='notfound-search'>
       <SearchBox />
     </div>
+    <p className='notfound-random'>
+      不知道看什么，就<RandomPost posts={props.allNavPages} />
+    </p>
   </header>
 )
 
