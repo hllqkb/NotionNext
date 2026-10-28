@@ -86,7 +86,7 @@ const LeadStory = ({ post }) => (
     {hasCover(post) && (
       <PageLink href={post.href} className='lead-cover' tabIndex={-1} aria-hidden='true'>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={post.pageCoverThumbnail} alt='' loading='lazy' />
+        <img src={post.pageCoverThumbnail} alt='' fetchPriority='high' />
       </PageLink>
     )}
     <div className='lead-meta'>
