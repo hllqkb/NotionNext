@@ -88,10 +88,13 @@ export const Seal = ({ text }) => {
 }
 
 /** 写作打卡：最近 26 周，每周一个点，写过文章的周点亮，颜色随篇数加深 */
-export const WritingStreak = ({ pages = [] }) => {
+export const WritingStreak = ({ pages = [], buildTime }) => {
   const WEEKS = 26
   const week = 7 * 24 * 3600 * 1000
-  const now = Date.now()
+  // 静态 HTML 和 hydration 首帧用构建时刻，挂载后再换成访问时的当前时间
+  const [now, setNow] = useState(buildTime || null)
+  useEffect(() => setNow(Date.now()), [])
+  if (!now) return null
   const counts = new Array(WEEKS).fill(0)
   for (const p of pages) {
     const t = p.publishDate || Date.parse(postDay(p))

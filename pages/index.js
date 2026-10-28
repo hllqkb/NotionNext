@@ -131,6 +131,8 @@ export async function getStaticProps(req) {
   }
   props.latestPosts = cleanPostSummaries(props.latestPosts)
   delete props.allPages
+  // 构建时刻：首页「写作打卡」按它算周，服务端和客户端首帧一致，避免 hydration mismatch
+  props.buildTime = Date.now()
 
   return {
     props,

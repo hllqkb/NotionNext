@@ -123,7 +123,7 @@ const LayoutIndex = props => {
           <Seal text={siteConfig('READING_SEAL', null, CONFIG) || siteConfig('AUTHOR')} />
         </div>
       </header>
-      {siteConfig('READING_STREAK', true, CONFIG) && <WritingStreak pages={props.allNavPages || posts} />}
+      {siteConfig('READING_STREAK', true, CONFIG) && <WritingStreak pages={props.allNavPages || posts} buildTime={props.buildTime} />}
       <div className='collection-bar'>
         <p>全部 {postCount || posts.length} 篇</p>
         <SearchBox />
