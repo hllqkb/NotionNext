@@ -1,0 +1,27 @@
+name = "notion-autodeploy"
+main = "worker.mjs"
+compatibility_date = "2026-10-01"
+
+# Every 5 minutes (UTC). Uses 1 of the 5 Cron Triggers on the Workers Free plan.
+[triggers]
+crons = ["*/5 * * * *"]
+
+# Create with: npx wrangler kv namespace create STATE
+# then paste the printed id here. The id is not a secret.
+[[kv_namespaces]]
+binding = "STATE"
+id = "REPLACE_WITH_KV_NAMESPACE_ID"
+
+[vars]
+NOTION_DATABASE_ID = "aa8cdaa272b682a4904e81214563f827"
+# Rebuild only after this many minutes without new edits.
+QUIET_MINUTES = "10"
+# Hard cap on hook-triggered builds per day (UTC+8). 6 x 31 = 186 builds/month max.
+MAX_BUILDS_PER_DAY = "6"
+# Edits to pages with these status values are ignored (comma separated).
+IGNORE_STATUSES = "Draft"
+STATUS_PROPERTY = "status"
+
+# Secrets (never put them in this file):
+#   npx wrangler secret put NOTION_TOKEN
+#   npx wrangler secret put DEPLOY_HOOK_URL
