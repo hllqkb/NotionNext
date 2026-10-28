@@ -1,0 +1,25 @@
+{
+  "marketplace": "hllqkb-skills",
+  "repo": "hllqkb/skills",
+  "preview": true,
+  "skills": [
+    {
+      "name": "wechat-article",
+      "title": "公众号写作",
+      "summary": "从真实经历和资料出发写一篇公众号文章，审稿、去 AI 味、排版，存进草稿箱等你说「发」。",
+      "scenes": ["个人公众号写稿", "AI 主题技术文章", "已有素材想成稿"],
+      "example": "「把这周折腾博客性能的过程写成一篇公众号」",
+      "zip": "/skills/wechat-article.zip",
+      "skillMd": "/skills/wechat-article/SKILL.md"
+    },
+    {
+      "name": "qu-ai-wei",
+      "title": "去 AI 味",
+      "summary": "把生硬、套路化的中文改成像人写的，事实、语气和证据强度都不动。",
+      "scenes": ["文章润色", "改写 AI 初稿", "长文结构重写"],
+      "example": "「/qu-ai-wei 这段太像 AI 写的了，改自然点」",
+      "zip": "/skills/qu-ai-wei.zip",
+      "skillMd": "/skills/qu-ai-wei/SKILL.md"
+    }
+  ]
+}

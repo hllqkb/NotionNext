@@ -8,6 +8,7 @@ import { useRouter } from 'next/router'
 import { useEffect, useRef, useState } from 'react'
 import { CategoryChips, LockIcon, Masthead, PageLink, Seal, SiteFooter, WritingStreak, YearGroups, filterByCategory, hasCover, postDay, useReveal } from './components/Frame'
 import Gallery, { galleryImages } from './components/Gallery'
+import { SkillsBoard } from './components/Skills'
 
 const Comment = dynamic(() => import('@/components/Comment'), { ssr: false })
 import Toc from './components/Toc'
@@ -437,6 +438,9 @@ const LayoutTagIndex = props => {
   )
 }
 
+/** Skills：可安装的 Claude skills */
+const LayoutSkills = props => <SkillsBoard data={props.skillsData} />
+
 /** 404 */
 const Layout404 = () => (
   <header className='list-head'>
@@ -460,6 +464,7 @@ export {
   LayoutIndex,
   LayoutPostList,
   LayoutSearch,
+  LayoutSkills,
   LayoutSlug,
   LayoutTagIndex,
   CONFIG as THEME_CONFIG

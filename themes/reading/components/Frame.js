@@ -25,7 +25,8 @@ export const Masthead = ({ siteInfo }) => {
     { href: '/', label: '文章', match: p => p === '/' || p.startsWith('/page') },
     { href: '/archive', label: '归档', match: p => p.startsWith('/archive') },
     { href: '/category', label: '分类', match: p => p.startsWith('/category') },
-    { href: '/tag', label: '标签', match: p => p.startsWith('/tag') }
+    { href: '/tag', label: '标签', match: p => p.startsWith('/tag') },
+    { href: '/skills', label: 'Skills', match: p => p.startsWith('/skills') }
   ]
   return (
     <header className='masthead'>
