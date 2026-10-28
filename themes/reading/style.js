@@ -237,6 +237,14 @@ const Style = () => {
       #theme-reading .article-head { padding: 0 0 42px; margin-bottom: 38px; border-bottom: 1px solid var(--line); }
       #theme-reading .kicker { display: flex; align-items: baseline; flex-wrap: wrap; gap: 12px; color: var(--accent); font-size: 15px; margin: 0 0 20px; }
       #theme-reading .article-head h1 { font-size: 46px; font-weight: 400; line-height: 1.4; letter-spacing: -.02em; margin: 0 0 26px; overflow-wrap: anywhere; }
+      #theme-reading .post-lock { max-width: 420px; }
+      #theme-reading .post-lock label { display: block; margin: 0 0 14px; }
+      #theme-reading .post-lock div { display: flex; gap: 10px; }
+      #theme-reading .post-lock input { flex: 1; min-width: 0; font: inherit; color: var(--ink); background: transparent; border: 1px solid var(--line); border-radius: 4px; padding: 8px 12px; }
+      #theme-reading .post-lock input:focus { outline: none; border-color: var(--accent); }
+      #theme-reading .post-lock button { font: inherit; color: var(--paper); background: var(--accent); border: 0; border-radius: 4px; padding: 8px 18px; cursor: pointer; }
+      #theme-reading .post-lock button:disabled { opacity: .5; cursor: default; }
+      #theme-reading .post-lock [role='alert'] { color: var(--accent); margin: 12px 0 0; font-size: 15px; }
       #theme-reading .byline { display: flex; flex-wrap: wrap; gap: 10px; color: var(--muted); font-size: 15px; }
       #theme-reading .article-footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 24px; font-size: 16px; }
       #theme-reading .site-footer { max-width: 1080px; margin: 80px auto 0; padding: 24px 56px 32px; display: flex; justify-content: space-between; gap: 18px; font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); }

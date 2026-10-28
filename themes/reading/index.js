@@ -244,9 +244,10 @@ const readingStats = post => {
 }
 
 const LayoutSlug = props => {
-  const { post, lock, validPassword, prev, next } = props
+  const { post, lock, validPassword, unlocking, prev, next } = props
   const router = useRouter()
   const [password, setPassword] = useState('')
+  const [rejected, setRejected] = useState(false)
 
   useEffect(() => {
     if (!post) {
@@ -299,12 +300,31 @@ const LayoutSlug = props => {
         </header>
         {lock ? (
           <form
-            onSubmit={e => {
+            className='post-lock'
+            onSubmit={async e => {
               e.preventDefault()
-              validPassword(password)
+              if (!password || unlocking) return
+              setRejected(false)
+              setRejected(!(await validPassword(password)))
             }}>
-            <p>这篇文章需要密码。</p>
-            <input type='password' value={password} onChange={e => setPassword(e.target.value)} />
+            <label htmlFor='post-lock-password'>这篇文章需要密码。</label>
+            <div>
+              <input
+                id='post-lock-password'
+                type='password'
+                autoComplete='current-password'
+                value={password}
+                disabled={unlocking}
+                onChange={e => {
+                  setPassword(e.target.value)
+                  setRejected(false)
+                }}
+              />
+              <button type='submit' disabled={unlocking || !password}>
+                {unlocking ? '解锁中' : '解锁'}
+              </button>
+            </div>
+            {rejected && <p role='alert'>密码不对，再试一次。</p>}
           </form>
         ) : isGallery ? (
           <article id='article-wrapper' className='prose'>

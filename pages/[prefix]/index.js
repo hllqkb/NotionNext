@@ -24,7 +24,7 @@ const isStaticExport = process.env.EXPORT === 'true'
 const Slug = props => {
   const router = useRouter()
   const { locale } = useGlobal()
-  const access = useProtectedPost(props.post, router, locale, props.postUnlockUnavailable)
+  const access = useProtectedPost(props.post, router, locale, props.postUnlockUnavailable, props.encryptedPost)
   const { showNotification, Notification } = useNotification()
   const validPassword = async password => {
     const valid = await access.validPassword(password)
