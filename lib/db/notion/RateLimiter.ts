@@ -10,10 +10,15 @@ interface NodeError extends Error {
   code?: string
 }
 
+/**
+ * 构建期 Notion 请求限流。
+ * concurrency 个锁文件槽位跨 Next.js 构建 worker 共享，全局同时在途的请求不超过 concurrency；
+ * concurrency=1 时与旧版一致：全局串行，相邻请求间隔 minIntervalMs。
+ */
 export class RateLimiter {
   private queue: QueueItem<unknown>[] = []
-  private inflight = new Set<string>()
-  private isProcessing = false
+  private active = 0
+  private pumping = false
   private lastRequestTime = 0
   private requestCount = 0
   private windowStart = Date.now()
@@ -21,111 +26,126 @@ export class RateLimiter {
   constructor(
     private maxRequestsPerMinute = 200,
     private lockFilePath?: string,
-    private minIntervalMs = 300
+    private minIntervalMs = 300,
+    private concurrency = 1
   ) { }
 
-  private async acquireLock() {
-    if (!this.lockFilePath) return
-    // 如果锁文件存在且创建时间过久（比如 >5分钟），认为是陈旧锁，直接删除
-    if (fs.existsSync(this.lockFilePath)) {
-      const stats = fs.statSync(this.lockFilePath)
-      const age = Date.now() - stats.ctimeMs
+  private slotPath(slot: number) {
+    return this.concurrency === 1
+      ? this.lockFilePath!
+      : `${this.lockFilePath}.${slot}`
+  }
+
+  private removeStaleLock(file: string) {
+    // 如果锁文件存在且创建时间过久，认为是陈旧锁，直接删除
+    try {
+      const age = Date.now() - fs.statSync(file).ctimeMs
       if (age > 30 * 1000) { // 30秒
+        fs.unlinkSync(file)
+        console.warn('[限流] 删除陈旧锁文件:', file)
+      }
+    } catch (err) {
+      const e = err as NodeError
+      if (e.code !== 'ENOENT') console.error('[限流] 删除陈旧锁失败:', err)
+    }
+  }
+
+  private async acquireSlot(): Promise<number> {
+    if (!this.lockFilePath) return -1
+    while (true) {
+      for (let slot = 0; slot < this.concurrency; slot++) {
+        const file = this.slotPath(slot)
+        this.removeStaleLock(file)
         try {
-          fs.unlinkSync(this.lockFilePath)
-          console.warn('[限流] 删除陈旧锁文件:', this.lockFilePath)
+          fs.writeFileSync(file, process.pid.toString(), { flag: 'wx' })
+          return slot
         } catch (err) {
-          console.error('[限流] 删除陈旧锁失败:', err)
+          const e = err as NodeError
+          if (e.code !== 'EEXIST') throw err
         }
       }
-    }
-    while (true) {
-      try {
-        fs.writeFileSync(this.lockFilePath, process.pid.toString(), { flag: 'wx' })
-        return
-      } catch (err) {
-        const e = err as NodeError
-        if (e.code === 'EEXIST') await new Promise(res => setTimeout(res, 100))
-        else throw err
-      }
+      await new Promise(res => setTimeout(res, 100))
     }
   }
 
-  private releaseLock() {
-    if (!this.lockFilePath) return
-    try { if (fs.existsSync(this.lockFilePath)) fs.unlinkSync(this.lockFilePath) }
-    catch (err) { console.error('释放锁失败', err) }
+  private releaseSlot(slot: number) {
+    if (slot < 0) return
+    try { fs.unlinkSync(this.slotPath(slot)) }
+    catch (err) {
+      const e = err as NodeError
+      if (e.code !== 'ENOENT') console.error('释放锁失败', err)
+    }
   }
 
-  public enqueue<T>(key: string, requestFunc: () => Promise<T>): Promise<T> {
-    if (this.inflight.has(key)) {
-      return new Promise<T>((resolve, reject) => {
-        const interval = setInterval(() => {
-          if (!this.inflight.has(key)) {
-            clearInterval(interval)
-            // 用 void 显式标记忽略：递归 enqueue 自身已串接 resolve/reject
-            void this.enqueue(key, requestFunc).then(resolve).catch(reject)
-          }
-        }, 50)
-      })
+  private async waitForBudget() {
+    const now = Date.now()
+    const elapsed = now - this.windowStart
+
+    if (elapsed > 60_000) { this.requestCount = 0; this.windowStart = now }
+    if (this.requestCount >= this.maxRequestsPerMinute) {
+      const waitTime = 60_000 - elapsed + 100
+      await new Promise(res => setTimeout(res, waitTime))
+      this.requestCount = 0
+      this.windowStart = Date.now()
     }
 
+    // lastRequestTime 在请求开始和结束时都会刷新：串行时等价于「上一个请求结束后再隔 minIntervalMs」
+    const waitTime = Math.max(
+      0,
+      this.minIntervalMs - (Date.now() - this.lastRequestTime)
+    )
+    if (waitTime > 0) await new Promise(res => setTimeout(res, waitTime))
+
+    this.lastRequestTime = Date.now()
+    this.requestCount++
+  }
+
+  public enqueue<T>(_key: string, requestFunc: () => Promise<T>): Promise<T> {
     return new Promise<T>((resolve, reject) => {
       this.queue.push({
         requestFunc: requestFunc as () => Promise<unknown>,
         resolve: resolve as (value: unknown) => void,
         reject
       })
-      if (!this.isProcessing) {
-        // processQueue 是 async 但这里不 await，需要兜底捕获
-        void this.processQueue()
-      }
+      this.pump()
     })
   }
 
-  private async processQueue() {
-    if (this.queue.length === 0) { this.isProcessing = false; return }
-    this.isProcessing = true
+  private pump() {
+    if (this.pumping) return
+    this.pumping = true
+    // drain 是 async 但这里不 await，异常在内部兜底
+    void this.drain()
+  }
 
+  private async drain() {
     try {
-      await this.acquireLock()
-      const now = Date.now()
-      const elapsed = now - this.windowStart
-
-      if (elapsed > 60_000) { this.requestCount = 0; this.windowStart = now }
-      if (this.requestCount >= this.maxRequestsPerMinute) {
-        const waitTime = 60_000 - elapsed + 100
-        await new Promise(res => setTimeout(res, waitTime))
-        this.requestCount = 0
-        this.windowStart = Date.now()
+      while (this.queue.length > 0 && this.active < this.concurrency) {
+        const slot = await this.acquireSlot()
+        await this.waitForBudget()
+        const item = this.queue.shift()
+        if (!item) { this.releaseSlot(slot); break }
+        this.active++
+        void this.run(item, slot)
       }
-
-      const waitTime = Math.max(
-        0,
-        this.minIntervalMs - (now - this.lastRequestTime)
-      )
-      if (waitTime > 0) await new Promise(res => setTimeout(res, waitTime))
-
-      const { requestFunc, resolve, reject } = this.queue.shift()!
-      const key = crypto.randomUUID()
-      this.inflight.add(key)
-
-      try {
-        const result: unknown = await requestFunc()
-        this.lastRequestTime = Date.now()
-        this.requestCount++
-        resolve(result)
-      } catch (err) { reject(err) }
-      finally { this.inflight.delete(key) }
-
     } catch (err) {
       console.error('限流队列异常', err)
+      setTimeout(() => this.pump(), 100)
     } finally {
-      this.releaseLock()
-      // 显式忽略下一轮的返回 Promise
-      setTimeout(() => {
-        void this.processQueue()
-      }, 0)
+      this.pumping = false
+    }
+  }
+
+  private async run(item: QueueItem<unknown>, slot: number) {
+    try {
+      item.resolve(await item.requestFunc())
+    } catch (err) {
+      item.reject(err)
+    } finally {
+      this.lastRequestTime = Date.now()
+      this.active--
+      this.releaseSlot(slot)
+      this.pump()
     }
   }
 }
