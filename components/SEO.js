@@ -3,6 +3,7 @@ import { useGlobal } from '@/lib/global'
 import { getPwaConfig } from '@/lib/pwa'
 import { createSiteUrl, normalizeSiteUrl } from '@/lib/sitemap-utils'
 import { isHttpLink, loadExternalResource } from '@/lib/utils'
+import { getPostOgImagePath } from '@/lib/utils/ogImage'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { useEffect } from 'react'
@@ -64,7 +65,13 @@ const SEO = props => {
   }
   if (meta) {
     url = createSiteUrl(url, meta.slug) || url
-    image = getAbsoluteImageUrl(meta.image || '/bg_image.jpg', LINK)
+    // 文章用构建时生成的分享图（标题、分类、日期），其他页面沿用原来的图
+    const postOgImage =
+      meta.type === 'Post' ? getPostOgImagePath(meta.slug) : ''
+    image = getAbsoluteImageUrl(
+      postOgImage || meta.image || '/bg_image.jpg',
+      LINK
+    )
   }
   // 404 没有自己的地址，不声明 canonical，免得把它归到首页
   const canonical =

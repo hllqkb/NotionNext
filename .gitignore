@@ -57,6 +57,7 @@ output/
 /public/robots.txt
 /public/sitemap.xml
 /public/rss/*
+/public/llms.txt
 /sitemap.xml
 
 # yarn
