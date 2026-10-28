@@ -1,12 +1,16 @@
 'use client'
 
 import NotionPage from '@/components/NotionPage'
+import dynamic from 'next/dynamic'
 import SmartLink from '@/components/SmartLink'
 import { siteConfig } from '@/lib/config'
 import { isBrowser } from '@/lib/utils'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
-import { CategoryChips, LockIcon, Masthead, SiteFooter, YearGroups, filterByCategory, postDay, useReveal } from './components/Frame'
+import { CategoryChips, LockIcon, Masthead, Seal, SiteFooter, WritingStreak, YearGroups, filterByCategory, hasCover, postDay, useReveal } from './components/Frame'
+import Gallery, { galleryImages } from './components/Gallery'
+
+const Comment = dynamic(() => import('@/components/Comment'), { ssr: false })
 import Toc from './components/Toc'
 import CONFIG from './config'
 import { Style } from './style'
@@ -59,7 +63,13 @@ const SearchBox = ({ keyword = '' }) => {
 
 /** 最近一篇：大号展示 */
 const LeadStory = ({ post }) => (
-  <article className='lead-story reveal'>
+  <article className={`lead-story reveal${hasCover(post) ? ' has-cover' : ''}`}>
+    {hasCover(post) && (
+      <SmartLink href={post.href} className='lead-cover' tabIndex={-1} aria-hidden='true'>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={post.pageCoverThumbnail} alt='' loading='lazy' />
+      </SmartLink>
+    )}
     <div className='lead-meta'>
       <span>最近一篇</span>
       <time dateTime={postDay(post)}>{String(postDay(post)).replaceAll('-', '.')}</time>
@@ -97,12 +107,12 @@ const LayoutIndex = props => {
           </h1>
           <p className='intro-text'>{siteConfig('READING_HOME_INTRO', null, CONFIG)}</p>
         </div>
-        <p className='collection-note'>
-          {siteConfig('AUTHOR')}
-          <br />
-          {siteConfig('BIO')}
-        </p>
+        <div className='intro-side'>
+          <p className='vertical-title'>{siteConfig('READING_VERTICAL_TITLE', null, CONFIG)}</p>
+          <Seal text={siteConfig('READING_SEAL', null, CONFIG) || siteConfig('AUTHOR')} />
+        </div>
       </header>
+      {siteConfig('READING_STREAK', true, CONFIG) && <WritingStreak pages={props.allNavPages || posts} />}
       <div className='collection-bar'>
         <p>全部 {postCount || posts.length} 篇</p>
         <SearchBox />
@@ -204,6 +214,7 @@ const LayoutSlug = props => {
 
   if (!post) return null
   const day = postDay(post)
+  const isGallery = (post.tags || []).includes(siteConfig('READING_GALLERY_TAG', null, CONFIG))
   return (
     <div className='reading-shell'>
       <aside className='sidebar' aria-label='阅读导航'>
@@ -243,10 +254,19 @@ const LayoutSlug = props => {
             <p>这篇文章需要密码。</p>
             <input type='password' value={password} onChange={e => setPassword(e.target.value)} />
           </form>
+        ) : isGallery ? (
+          <article id='article-wrapper' className='prose'>
+            <Gallery images={galleryImages(post)} />
+          </article>
         ) : (
           <article id='article-wrapper' className='prose'>
             <NotionPage post={post} />
           </article>
+        )}
+        {!lock && (
+          <section className='comments reveal' aria-label='评论'>
+            <Comment frontMatter={post} />
+          </section>
         )}
         <footer className='article-footer'>
           <SmartLink href='/'>返回文章列表</SmartLink>

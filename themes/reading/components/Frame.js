@@ -64,6 +64,51 @@ export const groupByYear = posts => {
     }))
 }
 
+/** 文章是否设置了自己的封面（排除 NotionNext 的默认占位图） */
+export const hasCover = post => {
+  const src = post?.pageCoverThumbnail
+  return !!src && !/bg_image|HOME_BANNER/.test(src) && src !== siteConfig('HOME_BANNER_IMAGE')
+}
+
+/** 印章：作者名第一个字，朱红方印 */
+export const Seal = ({ text }) => (
+  <span className='seal' aria-hidden='true'>
+    {String(text || '').slice(0, 2)}
+  </span>
+)
+
+/** 写作打卡：最近 26 周，每周一个点，写过文章的周点亮，颜色随篇数加深 */
+export const WritingStreak = ({ pages = [] }) => {
+  const WEEKS = 26
+  const week = 7 * 24 * 3600 * 1000
+  const now = Date.now()
+  const counts = new Array(WEEKS).fill(0)
+  for (const p of pages) {
+    const t = p.publishDate || Date.parse(postDay(p))
+    if (!t) continue
+    const ago = Math.floor((now - t) / week)
+    if (ago >= 0 && ago < WEEKS) counts[WEEKS - 1 - ago]++
+  }
+  const total = counts.reduce((a, b) => a + b, 0)
+  let streak = 0
+  for (let i = WEEKS - 1; i >= 0 && counts[i] > 0; i--) streak++
+  return (
+    <div className='streak reveal' aria-label={`近 ${WEEKS} 周写了 ${total} 篇`}>
+      <div className='streak-label'>
+        写作打卡
+        <small>
+          近半年 {total} 篇{streak > 1 ? ` · 连续 ${streak} 周` : ''}
+        </small>
+      </div>
+      <div className='dots'>
+        {counts.map((n, i) => (
+          <span key={i} className={`dot level-${Math.min(n, 3)}${i === WEEKS - 1 ? ' this-week' : ''}`} title={`${WEEKS - 1 - i === 0 ? '本周' : `${WEEKS - 1 - i} 周前`}：${n} 篇`} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
 /** 加密文章的小锁 */
 export const LockIcon = () => (
   <svg className='lock' viewBox='0 0 16 16' width='14' height='14' aria-label='需要密码' role='img'>
@@ -83,6 +128,10 @@ export const EssayRow = ({ post }) => (
       <span className='row-meta'>
         {post.category && <span className='row-cat'>{post.category}</span>}
         <time dateTime={postDay(post)}>{String(postDay(post)).slice(5).replace('-', '.')}</time>
+        {hasCover(post) && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img className='row-cover' src={post.pageCoverThumbnail} alt='' loading='lazy' />
+        )}
       </span>
     </SmartLink>
   </li>
