@@ -112,7 +112,14 @@ const LayoutIndex = props => {
           <p className='intro-text'>{siteConfig('READING_HOME_INTRO', null, CONFIG)}</p>
         </div>
         <div className='intro-side'>
-          <p className='vertical-title'>{siteConfig('READING_VERTICAL_TITLE', null, CONFIG)}</p>
+          <p className='vertical-title'>
+            {String(siteConfig('READING_VERTICAL_TITLE', null, CONFIG) || '')
+              .split(/\s+/)
+              .filter(Boolean)
+              .map(line => (
+                <span key={line}>{line}</span>
+              ))}
+          </p>
           <Seal text={siteConfig('READING_SEAL', null, CONFIG) || siteConfig('AUTHOR')} />
         </div>
       </header>
