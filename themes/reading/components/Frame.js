@@ -117,23 +117,28 @@ export const filterByCategory = (posts, cat) => (cat ? (posts || []).filter(p =>
 export const useReveal = () => {
   const [ready, setReady] = useState(false)
   useEffect(() => {
-    const root = document.getElementById('theme-reading')
     const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-    if (!root || reduce || !('IntersectionObserver' in window)) return
+    if (reduce || !('IntersectionObserver' in window)) return
+    const show = el => el.classList.add('in')
     const io = new IntersectionObserver(
       entries =>
         entries.forEach(e => {
           if (e.isIntersecting) {
-            e.target.classList.add('in')
+            show(e.target)
             io.unobserve(e.target)
           }
         }),
       { rootMargin: '0px 0px -8% 0px' }
     )
-    const watch = () => root.querySelectorAll('.reveal:not(.in)').forEach(el => io.observe(el))
+    // 主题加载后 NotionNext 会替换根节点，所以每次都从 document 重新找；已在视口内的直接显示
+    const watch = () =>
+      document.querySelectorAll('#theme-reading .reveal:not(.in)').forEach(el => {
+        if (el.getBoundingClientRect().top < window.innerHeight * 0.92) show(el)
+        else io.observe(el)
+      })
     watch()
     const mo = new MutationObserver(watch)
-    mo.observe(root, { childList: true, subtree: true })
+    mo.observe(document.body, { childList: true, subtree: true })
     setReady(true)
     return () => {
       io.disconnect()
