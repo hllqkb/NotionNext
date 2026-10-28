@@ -808,7 +808,7 @@ const renderCodeFrames = ({
       copyButton.className = 'code-frame-copy'
       copyButton.textContent = '复制'
       let copyTimer = null
-      copyButton.addEventListener('click', async () => {
+      const copyCode = async () => {
         const copied = await writeClipboard(getRawCode(pre, rawCodeById))
         copyButton.textContent = copied ? '已复制' : '复制失败'
         copyButton.dataset.state = copied ? 'copied' : 'error'
@@ -817,6 +817,9 @@ const renderCodeFrames = ({
           copyButton.textContent = '复制'
           delete copyButton.dataset.state
         }, 2000)
+      }
+      copyButton.addEventListener('click', () => {
+        void copyCode()
       })
       actions.appendChild(copyButton)
       head.appendChild(actions)
