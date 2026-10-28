@@ -22,7 +22,7 @@ const PRISM_MAC_STYLE_PATH = '/css/prism-mac-style.css'
  * @author https://github.com/txs/
  * @returns
  */
-const PrismMac = () => {
+const PrismMac = ({ blockMap } = {}) => {
   const pathname = usePathname()
   const { isDarkMode } = useGlobal()
   const codeMacBar = siteConfig('CODE_MAC_BAR')
@@ -39,6 +39,9 @@ const PrismMac = () => {
 
   const codeCollapse = siteConfig('CODE_COLLAPSE')
   const codeCollapseExpandDefault = siteConfig('CODE_COLLAPSE_EXPAND_DEFAULT')
+  const codeCollapseMinLines = Number(siteConfig('CODE_COLLAPSE_MIN_LINES', 20))
+  // 统一代码框：mac 圆点、语言名、复制、折叠放在同一条头部，替代 pre-mac + 折叠条
+  const codeFrame = siteConfig('CODE_FRAME')
 
   useEffect(() => {
     let isDisposed = false
@@ -49,6 +52,7 @@ const PrismMac = () => {
     let initTimer = null
     let enhancementTimer = null
     let hasInitialized = false
+    const rawCodeById = codeFrame ? buildRawCodeMap(blockMap) : {}
 
     const cleanupPrism = () => {
       try {
@@ -78,12 +82,22 @@ const PrismMac = () => {
           window.Prism.plugins.autoloader.languages_path = prismjsPath
         }
 
-        const dispose = renderPrismMac(codeLineNumbers, codeMacBar)
+        const dispose = renderPrismMac(codeLineNumbers, codeMacBar && !codeFrame)
         stopLineNumbers = typeof dispose === 'function' ? dispose : () => {}
         const disposeMermaid = renderMermaid(mermaidCDN)
         stopMermaid =
           typeof disposeMermaid === 'function' ? disposeMermaid : () => {}
-        renderCollapseCode(codeCollapse, codeCollapseExpandDefault)
+        if (codeFrame) {
+          renderCodeFrames({
+            macBar: codeMacBar,
+            collapse: codeCollapse,
+            expandDefault: codeCollapseExpandDefault,
+            minLines: codeCollapseMinLines,
+            rawCodeById
+          })
+        } else {
+          renderCollapseCode(codeCollapse, codeCollapseExpandDefault)
+        }
         getNotionArticle()
           ?.querySelectorAll('pre.notion-code')
           .forEach(codeBlock => {
@@ -137,7 +151,7 @@ const PrismMac = () => {
         prismThemeLightPath,
         prismThemePrefixPath
       )
-      if (codeMacBar || codeCollapse) {
+      if ((codeMacBar || codeCollapse) && !codeFrame) {
         loadPrismMacStyleCSS()
         Promise.resolve(prismThemeReady)
           .catch(err => {
@@ -196,7 +210,7 @@ const PrismMac = () => {
       closeCodeSidePanel()
       cleanupPrism()
     }
-  }, [pathname, isDarkMode])
+  }, [pathname, isDarkMode, blockMap])
 
   return <></>
 }
@@ -603,6 +617,277 @@ export const renderCollapseCode = (codeCollapse, codeCollapseExpandDefault) => {
       console.warn('[PrismMac] collapse code failed:', err)
     }
   }
+}
+
+/**
+ * 代码块 id -> Notion 原文。复制时用原文，不从高亮后的 DOM 拼文字
+ */
+const buildRawCodeMap = blockMap => {
+  const map = {}
+  Object.values(blockMap?.block || {}).forEach(item => {
+    const block = item?.value
+    if (block?.type !== 'code' || !block.id) return
+    map[block.id.replace(/-/g, '')] = (block.properties?.title || [])
+      .map(segment => segment?.[0] || '')
+      .join('')
+  })
+  return map
+}
+
+const CODE_ID_CLASS_PREFIX = 'notion-code-id-'
+
+const CODE_LANGUAGE_NAMES = {
+  bash: 'Bash',
+  c: 'C',
+  cpp: 'C++',
+  csharp: 'C#',
+  css: 'CSS',
+  docker: 'Docker',
+  go: 'Go',
+  handlebars: 'Handlebars',
+  html: 'HTML',
+  java: 'Java',
+  javascript: 'JavaScript',
+  json: 'JSON',
+  kotlin: 'Kotlin',
+  lua: 'Lua',
+  markdown: 'Markdown',
+  php: 'PHP',
+  powershell: 'PowerShell',
+  python: 'Python',
+  shell: 'Shell',
+  sql: 'SQL',
+  typescript: 'TypeScript',
+  xml: 'XML',
+  yaml: 'YAML'
+}
+
+const getCodeLanguage = pre => {
+  const match = (pre.className || '').match(/language-([\w#+-]+)/)
+  return match ? match[1].toLowerCase() : ''
+}
+
+const getCodeLanguageLabel = language => {
+  if (!language || ['plain', 'text', 'none', 'plaintext'].includes(language)) {
+    return ''
+  }
+  return (
+    CODE_LANGUAGE_NAMES[language] ||
+    language.charAt(0).toUpperCase() + language.slice(1)
+  )
+}
+
+const getRawCode = (pre, rawCodeById) => {
+  const idClass = Array.from(pre.classList).find(name =>
+    name.startsWith(CODE_ID_CLASS_PREFIX)
+  )
+  const raw = idClass && rawCodeById[idClass.slice(CODE_ID_CLASS_PREFIX.length)]
+  if (typeof raw === 'string') return raw
+
+  // 兜底：没有 block id 时取 code 文本，去掉行号插件插入的元素
+  const code = pre.querySelector('code')
+  if (!code) return ''
+  const clone = code.cloneNode(true)
+  clone.querySelectorAll('.line-numbers-rows').forEach(el => el.remove())
+  return clone.textContent || ''
+}
+
+const writeClipboard = async text => {
+  if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(text)
+      return true
+    } catch (e) {
+      /* 回退到 execCommand */
+    }
+  }
+  const textarea = document.createElement('textarea')
+  textarea.value = text
+  textarea.setAttribute('readonly', '')
+  textarea.style.position = 'fixed'
+  textarea.style.top = '-1000px'
+  document.body.appendChild(textarea)
+  textarea.select()
+  let copied = false
+  try {
+    copied = document.execCommand('copy')
+  } catch (e) {
+    copied = false
+  }
+  textarea.remove()
+  return copied
+}
+
+const prefersReducedMotion = () =>
+  typeof window !== 'undefined' &&
+  typeof window.matchMedia === 'function' &&
+  window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+/**
+ * 把 pre 的 max-height 过渡到目标值；target 为 'none' 时展开到内容高度后放开限制
+ */
+const animateCodeHeight = (pre, target) => {
+  const reduce = prefersReducedMotion()
+  const finish = () => {
+    if (target === 'none') pre.style.maxHeight = 'none'
+  }
+  if (reduce) {
+    pre.style.maxHeight = target === 'none' ? 'none' : `${target}px`
+    return
+  }
+  pre.style.maxHeight = `${pre.getBoundingClientRect().height}px`
+  // 读一次布局，让起始高度生效后再改目标值，过渡才会发生
+  void pre.offsetHeight
+  pre.style.maxHeight = target === 'none' ? `${pre.scrollHeight}px` : `${target}px`
+  const onEnd = event => {
+    if (event.propertyName !== 'max-height') return
+    pre.removeEventListener('transitionend', onEnd)
+    finish()
+  }
+  pre.addEventListener('transitionend', onEnd)
+}
+
+const getFoldHeight = (pre, lines) => {
+  const style = window.getComputedStyle(pre)
+  const fontSize = parseFloat(style.fontSize) || 14
+  const lineHeight = parseFloat(style.lineHeight) || fontSize * 1.5
+  return Math.round((parseFloat(style.paddingTop) || 0) + lineHeight * lines)
+}
+
+const CHEVRON_ICON =
+  '<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 0 1 1.414 0L10 10.586l3.293-3.293a1 1 0 1 1 1.414 1.414l-4 4a1 1 0 0 1-1.414 0l-4-4a1 1 0 0 1 0-1.414z" clip-rule="evenodd"/></svg>'
+
+/**
+ * 统一代码框：在 Prism toolbar 生成的 div.code-toolbar 里加一条头部
+ * （mac 圆点 + 语言名 + 复制 + 折叠），超过 minLines 行的代码默认收起到 minLines 行，
+ * 底部渐隐并给出「展开全部（共 X 行）」。Prism 自带的 .toolbar 由主题样式隐藏。
+ */
+const renderCodeFrames = ({
+  macBar,
+  collapse,
+  expandDefault,
+  minLines,
+  rawCodeById
+}) => {
+  const container = getNotionArticle()
+  if (!container) return
+
+  container.querySelectorAll('div.code-toolbar').forEach(wrapper => {
+    try {
+      if (wrapper.classList.contains('code-frame')) return
+      const pre = wrapper.querySelector(':scope > pre')
+      if (!pre) return
+      const language = getCodeLanguage(pre)
+      if (language === 'mermaid') return
+
+      wrapper.classList.add('code-frame')
+      const raw = getRawCode(pre, rawCodeById)
+      const lineCount = raw.replace(/\n+$/, '').split('\n').length
+
+      const head = document.createElement('div')
+      head.className = 'code-frame-head'
+
+      if (macBar) {
+        const dots = document.createElement('span')
+        dots.className = 'code-frame-dots'
+        dots.setAttribute('aria-hidden', 'true')
+        dots.innerHTML = '<span></span><span></span><span></span>'
+        head.appendChild(dots)
+      }
+
+      const label = document.createElement('span')
+      label.className = 'code-frame-lang'
+      label.textContent = getCodeLanguageLabel(language)
+      head.appendChild(label)
+
+      const actions = document.createElement('div')
+      actions.className = 'code-frame-actions'
+
+      const copyButton = document.createElement('button')
+      copyButton.type = 'button'
+      copyButton.className = 'code-frame-copy'
+      copyButton.textContent = '复制'
+      let copyTimer = null
+      copyButton.addEventListener('click', async () => {
+        const copied = await writeClipboard(getRawCode(pre, rawCodeById))
+        copyButton.textContent = copied ? '已复制' : '复制失败'
+        copyButton.dataset.state = copied ? 'copied' : 'error'
+        clearTimeout(copyTimer)
+        copyTimer = setTimeout(() => {
+          copyButton.textContent = '复制'
+          delete copyButton.dataset.state
+        }, 2000)
+      })
+      actions.appendChild(copyButton)
+      head.appendChild(actions)
+      wrapper.insertBefore(head, wrapper.firstChild)
+
+      if (!collapse) return
+
+      const foldable = lineCount > minLines
+      let folded = foldable && !expandDefault
+      let hidden = false
+      const foldHeight = foldable ? getFoldHeight(pre, minLines) : 0
+
+      let more = null
+      let moreButton = null
+      if (foldable) {
+        more = document.createElement('div')
+        more.className = 'code-frame-more'
+        moreButton = document.createElement('button')
+        moreButton.type = 'button'
+        more.appendChild(moreButton)
+        wrapper.appendChild(more)
+      }
+
+      const toggleButton = document.createElement('button')
+      toggleButton.type = 'button'
+      toggleButton.className = 'code-frame-toggle'
+      toggleButton.innerHTML = CHEVRON_ICON
+      actions.appendChild(toggleButton)
+
+      const syncLabels = () => {
+        wrapper.classList.toggle('is-folded', folded)
+        wrapper.classList.toggle('is-hidden', hidden)
+        toggleButton.setAttribute('aria-expanded', hidden ? 'false' : 'true')
+        toggleButton.setAttribute('aria-label', hidden ? '展开代码' : '收起代码')
+        toggleButton.title = hidden ? '展开代码' : '收起代码'
+        if (moreButton) {
+          moreButton.textContent = folded ? `展开全部（共 ${lineCount} 行）` : '收起'
+          moreButton.setAttribute('aria-expanded', folded ? 'false' : 'true')
+        }
+      }
+
+      const targetHeight = () => {
+        if (hidden) return 0
+        return folded ? foldHeight : 'none'
+      }
+
+      toggleButton.addEventListener('click', () => {
+        hidden = !hidden
+        syncLabels()
+        animateCodeHeight(pre, targetHeight())
+      })
+      moreButton?.addEventListener('click', () => {
+        const wasFolded = folded
+        folded = !folded
+        syncLabels()
+        animateCodeHeight(pre, targetHeight())
+        // 从展开收起时，把代码框拉回视口，避免停在下方空白处
+        if (!wasFolded && wrapper.getBoundingClientRect().top < 0) {
+          wrapper.scrollIntoView({
+            block: 'start',
+            behavior: prefersReducedMotion() ? 'auto' : 'smooth'
+          })
+        }
+      })
+
+      syncLabels()
+      if (folded) pre.style.maxHeight = `${foldHeight}px`
+    } catch (err) {
+      console.warn('[PrismMac] code frame failed:', err)
+    }
+  })
 }
 
 /**
