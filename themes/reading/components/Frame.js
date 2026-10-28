@@ -1,9 +1,20 @@
-import SmartLink from '@/components/SmartLink'
 import { siteConfig } from '@/lib/config'
 import { useGlobal } from '@/lib/global'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import CONFIG from '../config'
+
+/**
+ * 站内链接一律用原生 a 整页跳转：页面都是静态 HTML，Next Link 会在视口内和悬停时
+ * 预取 /_next/data 的 JSON，跟首屏资源抢带宽，点击后还要等 JSON 才能换页
+ */
+/* eslint-disable @next/next/no-html-link-for-pages */
+export const PageLink = ({ href, children, ...rest }) => {
+  const external = /^https?:\/\//.test(href || '') && !href.startsWith(siteConfig('LINK'))
+  return external
+    ? <a href={href} target='_blank' rel='noopener noreferrer' {...rest}>{children}</a>
+    : <a href={href} {...rest}>{children}</a>
+}
 
 /** 页头：站名 + 导航 + 深浅色切换 */
 export const Masthead = ({ siteInfo }) => {
@@ -18,15 +29,15 @@ export const Masthead = ({ siteInfo }) => {
   ]
   return (
     <header className='masthead'>
-      <SmartLink className='brand' href='/'>
+      <PageLink className='brand' href='/'>
         {siteConfig('TITLE') || siteInfo?.title}
         <span className='brand-dot' aria-hidden='true' />
-      </SmartLink>
+      </PageLink>
       <nav aria-label='主导航'>
         {links.map(l => (
-          <SmartLink key={l.href} href={l.href} className={l.match(path) ? 'active' : ''}>
+          <PageLink key={l.href} href={l.href} className={l.match(path) ? 'active' : ''}>
             {l.label}
-          </SmartLink>
+          </PageLink>
         ))}
         <button type='button' onClick={toggleDarkMode} aria-label='切换深浅色'>
           {isDarkMode ? '浅色' : '深色'}
@@ -130,7 +141,7 @@ export const LockIcon = () => (
 /** 一行文章：标题（加密文章带锁）+ 分类 + 月日 */
 export const EssayRow = ({ post }) => (
   <li className='essay-row'>
-    <SmartLink href={post.href}>
+    <PageLink href={post.href}>
       <h3>
         {post.password && <LockIcon />}
         {post.title}
@@ -143,7 +154,7 @@ export const EssayRow = ({ post }) => (
           <img className='row-cover' src={post.pageCoverThumbnail} alt='' loading='lazy' />
         )}
       </span>
-    </SmartLink>
+    </PageLink>
   </li>
 )
 
