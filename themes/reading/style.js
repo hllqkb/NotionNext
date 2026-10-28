@@ -499,7 +499,8 @@ const Style = () => {
       #theme-reading .read-progress span { display: block; height: 100%; background: var(--accent); transform: scaleX(0); transform-origin: 0 50%; }
 
       /* 目录当前章节：朱红字 + 左侧一道短竖线 */
-      #theme-reading .toc { position: relative; }
+      /* 别处有全局 .toc { flex-wrap: wrap }，条目一多就折成被截断的第二列，这里拉回单列滚动 */
+      #theme-reading .toc { position: relative; flex-wrap: nowrap; }
       #theme-reading .toc a { position: relative; transition: color 160ms var(--ease); }
       #theme-reading .toc a.active { color: var(--accent); }
       #theme-reading .toc a::before { content: ''; position: absolute; left: -10px; top: .45em; bottom: .45em; width: 2px; border-radius: 1px; background: var(--accent); transform: scaleY(0); transition: transform 160ms var(--ease); }
