@@ -47,13 +47,29 @@ export const Masthead = ({ siteInfo }) => {
   )
 }
 
+/** RSS 图标 */
+const RssIcon = () => (
+  <svg className='rss-icon' viewBox='0 0 16 16' width='13' height='13' aria-hidden='true'>
+    <circle cx='3' cy='13' r='1.8' fill='currentColor' />
+    <path d='M1.5 7.2a7.3 7.3 0 0 1 7.3 7.3M1.5 2.2a12.3 12.3 0 0 1 12.3 12.3' fill='none' stroke='currentColor' strokeWidth='1.9' strokeLinecap='round' />
+  </svg>
+)
+
 /** 页脚 */
 export const SiteFooter = ({ siteInfo }) => (
   <footer className='site-footer'>
     <span>
       {siteConfig('TITLE') || siteInfo?.title} · © {new Date().getFullYear()} {siteConfig('AUTHOR')}
     </span>
-    <span>{siteConfig('READING_FOOTER_RIGHT', null, CONFIG)}</span>
+    <span className='footer-right'>
+      {siteConfig('ENABLE_RSS') && (
+        <a className='rss-link' href='/rss/feed.xml' type='application/rss+xml' title='RSS 订阅'>
+          <RssIcon />
+          订阅
+        </a>
+      )}
+      {siteConfig('READING_FOOTER_RIGHT', null, CONFIG)}
+    </span>
   </footer>
 )
 

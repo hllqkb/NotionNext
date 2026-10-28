@@ -1,0 +1,5 @@
+# 搜索改成 /search?s=关键词 的客户端搜索，老的 /search/关键词 链接 301 过去（带不带尾斜杠都接）
+/search/:kw/page/:n/ /search?s=:kw 301
+/search/:kw/page/:n /search?s=:kw 301
+/search/:kw/ /search?s=:kw 301
+/search/:kw /search?s=:kw 301
