@@ -98,7 +98,7 @@ const Style = () => {
 
       /* 首页右侧：竖排一句话 + 朱红印章 */
       #theme-reading .intro-side { display: flex; align-items: flex-end; gap: 18px; align-self: stretch; }
-      #theme-reading .vertical-title { writing-mode: vertical-rl; margin: 0; font-size: 17px; letter-spacing: .32em; color: var(--muted); line-height: 1.6; max-height: 210px; }
+      #theme-reading .vertical-title { writing-mode: vertical-rl; margin: 0; font-size: 17px; letter-spacing: .28em; color: var(--muted); line-height: 1.6; white-space: nowrap; }
       #theme-reading .seal { display: inline-flex; align-items: center; justify-content: center; width: 54px; height: 54px; border: 2px solid var(--accent); border-radius: 6px; color: var(--accent); font-size: 21px; line-height: 1; letter-spacing: .05em; writing-mode: vertical-rl; transform: rotate(-4deg); box-shadow: inset 0 0 0 3px var(--paper), inset 0 0 0 4px var(--accent); opacity: .9; }
 
       /* 写作打卡点阵 */

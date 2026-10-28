@@ -92,7 +92,11 @@ const LeadStory = ({ post }) => (
 
 /** 首页：大标题 + 最近一篇 + 按年归档 */
 const LayoutIndex = props => {
-  const { posts = [], postCount } = props
+  const { postCount } = props
+  // 首页直接按发布时间排全部文章（allNavPages 含全部已发布文章），不受 Notion 里的行顺序和分页影响
+  const posts = [...(props.allNavPages?.length ? props.allNavPages : props.posts || [])].sort(
+    (a, b) => (b.publishDate || 0) - (a.publishDate || 0)
+  )
   const [cat, setCat] = useState('')
   const [lead, ...rest] = posts
   const listed = cat ? filterByCategory(posts, cat) : rest

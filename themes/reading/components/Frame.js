@@ -47,7 +47,13 @@ export const SiteFooter = ({ siteInfo }) => (
 )
 
 /** 文章日期：优先发布日期 */
-export const postDay = post => post?.publishDay || post?.date?.start_date || post?.createdTime || ''
+export const postDay = post => {
+  if (post?.publishDay) return post.publishDay
+  if (post?.date?.start_date) return post.date.start_date
+  // allNavPages 只有毫秒时间戳 publishDate，按北京时间转成 YYYY-MM-DD
+  if (post?.publishDate) return new Date(post.publishDate).toLocaleDateString('sv-SE', { timeZone: 'Asia/Shanghai' })
+  return post?.createdTime || ''
+}
 
 /** 按年分组，年份倒序、组内按发布时间倒序 */
 export const groupByYear = posts => {
