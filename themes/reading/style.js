@@ -84,6 +84,31 @@ const Style = () => {
       #theme-reading .essay-row time { font-size: 14px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
       #theme-reading .essay-row + .essay-row { border-top: 1px solid var(--line-soft); }
       #theme-reading .empty { padding: 50px 0; color: var(--muted); }
+
+      /* 年谱时间线：每年一条竖线，每篇一个圆点，当年最新一篇点亮 */
+      #theme-reading .year-group ul { position: relative; padding-left: 26px; }
+      #theme-reading .year-group ul::before { content: ''; position: absolute; left: 4px; top: 26px; bottom: 26px; width: 1px; background: var(--line); }
+      #theme-reading .essay-row { position: relative; }
+      #theme-reading .essay-row::before { content: ''; position: absolute; left: -26px; top: 31px; width: 9px; height: 9px; border-radius: 50%; background: var(--paper); border: 1px solid var(--muted); transition: background .2s, border-color .2s; }
+      #theme-reading .essay-row:first-child::before { background: var(--accent); border-color: var(--accent); }
+      #theme-reading .essay-row:hover::before { border-color: var(--accent); }
+      #theme-reading .row-meta { display: flex; align-items: baseline; gap: 14px; flex-shrink: 0; }
+      #theme-reading .row-cat { font-size: 13px; color: var(--accent); }
+      #theme-reading .lock { display: inline-block; vertical-align: -1px; margin-right: 8px; color: var(--muted); }
+
+      /* 分类筛选 */
+      #theme-reading .filter-chips { display: flex; flex-wrap: wrap; gap: 10px; padding: 18px 0 4px; }
+      #theme-reading .filter-chips button { border: 1px solid var(--line); border-radius: 999px; background: transparent; color: var(--ink); font: 400 15px/1.6 var(--font); padding: 3px 14px; cursor: pointer; transition: border-color .2s, color .2s; }
+      #theme-reading .filter-chips button:hover { border-color: var(--accent); color: var(--accent); }
+      #theme-reading .filter-chips button.active { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+      #theme-reading .filter-chips button span { margin-left: 6px; font-size: 12px; opacity: .7; }
+
+      /* 滚动淡入：只有 JS 就绪后才先隐藏，避免无 JS 时内容看不见 */
+      #theme-reading.reveal-ready .reveal { opacity: 0; transform: translateY(14px); transition: opacity .6s ease, transform .6s ease; }
+      #theme-reading.reveal-ready .reveal.in { opacity: 1; transform: none; }
+      @media (prefers-reduced-motion: reduce) {
+        #theme-reading.reveal-ready .reveal { opacity: 1; transform: none; transition: none; }
+      }
       #theme-reading .pager { display: flex; justify-content: space-between; padding: 24px 0; font-size: 16px; }
 
       /* 分类 / 标签云 */
@@ -165,6 +190,8 @@ const Style = () => {
         #theme-reading .year-label { font-size: 24px; margin: 0 0 6px; }
         #theme-reading .essay-row h3 { font-size: 19px; }
         #theme-reading .essay-row a { gap: 16px; padding: 14px 0; }
+        #theme-reading .essay-row::before { top: 26px; }
+        #theme-reading .row-cat { display: none; }
         #theme-reading .prose { font-size: 18px; }
         #theme-reading .article-head h1 { font-size: 30px; }
         #theme-reading .site-footer { flex-direction: column; gap: 4px; padding-inline: 20px; }

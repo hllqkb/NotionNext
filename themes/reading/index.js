@@ -6,7 +6,7 @@ import { siteConfig } from '@/lib/config'
 import { isBrowser } from '@/lib/utils'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
-import { Masthead, SiteFooter, YearGroups, postDay } from './components/Frame'
+import { CategoryChips, LockIcon, Masthead, SiteFooter, YearGroups, filterByCategory, postDay, useReveal } from './components/Frame'
 import Toc from './components/Toc'
 import CONFIG from './config'
 import { Style } from './style'
@@ -16,8 +16,9 @@ import { Style } from './style'
  */
 const LayoutBase = props => {
   const { children, siteInfo, post } = props
+  const revealReady = useReveal()
   return (
-    <div id='theme-reading' className={siteConfig('FONT_STYLE')}>
+    <div id='theme-reading' className={`${siteConfig('FONT_STYLE')} ${revealReady ? 'reveal-ready' : ''}`}>
       <Style />
       <div className='page'>
         <Masthead siteInfo={siteInfo} />
@@ -58,14 +59,17 @@ const SearchBox = ({ keyword = '' }) => {
 
 /** 最近一篇：大号展示 */
 const LeadStory = ({ post }) => (
-  <article className='lead-story'>
+  <article className='lead-story reveal'>
     <div className='lead-meta'>
       <span>最近一篇</span>
       <time dateTime={postDay(post)}>{String(postDay(post)).replaceAll('-', '.')}</time>
       {post.category && <span>{post.category}</span>}
     </div>
     <h2>
-      <SmartLink href={post.href}>{post.title}</SmartLink>
+      <SmartLink href={post.href}>
+        {post.password && <LockIcon />}
+        {post.title}
+      </SmartLink>
     </h2>
     <div className='lead-row'>
       <p>{post.summary}</p>
@@ -79,7 +83,9 @@ const LeadStory = ({ post }) => (
 /** 首页：大标题 + 最近一篇 + 按年归档 */
 const LayoutIndex = props => {
   const { posts = [], postCount } = props
+  const [cat, setCat] = useState('')
   const [lead, ...rest] = posts
+  const listed = cat ? filterByCategory(posts, cat) : rest
   return (
     <>
       <header className='intro'>
@@ -101,8 +107,9 @@ const LayoutIndex = props => {
         <p>全部 {postCount || posts.length} 篇</p>
         <SearchBox />
       </div>
-      {lead && <LeadStory post={lead} />}
-      <YearGroups posts={rest} />
+      <CategoryChips posts={posts} value={cat} onChange={setCat} />
+      {lead && !cat && <LeadStory post={lead} />}
+      <YearGroups posts={listed} />
       {postCount > posts.length && (
         <div className='pager'>
           <span />
@@ -161,6 +168,7 @@ const LayoutSearch = props => {
 /** 归档：全部文章按年 */
 const LayoutArchive = props => {
   const { posts = [] } = props
+  const [cat, setCat] = useState('')
   return (
     <>
       <header className='list-head'>
@@ -172,7 +180,8 @@ const LayoutArchive = props => {
         <p>全部 {posts.length} 篇</p>
         <SearchBox />
       </div>
-      <YearGroups posts={posts} />
+      <CategoryChips posts={posts} value={cat} onChange={setCat} />
+      <YearGroups posts={filterByCategory(posts, cat)} />
     </>
   )
 }
