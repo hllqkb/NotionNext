@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import enUS from '@/lib/lang/en-US'
+import { decryptPost, decryptPostWithSavedKey } from '@/lib/utils/postDecryption'
 
-export default function useProtectedPost(initialPost, router, locale = enUS, unlockUnavailable = false) {
+/** encryptedPost: static exports decrypt in the browser instead of calling /api/post/unlock. */
+export default function useProtectedPost(initialPost, router, locale = enUS, unlockUnavailable = false, encryptedPost = null) {
   const rateLimitMessage = locale.COMMON.POST_UNLOCK_RATE_LIMIT || enUS.COMMON.POST_UNLOCK_RATE_LIMIT
   const unavailableMessage = locale.COMMON.POST_UNLOCK_UNAVAILABLE || enUS.COMMON.POST_UNLOCK_UNAVAILABLE
   const networkMessage = locale.COMMON.POST_UNLOCK_NETWORK_ERROR || enUS.COMMON.POST_UNLOCK_NETWORK_ERROR
@@ -25,6 +27,16 @@ export default function useProtectedPost(initialPost, router, locale = enUS, unl
       setUnlocking(true)
       setUnlockError('')
       try {
+        let payload
+        if (encryptedPost) {
+          payload = await decryptPost(password, encryptedPost, initialPost.id)
+          if (
+            !payload ||
+            currentVersion !== version.current ||
+            identityRef.current !== identity
+          )
+            return false
+        } else {
         const response = await fetch(
           `${router.basePath || ''}/api/post/unlock`,
           {
@@ -51,7 +63,9 @@ export default function useProtectedPost(initialPost, router, locale = enUS, unl
               ? 'RATE_LIMITED'
               : 'UNAVAILABLE'
           )
-        const { post, prev, next, recommendPosts } = await response.json()
+        payload = await response.json()
+        }
+        const { post, prev, next, recommendPosts } = payload
         if (
           currentVersion !== version.current ||
           identityRef.current !== identity
@@ -84,7 +98,7 @@ export default function useProtectedPost(initialPost, router, locale = enUS, unl
           setUnlocking(false)
       }
     },
-    [identity, initialPost?.id, router.locale, router.basePath, unlockUnavailable, rateLimitMessage, unavailableMessage, networkMessage]
+    [identity, initialPost?.id, router.locale, router.basePath, unlockUnavailable, encryptedPost, rateLimitMessage, unavailableMessage, networkMessage]
   )
 
   useEffect(() => {
@@ -98,6 +112,14 @@ export default function useProtectedPost(initialPost, router, locale = enUS, unl
     const unlockSavedPassword = async () => {
       await Promise.resolve()
       if (cancelled) return
+      if (encryptedPost) {
+        const saved = await decryptPostWithSavedKey(encryptedPost, initialPost.id)
+        if (cancelled) return
+        if (saved?.post?.id === initialPost.id && saved.post.blockMap?.block) {
+          setUnlocked({ identity, ...saved })
+          return
+        }
+      }
     let candidates = []
     // Migrate existing password links/storage once, without saving new plaintext passwords.
     try {
@@ -136,7 +158,7 @@ export default function useProtectedPost(initialPost, router, locale = enUS, unl
       version.current++
       request.current?.abort()
     }
-  }, [identity, initialPost?.password, validPassword])
+  }, [identity, initialPost?.password, initialPost?.id, encryptedPost, validPassword])
 
   const authorizedPost = unlocked?.identity === identity ? unlocked.post : null
   return {
