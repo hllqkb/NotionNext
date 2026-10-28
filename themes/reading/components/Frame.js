@@ -189,10 +189,11 @@ export const useReveal = () => {
         }),
       { rootMargin: '0px 0px -8% 0px' }
     )
-    // 主题加载后 NotionNext 会替换根节点，所以每次都从 document 重新找；已在视口内的直接显示
+    // 主题加载后 NotionNext 会替换根节点，所以每次都从 document 重新找。
+    // 顶边已进视口的直接显示：它们在 reveal-ready 加上之前就有 .in，首屏不会先藏再淡入
     const watch = () =>
       document.querySelectorAll('#theme-reading .reveal:not(.in)').forEach(el => {
-        if (el.getBoundingClientRect().top < window.innerHeight * 0.92) show(el)
+        if (el.getBoundingClientRect().top < window.innerHeight) show(el)
         else io.observe(el)
       })
     watch()
