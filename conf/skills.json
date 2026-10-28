@@ -1,5 +1,4 @@
 {
-  "preview": true,
   "skills": [
     {
       "name": "wechat-article",
@@ -26,6 +25,24 @@
       "example": "「/qu-ai-wei 这段太像 AI 写的了，改自然点」",
       "zip": "/skills/qu-ai-wei.zip",
       "skillMd": "/skills/qu-ai-wei/SKILL.md"
+    },
+    {
+      "name": "gzh-design",
+      "title": "公众号排版",
+      "summary": "把 Markdown、Word、PDF 排成能直接粘进公众号编辑器的 HTML，带多套主题；我加了一套 Claude 陶土主题。",
+      "scenes": [
+        "公众号排版",
+        "Markdown 转公众号 HTML",
+        "自定义排版主题"
+      ],
+      "example": "「用 Claude 陶土主题把这篇 md 排成公众号」",
+      "credit": {
+        "author": "isjiamu",
+        "license": "AGPL-3.0",
+        "url": "https://github.com/isjiamu/gzh-design-skill"
+      },
+      "zip": "/skills/gzh-design.zip",
+      "skillMd": "/skills/gzh-design/SKILL.md"
     }
   ]
 }

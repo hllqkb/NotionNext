@@ -38,6 +38,15 @@ const SkillCard = ({ skill, selected, onToggle }) => (
       <img className='sk-shot' src={skill.image} alt={`${skill.title} 示例截图`} loading='lazy' />
     )}
     {skill.example && <p className='sk-example'>{skill.example}</p>}
+    {skill.credit && (
+      <p className='sk-credit'>
+        原作者{' '}
+        <a href={skill.credit.url} target='_blank' rel='noopener noreferrer'>
+          {skill.credit.author}
+        </a>
+        ，{skill.credit.license} 开源，zip 里附许可证和修改说明。
+      </p>
+    )}
     <p className='sk-install'>
       解压到 <code>~/.claude/skills/</code>，或者把 zip 上传到 claude.ai。
     </p>
@@ -70,7 +79,6 @@ export const SkillsBoard = ({ data }) => {
         </h1>
         <p className='intro-text'>我平时给 Claude 用的 skill，下载 zip 就能装。</p>
       </header>
-      {data?.preview && <p className='sk-notice'>预览数据：zip 和 SKILL.md 目前是占位内容，正式 skill 还没放上来。</p>}
       <div className='collection-bar'>
         <p>
           共 {skills.length} 个 · 已选 {chosen.length} 个
@@ -130,7 +138,6 @@ export const SkillsBoard = ({ data }) => {
 
 const SkillsStyle = () => (
   <style jsx global>{`
-    #theme-reading .sk-notice { margin: 0 0 18px; padding: 10px 14px; border-left: 2px solid var(--accent); background: var(--quote-bg); font-size: 15px; color: var(--muted); }
     #theme-reading .sk-bar-actions button,
     #theme-reading .sk-clear { background: none; border: 0; padding: 0; font: inherit; color: var(--accent); cursor: pointer; }
     #theme-reading .sk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr)); gap: 28px; padding: 30px 0 10px; }
@@ -147,6 +154,8 @@ const SkillsStyle = () => (
     #theme-reading .sk-shot { width: 100%; border: 1px solid var(--line-soft); border-radius: 6px; }
     #theme-reading .sk-example { margin: 0; font-size: 15px; color: var(--muted); }
     #theme-reading .sk-example::before { content: '例 '; color: var(--accent); }
+    #theme-reading .sk-credit { margin: 0; font-size: 14px; color: var(--muted); }
+    #theme-reading .sk-credit a { color: var(--accent); }
     #theme-reading .sk-install { margin: 0; padding-top: 12px; border-top: 1px solid var(--line-soft); font-size: 14px; color: var(--muted); }
     #theme-reading .sk-install code,
     #theme-reading .sk-howto code { font-size: 13px; background: var(--code-bg); padding: 1px 5px; border-radius: 3px; }
