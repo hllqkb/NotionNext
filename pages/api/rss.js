@@ -1,5 +1,7 @@
 import BLOG from '@/blog.config'
 import { fetchGlobalAllData } from '@/lib/db/SiteDataApi'
+import { siteConfig } from '@/lib/config'
+import { getFeedPosts } from '@/lib/utils/feedPosts'
 import { createFeed } from '@/lib/utils/rss'
 
 /**
@@ -41,12 +43,13 @@ async function generateRssContent() {
 
   const { siteInfo, allPages, NOTION_CONFIG } = props
 
-  // 复用构建时同一份文章列表，保证兜底 feed 与静态 feed 的条数与顺序一致
-  const latestPosts = (props.latestPosts || []).filter(
-    post => post.type === 'Post' && post.status === 'Published'
+  // 与构建时的静态 feed 同一套取数，保证兜底 feed 与静态 feed 的条数与顺序一致
+  const feedPosts = getFeedPosts(
+    allPages,
+    siteConfig('RSS_POST_COUNT', 20, NOTION_CONFIG)
   )
 
-  if (latestPosts.length === 0) {
+  if (feedPosts.length === 0) {
     return null
   }
 
@@ -54,7 +57,7 @@ async function generateRssContent() {
   const feed = await createFeed({
     siteInfo,
     NOTION_CONFIG,
-    posts: latestPosts,
+    posts: feedPosts,
     allPages,
     subPath: NOTION_CONFIG?.SUB_PATH || BLOG.SUB_PATH
   })

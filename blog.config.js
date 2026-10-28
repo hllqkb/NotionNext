@@ -20,6 +20,7 @@ const BLOG = {
   BIO: process.env.NEXT_PUBLIC_BIO || '软件工程在读，后端开发实习生。喜欢做小工具，也写点生活。', // 作者简介
   LINK: process.env.NEXT_PUBLIC_LINK || 'https://hllqkb-blog.pages.dev', // 绑定自定义域名后改成域名 // 网站地址
   KEYWORDS: process.env.NEXT_PUBLIC_KEYWORD || '水啊, 博客, 后端开发, 搜索推荐, AI 编程', // 网站关键词 英文逗号隔开
+  SEO_OG_IMAGE: process.env.NEXT_PUBLIC_SEO_OG_IMAGE || '/og-default.png', // 站点默认分享图 1200x630；文章有封面时用文章封面。留空则回退到 Notion 站点封面
   BLOG_FAVICON: process.env.NEXT_PUBLIC_FAVICON || '/favicon.ico', // blog favicon 配置, 默认使用 /public/favicon.ico，支持在线图片，如 https://img.imesong.com/favicon.png
   PWA_ENABLE: process.env.NEXT_PUBLIC_PWA_ENABLE || false, // 是否启用 PWA 安装入口；也可在 Notion_Config 中配置 PWA_ENABLE=true
   PWA_NAME: process.env.NEXT_PUBLIC_PWA_NAME || '', // PWA 安装名称；默认读取站点标题，通常无需单独配置
@@ -38,6 +39,7 @@ const BLOG = {
   // RSS订阅
   ENABLE_RSS: process.env.NEXT_PUBLIC_ENABLE_RSS || true, // 是否开启RSS订阅功能
   RSS_FULL_CONTENT: process.env.RSS_FULL_CONTENT || true, // RSS是否返回文章全文；false时仅返回摘要
+  RSS_POST_COUNT: process.env.NEXT_PUBLIC_RSS_POST_COUNT || 20, // RSS条目数，按发布时间倒序
 
   // 其它复杂配置
   // 原配置文件过长，且并非所有人都会用到，故此将配置拆分到/conf/目录下, 按需找到对应文件并修改即可

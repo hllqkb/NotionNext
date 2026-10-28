@@ -53,9 +53,8 @@ const publishedPost = {
 
 const siteData = {
   siteInfo: { title: 'Demo', description: 'desc', link: 'https://example.com' },
-  allPages: [],
-  NOTION_CONFIG: { AUTHOR: 'Tester', SUB_PATH: '' },
-  latestPosts: [publishedPost]
+  allPages: [publishedPost],
+  NOTION_CONFIG: { AUTHOR: 'Tester', SUB_PATH: '' }
 }
 
 const feedStub = () => ({
@@ -103,7 +102,7 @@ describe('/api/rss fallback', () => {
   })
 
   it('keeps the 503 response when no published posts are available', async () => {
-    fetchGlobalAllDataMock.mockResolvedValue({ ...siteData, latestPosts: [] })
+    fetchGlobalAllDataMock.mockResolvedValue({ ...siteData, allPages: [] })
 
     const res = createResponse()
     await loadHandler()({ method: 'GET', query: {} }, res)
