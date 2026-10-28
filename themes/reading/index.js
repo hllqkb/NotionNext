@@ -8,6 +8,7 @@ import { useRouter } from 'next/router'
 import { useEffect, useRef, useState } from 'react'
 import { CategoryChips, LockIcon, Masthead, PageLink, Seal, SiteFooter, WritingStreak, YearGroups, filterByCategory, hasCover, postDay, useReveal } from './components/Frame'
 import Gallery, { galleryImages } from './components/Gallery'
+import { LayoutAbout, LayoutBooks, LayoutGallery, LayoutLinks, LayoutProjects, pageLayoutFor } from './components/Pages'
 
 const Comment = dynamic(() => import('@/components/Comment'), { ssr: false })
 import Toc from './components/Toc'
@@ -452,15 +453,26 @@ const Layout404 = () => (
   </header>
 )
 
+/** Notion 里的独立页面（about、projects 等）用专门版式，其余照常是文章页 */
+const LayoutSlugOrPage = props => {
+  const PageLayout = pageLayoutFor(props.post)
+  return PageLayout ? <PageLayout {...props} /> : <LayoutSlug {...props} />
+}
+
 export {
   Layout404,
+  LayoutAbout,
   LayoutArchive,
   LayoutBase,
+  LayoutBooks,
   LayoutCategoryIndex,
+  LayoutGallery,
   LayoutIndex,
+  LayoutLinks,
   LayoutPostList,
+  LayoutProjects,
   LayoutSearch,
-  LayoutSlug,
+  LayoutSlugOrPage as LayoutSlug,
   LayoutTagIndex,
   CONFIG as THEME_CONFIG
 }
