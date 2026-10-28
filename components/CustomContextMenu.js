@@ -197,9 +197,11 @@ export default function CustomContextMenu(props) {
             </div>
           )}
 
+          {/* 菜单平时隐藏但一直在 DOM 里，默认预取会让每个页面都去拉 /category、/tag 的数据 */}
           {CUSTOM_RIGHT_CLICK_CONTEXT_MENU_CATEGORY && (
             <SmartLink
               href='/category'
+              prefetch={false}
               title={locale.MENU.CATEGORY}
               className='w-full px-2 h-10 flex justify-start items-center flex-nowrap cursor-pointer hover:bg-blue-600 hover:text-white rounded-lg duration-200 transition-all'>
               <i className='fa-solid fa-square-minus mr-2' />
@@ -210,6 +212,7 @@ export default function CustomContextMenu(props) {
           {CUSTOM_RIGHT_CLICK_CONTEXT_MENU_TAG && (
             <SmartLink
               href='/tag'
+              prefetch={false}
               title={locale.MENU.TAGS}
               className='w-full px-2 h-10 flex justify-start items-center flex-nowrap cursor-pointer hover:bg-blue-600 hover:text-white rounded-lg duration-200 transition-all'>
               <i className='fa-solid fa-tag mr-2' />
