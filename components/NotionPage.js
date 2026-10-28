@@ -284,13 +284,13 @@ function getMediumZoomMargin() {
   }
 }
 
-// 代码
+// 代码：服务端先输出 <pre><code> 原文，Prism 高亮和复制按钮在客户端 effect 里接管
 const Code = dynamic(
   () =>
     import('react-notion-x/build/third-party/code').then(m => {
       return m.Code
     }),
-  { ssr: false }
+  { ssr: true }
 )
 
 // 公式
