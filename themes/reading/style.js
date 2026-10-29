@@ -10,7 +10,8 @@ const Style = () => {
         --paper: #f7f6f0;
         --sidebar: #f0eee7;
         --ink: #34352e;
-        --muted: #78786e;
+        /* 纸色、侧栏、引用底上都要过 4.5:1（原 #78786e 只有 3.8–4.1） */
+        --muted: #6b6b61;
         --line: #dfdfd4;
         --line-soft: #e8e7df;
         --accent: #aa533b;
@@ -40,7 +41,8 @@ const Style = () => {
 
       #theme-reading a { color: inherit; text-decoration: none; }
       #theme-reading a:hover { color: var(--accent); }
-      #theme-reading ::selection { background: #e4cebc; }
+      /* 选区底是浅色，字也固定成深墨色，深色模式下才看得清 */
+      #theme-reading ::selection { background: #e4cebc; color: #34352e; }
       #theme-reading .page { max-width: 1080px; margin: auto; padding: 0 56px; }
 
       /* 页头 */
@@ -198,6 +200,30 @@ const Style = () => {
       #theme-reading .code-frame button:hover,
       #theme-reading .code-frame button:focus-visible { color: var(--accent); border-color: var(--accent); }
       #theme-reading .code-frame-copy[data-state='copied'] { color: var(--accent); border-color: var(--accent); }
+      /* One Light / One Dark 里低于 4.5:1 的 token 颜色（浅色注释 2.5、字符串 3.1，深色注释 2.28 等）。
+         选择器照抄 prism-themes@1.9.0 原规则，只把明度调到 4.8:1 左右、色相不变；浅色只在非深色模式下生效 */
+      html:not(.dark) #theme-reading .prose .token.cdata, html:not(.dark) #theme-reading .prose .token.comment, html:not(.dark) #theme-reading .prose .token.prolog { color: #6d6e75; }
+      html:not(.dark) #theme-reading .prose .token.atrule, html:not(.dark) #theme-reading .prose .token.attr-name, html:not(.dark) #theme-reading .prose .token.boolean, html:not(.dark) #theme-reading .prose .token.class-name, html:not(.dark) #theme-reading .prose .token.constant, html:not(.dark) #theme-reading .prose .token.number { color: #a25e00; }
+      html:not(.dark) #theme-reading .prose .token.deleted, html:not(.dark) #theme-reading .prose .token.important, html:not(.dark) #theme-reading .prose .token.property, html:not(.dark) #theme-reading .prose .token.symbol, html:not(.dark) #theme-reading .prose .token.tag { color: #d32e21; }
+      html:not(.dark) #theme-reading .prose .token.attr-value, html:not(.dark) #theme-reading .prose .token.attr-value>.token.punctuation, html:not(.dark) #theme-reading .prose .token.builtin, html:not(.dark) #theme-reading .prose .token.char, html:not(.dark) #theme-reading .prose .token.inserted, html:not(.dark) #theme-reading .prose .token.regex, html:not(.dark) #theme-reading .prose .token.selector, html:not(.dark) #theme-reading .prose .token.string { color: #3e7c3d; }
+      html:not(.dark) #theme-reading .prose .token.function, html:not(.dark) #theme-reading .prose .token.operator, html:not(.dark) #theme-reading .prose .token.variable { color: #2364ef; }
+      html:not(.dark) #theme-reading .prose .token.url { color: #0076a9; }
+      html:not(.dark) #theme-reading .prose .language-css .token.selector { color: #d32e21; }
+      html:not(.dark) #theme-reading .prose .language-css .token.function, html:not(.dark) #theme-reading .prose .language-css .token.url>.token.function { color: #0076a9; }
+      html:not(.dark) #theme-reading .prose .language-css .token.url>.token.string.url { color: #3e7c3d; }
+      html:not(.dark) #theme-reading .prose .language-json .token.null.keyword { color: #a25e00; }
+      html:not(.dark) #theme-reading .prose .language-markdown .token.url>.token.content { color: #2364ef; }
+      html:not(.dark) #theme-reading .prose .language-markdown .token.url-reference.url, html:not(.dark) #theme-reading .prose .language-markdown .token.url>.token.url { color: #0076a9; }
+      html:not(.dark) #theme-reading .prose .language-markdown .token.blockquote.punctuation, html:not(.dark) #theme-reading .prose .language-markdown .token.hr.punctuation { color: #6d6e75; }
+      html:not(.dark) #theme-reading .prose .language-markdown .token.code-snippet { color: #3e7c3d; }
+      html:not(.dark) #theme-reading .prose .language-markdown .token.bold .token.content { color: #a25e00; }
+      html:not(.dark) #theme-reading .prose .language-markdown .token.list.punctuation, html:not(.dark) #theme-reading .prose .language-markdown .token.strike .token.content, html:not(.dark) #theme-reading .prose .language-markdown .token.strike .token.punctuation, html:not(.dark) #theme-reading .prose .language-markdown .token.title.important>.token.punctuation { color: #d32e21; }
+      .dark #theme-reading .prose .token.cdata, .dark #theme-reading .prose .token.comment, .dark #theme-reading .prose .token.prolog { color: #9198a5; }
+      .dark #theme-reading .prose .token.deleted, .dark #theme-reading .prose .token.important, .dark #theme-reading .prose .token.property, .dark #theme-reading .prose .token.symbol, .dark #theme-reading .prose .token.tag { color: #e27881; }
+      .dark #theme-reading .prose .language-css .token.selector { color: #e27881; }
+      .dark #theme-reading .prose .language-javascript .token.template-string>.token.interpolation>.token.interpolation-punctuation.punctuation { color: #d1847d; }
+      .dark #theme-reading .prose .language-markdown .token.blockquote.punctuation, .dark #theme-reading .prose .language-markdown .token.hr.punctuation { color: #9198a5; }
+      .dark #theme-reading .prose .language-markdown .token.list.punctuation, .dark #theme-reading .prose .language-markdown .token.strike .token.content, .dark #theme-reading .prose .language-markdown .token.strike .token.punctuation, .dark #theme-reading .prose .language-markdown .token.title.important>.token.punctuation { color: #e27881; }
       #theme-reading .code-frame-toggle { display: inline-flex; align-items: center; padding: 4px 6px !important; }
       #theme-reading .code-frame-toggle svg { width: 15px; height: 15px; transition: transform .3s var(--ease); }
       #theme-reading .code-frame.is-hidden .code-frame-toggle svg { transform: rotate(-90deg); }
@@ -309,6 +335,10 @@ const Style = () => {
       #theme-reading .prose .notion-code { background: var(--code-block-bg) !important; border: 1px solid var(--line); border-radius: 10px; font-size: 14px; }
       #theme-reading .prose .notion-inline-code { background: var(--code-bg); color: var(--ink); padding: 2px 5px; border-radius: 4px; }
       #theme-reading .prose .notion-callout { background: var(--quote-bg); border: 0; border-radius: 8px; }
+      /* styles/notion.css 给深色 quote / callout 强制了蓝色渐变，reading 主题里换回纸色系 */
+      .dark #theme-reading .prose .notion-quote { background: var(--quote-bg) !important; color: var(--muted) !important; border: 0 !important; }
+      .dark #theme-reading .prose .notion-callout { background: var(--quote-bg) !important; color: var(--ink) !important; border: 0 !important; border-radius: 8px; }
+      .dark #theme-reading .prose .notion-callout :is(.notion-callout-text, .notion-text) { color: inherit !important; }
       #theme-reading .prose .notion-table { font-size: 17px; }
 
       @media (max-width: 1050px) {
@@ -358,6 +388,10 @@ const Style = () => {
         #theme-reading .post-around a.next { text-align: left; }
         #theme-reading .prose { font-size: 18px; }
         #theme-reading .article-head h1 { font-size: 30px; }
+        /* 手机上正文标题要比文章标题小一级（原来章节 32px 大过文章标题 30px） */
+        #theme-reading .prose .notion-h1 { font-size: 26px; }
+        #theme-reading .prose .notion-h2 { font-size: 23px; }
+        #theme-reading .prose .notion-h3 { font-size: 20px; }
         #theme-reading .site-footer { flex-direction: column; gap: 4px; --fp: 20px; }
       }
 
@@ -744,6 +778,9 @@ const Style = () => {
       /* 宽表格、长公式只在自己的框里横向滚动，不撑宽正文 */
       #theme-reading .prose .notion-simple-table { display: block; width: max-content; max-width: 100%; overflow-x: auto; scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
       #theme-reading .prose .notion-simple-table td { min-width: 6em; }
+      /* 简单表格原来跟着全局 14px，表里的行内代码再乘 85% 只剩 12px */
+      #theme-reading .prose .notion-simple-table { font-size: 16px; line-height: 1.65; }
+      #theme-reading .prose .notion-simple-table .notion-inline-code { font-size: .9375em; }
       #theme-reading .prose :is(.notion-equation-block, .katex-display) { display: block; max-width: 100%; overflow-x: auto; overflow-y: hidden; scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
       #theme-reading .prose :is(.notion-collection, .notion-table) { max-width: 100%; overflow-x: auto; }
 
