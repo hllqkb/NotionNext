@@ -11,7 +11,8 @@ import Gallery, { galleryImages } from './components/Gallery'
 import { LayoutAbout, LayoutBooks, LayoutGallery, LayoutLinks, LayoutProjects, pageLayoutFor } from './components/Pages'
 
 const Comment = dynamic(() => import('@/components/Comment'), { ssr: false })
-import Toc from './components/Toc'
+import Toc, { useActiveHeading } from './components/Toc'
+import { ReadingProgress, RelatedPosts, SeriesBox, dekOf, getRelatedPosts, getSeries } from './components/Article'
 import CONFIG from './config'
 import { Style } from './style'
 
@@ -251,10 +252,11 @@ const readingStats = post => {
 }
 
 const LayoutSlug = props => {
-  const { post, lock, validPassword, unlocking, prev, next } = props
+  const { post, lock, validPassword, unlocking, prev, next, allNavPages } = props
   const router = useRouter()
   const [password, setPassword] = useState('')
   const [rejected, setRejected] = useState(false)
+  const activeHeading = useActiveHeading(lock ? null : post?.toc)
 
   useEffect(() => {
     if (!post) {
@@ -272,13 +274,17 @@ const LayoutSlug = props => {
   const stats = readingStats(post)
   const isArticle = post.type === 'Post'
   const pageUrl = `${siteConfig('LINK')}/${post.slug}`
+  const dek = dekOf(post)
+  const series = isArticle ? getSeries(post, allNavPages) : null
+  const related = isArticle && !lock ? getRelatedPosts(post, allNavPages, series) : []
   return (
     <div className='reading-shell'>
+      <ReadingProgress />
       <aside className='sidebar' aria-label='阅读导航'>
         <PageLink className='all-articles' href='/'>
           全部文章
         </PageLink>
-        {!lock && <Toc toc={post.toc} />}
+        {!lock && <Toc toc={post.toc} active={activeHeading} />}
         <div className='sidebar-note'>
           <p>{siteConfig('READING_SIDEBAR_NOTE', null, CONFIG)}</p>
           <span>{siteConfig('AUTHOR')}</span>
@@ -292,6 +298,7 @@ const LayoutSlug = props => {
             {day && <time dateTime={day}>{String(day).replaceAll('-', ' / ')}</time>}
           </p>
           <h1>{post.title}</h1>
+          {dek && <p className='dek'>{dek}</p>}
           <div className='byline'>
             {stats.chars > 0 && !lock && (
               <span>
@@ -305,6 +312,8 @@ const LayoutSlug = props => {
             ))}
           </div>
         </header>
+        <SeriesBox series={series} />
+        {!lock && <Toc toc={post.toc} active={activeHeading} mobile />}
         {lock ? (
           <form
             className='post-lock'
@@ -362,6 +371,7 @@ const LayoutSlug = props => {
             </p>
           </aside>
         )}
+        <RelatedPosts posts={related} />
         {isArticle && (prev || next) && (
           <nav className='post-around reveal' aria-label='上一篇和下一篇'>
             {prev ? (
