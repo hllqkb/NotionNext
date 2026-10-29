@@ -8,6 +8,7 @@ import { useRouter } from 'next/router'
 import { useEffect, useRef, useState } from 'react'
 import { CategoryChips, LockIcon, Masthead, PageLink, Seal, SiteFooter, WritingStreak, YearGroups, filterByCategory, hasCover, postDay, useReveal } from './components/Frame'
 import Gallery, { galleryImages } from './components/Gallery'
+import { LayoutAbout, LayoutBooks, LayoutGallery, LayoutLinks, LayoutProjects, pageLayoutFor } from './components/Pages'
 import { SkillsBoard } from './components/Skills'
 
 const Comment = dynamic(() => import('@/components/Comment'), { ssr: false })
@@ -139,7 +140,7 @@ const LayoutIndex = props => {
           <Seal text={siteConfig('READING_SEAL', null, CONFIG) || siteConfig('AUTHOR')} />
         </div>
       </header>
-      {siteConfig('READING_STREAK', true, CONFIG) && <WritingStreak pages={props.allNavPages || posts} />}
+      {siteConfig('READING_STREAK', true, CONFIG) && <WritingStreak pages={props.allNavPages || posts} buildTime={props.buildTime} />}
       <div className='collection-bar'>
         <p>全部 {postCount || posts.length} 篇</p>
         <SearchBox />
@@ -456,16 +457,27 @@ const Layout404 = () => (
   </header>
 )
 
+/** Notion 里的独立页面（about、projects 等）用专门版式，其余照常是文章页 */
+const LayoutSlugOrPage = props => {
+  const PageLayout = pageLayoutFor(props.post)
+  return PageLayout ? <PageLayout {...props} /> : <LayoutSlug {...props} />
+}
+
 export {
   Layout404,
+  LayoutAbout,
   LayoutArchive,
   LayoutBase,
+  LayoutBooks,
   LayoutCategoryIndex,
+  LayoutGallery,
   LayoutIndex,
+  LayoutLinks,
   LayoutPostList,
+  LayoutProjects,
   LayoutSearch,
   LayoutSkills,
-  LayoutSlug,
+  LayoutSlugOrPage as LayoutSlug,
   LayoutTagIndex,
   CONFIG as THEME_CONFIG
 }

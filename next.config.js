@@ -414,6 +414,12 @@ const nextConfig = {
 
     // 动态主题：添加 resolve.alias 配置，将动态路径映射到实际路径
     config.resolve.alias['@'] = path.resolve(__dirname)
+    // 默认主题静态引入（themes/theme.js），让 SSR 同步渲染布局和正文；?theme= 预览其他主题仍走动态 import
+    config.resolve.alias['@theme-default'] = path.resolve(
+      __dirname,
+      'themes',
+      BLOG.THEME
+    )
     config.resolve.alias['lodash.throttle'] = path.resolve(
       __dirname,
       'lib/utils/throttle.js'
@@ -424,7 +430,7 @@ const nextConfig = {
         '[ThemeResolver][webpack]',
         JSON.stringify({
           note:
-            'Layouts load via dynamic import(@/themes/<name>). Theme folder follows runtime NEXT_PUBLIC_THEME / Notion; no compile-time @theme-components alias.',
+            'BLOG.THEME layouts are bundled via the @theme-default alias so SSR renders them; other themes (?theme=, Notion THEME) load via dynamic import(@/themes/<name>).',
           envTheme: process.env.NEXT_PUBLIC_THEME || null,
           configTheme: BLOG.THEME,
           themeFolderPath: path.resolve(__dirname, 'themes', BLOG.THEME)

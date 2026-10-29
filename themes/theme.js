@@ -3,6 +3,10 @@ import getConfig from 'next/config'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
 import { getQueryParam, getQueryVariable, isBrowser } from '../lib/utils'
+// 默认主题（BLOG.THEME）在构建期静态引入，见 next.config.js 的 @theme-default 别名。
+// 渲染期才创建的 next/dynamic 组件不在 SSR 的 preloadAll 范围内，导出时只能输出 loading 占位，
+// 静态引入后服务端和客户端首帧都同步拿到同一个布局，正文直接进 HTML，也不会 hydration mismatch。
+import * as DefaultTheme from '@theme-default'
 
 // 在next.config.js中扫描所有主题
 export const { THEMES = [] } = getConfig()?.publicRuntimeConfig || {}
@@ -77,6 +81,8 @@ const normalizeThemeName = themeValue => {
   if (!firstTheme) return BLOG.THEME
   return THEMES.includes(firstTheme) ? firstTheme : BLOG.THEME
 }
+
+const isDefaultTheme = themeName => themeName === normalizeThemeName(BLOG.THEME)
 
 const getFallbackThemeName = themeName => {
   const preferred = normalizeThemeName(BLOG.THEME)
@@ -191,6 +197,9 @@ const getCurrentTheme = (router, fallbackTheme) => {
  */
 export const getBaseLayoutByTheme = theme => {
   const normalizedTheme = normalizeThemeName(theme)
+  if (isDefaultTheme(normalizedTheme)) {
+    return getThemeExport(DefaultTheme, 'LayoutBase') || EmptyBaseLayout
+  }
   if (baseLayoutCache.has(normalizedTheme)) {
     return baseLayoutCache.get(normalizedTheme)
   }
@@ -223,6 +232,16 @@ export const useLayoutByTheme = ({ layoutName, theme }) => {
   const router = useRouter()
   const themeQuery = getCurrentTheme(router, theme)
   const cacheKey = `${themeQuery}:${layoutName}`
+
+  if (isDefaultTheme(themeQuery)) {
+    const Layout =
+      getThemeExport(DefaultTheme, layoutName) ||
+      getThemeExport(DefaultTheme, 'LayoutSlug')
+    if (Layout) {
+      scheduleFixThemeDOM(80)
+      return Layout
+    }
+  }
 
   if (layoutByThemeCache.has(cacheKey)) {
     scheduleFixThemeDOM(themeQuery === BLOG.THEME ? 80 : 240)

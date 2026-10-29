@@ -21,13 +21,14 @@ module.exports = {
     process.env.NEXT_PUBLIC_PRISM_THEME_DARK_PATH ||
     'https://cdn.jsdelivr.net/npm/prism-themes@1.9.0/themes/prism-one-dark.min.css', // 深色模式主题
 
-  CODE_MAC_BAR: process.env.NEXT_PUBLIC_CODE_MAC_BAR || false, // 代码左上角显示mac的红黄绿图标（reading 主题用「语言名 + 复制」头部，不要红黄绿点）
+  CODE_FRAME: process.env.NEXT_PUBLIC_CODE_FRAME || true, // 统一代码框：mac 圆点、语言名、复制、折叠在同一条头部（样式在 themes/reading/style.js）；关掉则回到 pre-mac + 折叠条的旧样式
+  CODE_MAC_BAR: process.env.NEXT_PUBLIC_CODE_MAC_BAR || true, // 代码左上角显示mac的红黄绿图标
   CODE_LINE_NUMBERS: process.env.NEXT_PUBLIC_CODE_LINE_NUMBERS || false, // 是否显示行号
-  CODE_COLLAPSE: process.env.NEXT_PUBLIC_CODE_COLLAPSE || false, // 是否支持折叠代码框（关掉后也不会出现「在侧栏查看」）
+  CODE_COLLAPSE: process.env.NEXT_PUBLIC_CODE_COLLAPSE || true, // 是否支持折叠代码框
   CODE_COLLAPSE_EXPAND_DEFAULT:
-    process.env.NEXT_PUBLIC_CODE_COLLAPSE_EXPAND_DEFAULT || true, // 折叠代码默认是展开状态
+    process.env.NEXT_PUBLIC_CODE_COLLAPSE_EXPAND_DEFAULT || false, // 超过行数的代码默认收起到 CODE_COLLAPSE_MIN_LINES 行
   CODE_COLLAPSE_MIN_LINES:
-    process.env.NEXT_PUBLIC_CODE_COLLAPSE_MIN_LINES || 20, // 只有超过该行数的代码块才显示折叠条
+    process.env.NEXT_PUBLIC_CODE_COLLAPSE_MIN_LINES || 20, // 超过该行数的代码块默认收起到这么多行，底部给「展开全部」
   // Mermaid 图表CDN
   MERMAID_CDN:
     process.env.NEXT_PUBLIC_MERMAID_CDN ||

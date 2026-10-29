@@ -40,11 +40,12 @@ const SkillCard = ({ skill, selected, onToggle }) => (
     {skill.example && <p className='sk-example'>{skill.example}</p>}
     {skill.credit && (
       <p className='sk-credit'>
-        原作者{' '}
+        第三方 skill，原作者 {skill.credit.author}，{skill.credit.license} 许可证。
         <a href={skill.credit.url} target='_blank' rel='noopener noreferrer'>
-          {skill.credit.author}
+          原仓库<span aria-hidden='true'>↗</span>
         </a>
-        ，{skill.credit.license} 开源，zip 里附许可证和修改说明。
+        <br />
+        zip 里附原许可证和修改说明。
       </p>
     )}
     <p className='sk-install'>
@@ -155,7 +156,7 @@ const SkillsStyle = () => (
     #theme-reading .sk-example { margin: 0; font-size: 15px; color: var(--muted); }
     #theme-reading .sk-example::before { content: '例 '; color: var(--accent); }
     #theme-reading .sk-credit { margin: 0; font-size: 14px; color: var(--muted); }
-    #theme-reading .sk-credit a { color: var(--accent); }
+    #theme-reading .sk-credit a { color: var(--accent); margin-left: 6px; }
     #theme-reading .sk-install { margin: 0; padding-top: 12px; border-top: 1px solid var(--line-soft); font-size: 14px; color: var(--muted); }
     #theme-reading .sk-install code,
     #theme-reading .sk-howto code { font-size: 13px; background: var(--code-bg); padding: 1px 5px; border-radius: 3px; }

@@ -171,7 +171,7 @@ const NotionPage = ({ post, className }) => {
         // 图片统一走 NotionImage：本站托管图换 WebP srcset 并补宽高
         forceCustomImages
         components={{
-          Code,
+          Code: CodeWithId,
           Collection,
           Embed: NotionEmbed,
           Equation,
@@ -186,7 +186,7 @@ const NotionPage = ({ post, className }) => {
 
       <AdEmbed />
       <OriginalityProof proof={post?.originalityProof} />
-      {hasCodeBlock(post?.blockMap) && <PrismMac />}
+      {hasCodeBlock(post?.blockMap) && <PrismMac blockMap={post?.blockMap} />}
     </div>
   )
 }
@@ -284,13 +284,23 @@ function getMediumZoomMargin() {
   }
 }
 
-// 代码
+// 代码：服务端先输出 <pre><code> 原文，Prism 高亮和复制按钮在客户端 effect 里接管
 const Code = dynamic(
   () =>
     import('react-notion-x/build/third-party/code').then(m => {
       return m.Code
     }),
-  { ssr: false }
+  { ssr: true }
+)
+
+// pre 上带 block id，PrismMac 复制时按 id 取 Notion 原文
+const CodeWithId = props => (
+  <Code
+    {...props}
+    className={`${props.className || ''} notion-code-id-${String(
+      props.block?.id || ''
+    ).replace(/-/g, '')}`.trim()}
+  />
 )
 
 // 公式
