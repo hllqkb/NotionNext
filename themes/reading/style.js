@@ -200,17 +200,30 @@ const Style = () => {
       #theme-reading .code-frame button:hover,
       #theme-reading .code-frame button:focus-visible { color: var(--accent); border-color: var(--accent); }
       #theme-reading .code-frame-copy[data-state='copied'] { color: var(--accent); border-color: var(--accent); }
-      /* One Light / One Dark 里注释、字符串、数字等在代码底色上不到 4.5:1，调深（浅色）或调亮（深色）到 5:1 左右，色相不变 */
-      #theme-reading .prose .token:is(.comment, .prolog, .cdata) { color: #6a6b73; }
-      #theme-reading .prose .token:is(.string, .char, .attr-value, .regex, .inserted) { color: #327a31; }
-      #theme-reading .prose .token:is(.attr-name, .property, .tag, .deleted, .symbol) { color: #b13c32; }
-      #theme-reading .prose .token:is(.number, .boolean, .constant, .class-name) { color: #935600; }
-      #theme-reading .prose .token:is(.function, .variable) { color: #285cc4; }
-      .dark #theme-reading .prose .token:is(.comment, .prolog, .cdata) { color: #a1a8b5; }
-      .dark #theme-reading .prose .token:is(.string, .char, .attr-value, .regex, .inserted) { color: #98c379; }
-      .dark #theme-reading .prose .token:is(.attr-name, .property, .tag, .deleted, .symbol) { color: #e06c75; }
-      .dark #theme-reading .prose .token:is(.number, .boolean, .constant, .class-name) { color: #d19a66; }
-      .dark #theme-reading .prose .token:is(.function, .variable) { color: #61afef; }
+      /* One Light / One Dark 里低于 4.5:1 的 token 颜色（浅色注释 2.5、字符串 3.1，深色注释 2.28 等）。
+         选择器照抄 prism-themes@1.9.0 原规则，只把明度调到 4.8:1 左右、色相不变；浅色只在非深色模式下生效 */
+      html:not(.dark) #theme-reading .prose .token.cdata, html:not(.dark) #theme-reading .prose .token.comment, html:not(.dark) #theme-reading .prose .token.prolog { color: #6d6e75; }
+      html:not(.dark) #theme-reading .prose .token.atrule, html:not(.dark) #theme-reading .prose .token.attr-name, html:not(.dark) #theme-reading .prose .token.boolean, html:not(.dark) #theme-reading .prose .token.class-name, html:not(.dark) #theme-reading .prose .token.constant, html:not(.dark) #theme-reading .prose .token.number { color: #a25e00; }
+      html:not(.dark) #theme-reading .prose .token.deleted, html:not(.dark) #theme-reading .prose .token.important, html:not(.dark) #theme-reading .prose .token.property, html:not(.dark) #theme-reading .prose .token.symbol, html:not(.dark) #theme-reading .prose .token.tag { color: #d32e21; }
+      html:not(.dark) #theme-reading .prose .token.attr-value, html:not(.dark) #theme-reading .prose .token.attr-value>.token.punctuation, html:not(.dark) #theme-reading .prose .token.builtin, html:not(.dark) #theme-reading .prose .token.char, html:not(.dark) #theme-reading .prose .token.inserted, html:not(.dark) #theme-reading .prose .token.regex, html:not(.dark) #theme-reading .prose .token.selector, html:not(.dark) #theme-reading .prose .token.string { color: #3e7c3d; }
+      html:not(.dark) #theme-reading .prose .token.function, html:not(.dark) #theme-reading .prose .token.operator, html:not(.dark) #theme-reading .prose .token.variable { color: #2364ef; }
+      html:not(.dark) #theme-reading .prose .token.url { color: #0076a9; }
+      html:not(.dark) #theme-reading .prose .language-css .token.selector { color: #d32e21; }
+      html:not(.dark) #theme-reading .prose .language-css .token.function, html:not(.dark) #theme-reading .prose .language-css .token.url>.token.function { color: #0076a9; }
+      html:not(.dark) #theme-reading .prose .language-css .token.url>.token.string.url { color: #3e7c3d; }
+      html:not(.dark) #theme-reading .prose .language-json .token.null.keyword { color: #a25e00; }
+      html:not(.dark) #theme-reading .prose .language-markdown .token.url>.token.content { color: #2364ef; }
+      html:not(.dark) #theme-reading .prose .language-markdown .token.url-reference.url, html:not(.dark) #theme-reading .prose .language-markdown .token.url>.token.url { color: #0076a9; }
+      html:not(.dark) #theme-reading .prose .language-markdown .token.blockquote.punctuation, html:not(.dark) #theme-reading .prose .language-markdown .token.hr.punctuation { color: #6d6e75; }
+      html:not(.dark) #theme-reading .prose .language-markdown .token.code-snippet { color: #3e7c3d; }
+      html:not(.dark) #theme-reading .prose .language-markdown .token.bold .token.content { color: #a25e00; }
+      html:not(.dark) #theme-reading .prose .language-markdown .token.list.punctuation, html:not(.dark) #theme-reading .prose .language-markdown .token.strike .token.content, html:not(.dark) #theme-reading .prose .language-markdown .token.strike .token.punctuation, html:not(.dark) #theme-reading .prose .language-markdown .token.title.important>.token.punctuation { color: #d32e21; }
+      .dark #theme-reading .prose .token.cdata, .dark #theme-reading .prose .token.comment, .dark #theme-reading .prose .token.prolog { color: #9198a5; }
+      .dark #theme-reading .prose .token.deleted, .dark #theme-reading .prose .token.important, .dark #theme-reading .prose .token.property, .dark #theme-reading .prose .token.symbol, .dark #theme-reading .prose .token.tag { color: #e27881; }
+      .dark #theme-reading .prose .language-css .token.selector { color: #e27881; }
+      .dark #theme-reading .prose .language-javascript .token.template-string>.token.interpolation>.token.interpolation-punctuation.punctuation { color: #d1847d; }
+      .dark #theme-reading .prose .language-markdown .token.blockquote.punctuation, .dark #theme-reading .prose .language-markdown .token.hr.punctuation { color: #9198a5; }
+      .dark #theme-reading .prose .language-markdown .token.list.punctuation, .dark #theme-reading .prose .language-markdown .token.strike .token.content, .dark #theme-reading .prose .language-markdown .token.strike .token.punctuation, .dark #theme-reading .prose .language-markdown .token.title.important>.token.punctuation { color: #e27881; }
       #theme-reading .code-frame-toggle { display: inline-flex; align-items: center; padding: 4px 6px !important; }
       #theme-reading .code-frame-toggle svg { width: 15px; height: 15px; transition: transform .3s var(--ease); }
       #theme-reading .code-frame.is-hidden .code-frame-toggle svg { transform: rotate(-90deg); }
