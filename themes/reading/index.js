@@ -19,6 +19,7 @@ import Toc, { useActiveHeading } from './components/Toc'
 import { ReadingProgress, RelatedPosts, SeriesBox, dekOf, getRelatedPosts, getSeries } from './components/Article'
 import { FontSizeControl, FontSizeScript, PageViews, RecentComments, ShareLink, SourceNote, StaleNote, sourceOf, useFootnotes, useImageFallback, useZoomKeyboard } from './components/ArticleTools'
 import CONFIG from './config'
+import { usePageFont } from './components/PageFont'
 import { Style } from './style'
 
 /**
@@ -47,6 +48,7 @@ const LazyComment = ({ post }) => {
 const LayoutBase = props => {
   const { children, siteInfo, post } = props
   const revealReady = useReveal()
+  usePageFont()
   // data-prismjs-copy*：Prism copy-to-clipboard 插件从祖先元素读这几个属性作为按钮文案
   return (
     <div
