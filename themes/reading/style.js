@@ -1,6 +1,6 @@
 /* eslint-disable react/no-unknown-property */
 /**
- * reading 主题样式：纸色底、墨色字、赭红点缀，霞鹜文楷（字体由 FONT_URL 加载）
+ * reading 主题样式：纸色底、墨色字、赭红点缀，霞鹜文楷（静态导出时由 scripts/font-subset.mjs 切子集内联）
  * 只作用于 #theme-reading 内部
  */
 const Style = () => {
@@ -17,7 +17,8 @@ const Style = () => {
         --accent: #aa533b;
         --quote-bg: #f0ede5;
         --code-bg: #eeece5;
-        --font: 'LXGW WenKai', 'Kaiti SC', KaiTi, serif;
+        /* 文楷按本站用字切子集（scripts/font-subset.mjs），子集外的字逐字回退到系统楷体，再到宋体 */
+        --font: 'LXGW WenKai', 'Kaiti SC', STKaiti, KaiTi, 'Songti SC', SimSun, serif;
         /* 动效统一用这条曲线，只动 transform / opacity */
         --ease: cubic-bezier(.22, 1, .36, 1);
         background: var(--paper);
