@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import enUS from '@/lib/lang/en-US'
-import { decryptPost, decryptPostWithSavedKey } from '@/lib/utils/postDecryption'
+import { decryptPost, decryptPostWithSavedKey, forgetPostKey } from '@/lib/utils/postDecryption'
 
 /** encryptedPost: static exports decrypt in the browser instead of calling /api/post/unlock. */
 export default function useProtectedPost(initialPost, router, locale = enUS, unlockUnavailable = false, encryptedPost = null) {
@@ -160,6 +160,15 @@ export default function useProtectedPost(initialPost, router, locale = enUS, unl
     }
   }, [identity, initialPost?.password, initialPost?.id, encryptedPost, validPassword])
 
+  const relock = useCallback(() => {
+    if (initialPost?.id) forgetPostKey(initialPost.id)
+    version.current++
+    request.current?.abort()
+    setUnlocked(null)
+    setUnlocking(false)
+    setUnlockError('')
+  }, [initialPost?.id])
+
   const authorizedPost = unlocked?.identity === identity ? unlocked.post : null
   return {
     ...(authorizedPost ? {
@@ -170,6 +179,7 @@ export default function useProtectedPost(initialPost, router, locale = enUS, unl
     post: authorizedPost || initialPost,
     lock: Boolean(initialPost?.password && !authorizedPost),
     validPassword,
+    relock: encryptedPost ? relock : undefined,
     unlocking,
     unlockError
   }

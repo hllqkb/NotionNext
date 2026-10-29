@@ -348,7 +348,7 @@ const readingStats = post => {
 }
 
 const LayoutSlug = props => {
-  const { post, lock, validPassword, unlocking, prev, next, allNavPages } = props
+  const { post, lock, validPassword, relock, unlocking, prev, next, allNavPages } = props
   const router = useRouter()
   const [password, setPassword] = useState('')
   const [rejected, setRejected] = useState(false)
@@ -416,6 +416,18 @@ const LayoutSlug = props => {
                 #{t}
               </PageLink>
             ))}
+            {post.password && !lock && relock && (
+              <button
+                type='button'
+                className='post-relock'
+                title='这台设备记住了密码，锁上后要重新输入'
+                onClick={() => {
+                  setPassword('')
+                  relock()
+                }}>
+                锁上
+              </button>
+            )}
           </div>
           {isArticle && <SourceNote source={sourceOf(post)} />}
           {isArticle && <StaleNote post={post} buildTime={props.buildTime} />}

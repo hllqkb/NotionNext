@@ -283,6 +283,8 @@ const Style = () => {
       #theme-reading .post-lock button:disabled { opacity: .5; cursor: default; }
       #theme-reading .post-lock [role='alert'] { color: var(--accent); margin: 12px 0 0; font-size: 15px; }
       #theme-reading .byline { display: flex; flex-wrap: wrap; gap: 10px; color: var(--muted); font-size: 15px; }
+      #theme-reading .post-relock { font: inherit; color: var(--muted); background: none; border: 1px solid var(--line); border-radius: 4px; padding: 0 8px; cursor: pointer; }
+      #theme-reading .post-relock:hover, #theme-reading .post-relock:focus-visible { color: var(--accent); border-color: var(--accent); }
       #theme-reading .article-footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 24px; font-size: 16px; }
       #theme-reading .site-footer { max-width: 1080px; margin: 80px auto 0; padding: 24px 56px 32px; display: flex; justify-content: space-between; gap: 18px; font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); }
 
@@ -597,16 +599,11 @@ const Style = () => {
       #theme-reading .reading-picks a:focus-visible { border-color: var(--accent); transform: translateY(-1px); }
       #theme-reading .reading-picks a:active { transform: scale(.99); transition-duration: 100ms; }
       #theme-reading .post-mark { flex: none; width: 52px; height: 52px; border-radius: 6px; object-fit: cover; }
-      #theme-reading .post-mark-seal { display: inline-flex; align-items: center; justify-content: center; background: var(--sidebar); }
-      #theme-reading .post-mark-seal .seal { width: 36px; height: 36px; font-size: 14px; box-shadow: inset 0 0 0 2px var(--sidebar), inset 0 0 0 3px var(--accent); }
       #theme-reading .pick-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
       #theme-reading .pick-title { font-size: 16px; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
       #theme-reading .pick-meta { display: flex; gap: 10px; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
       #theme-reading .pick-meta > span { color: var(--accent); }
       /* 无封面文章：右侧用一枚淡印章占住封面的位置 */
-      #theme-reading .row-seal { display: inline-flex; align-items: center; justify-content: center; background: var(--sidebar); }
-      #theme-reading .row-seal .seal { width: 30px; height: 30px; font-size: 12px; border-width: 1.5px; border-radius: 4px; box-shadow: inset 0 0 0 2px var(--sidebar), inset 0 0 0 3px var(--accent); opacity: .72; }
-      #theme-reading .row-seal .seal-latin { width: auto; height: 22px; padding: 0 6px; font-size: 11px; }
       /* 归档：按发布 / 最近更新 切换 */
       #theme-reading .archive-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
       #theme-reading .sort-toggle { display: inline-flex; gap: 4px; padding: 3px; margin-bottom: 8px; border: 1px solid var(--line); border-radius: 999px; }
@@ -622,7 +619,6 @@ const Style = () => {
         #theme-reading .random-post { margin-left: 10px; }
         #theme-reading .reading-picks h2 small { display: none; }
         #theme-reading .post-mark { width: 44px; height: 44px; }
-        #theme-reading .row-seal .seal { width: 24px; height: 24px; font-size: 10px; }
       }
       @media (prefers-reduced-motion: reduce) {
         #theme-reading .reading-picks a,

@@ -1,6 +1,6 @@
 import { siteConfig } from '@/lib/config'
 import CONFIG from '../config'
-import { EssayRow, LockIcon, PageLink, Seal, hasCover, postDay, updatedAt } from './Frame'
+import { EssayRow, LockIcon, PageLink, hasCover, postDay, updatedAt } from './Frame'
 
 /**
  * 摘要只保留完整的句子：Notion 里的摘要常被截在半句（自动摘要按字数截断），
@@ -14,16 +14,12 @@ export const wholeSentences = text => {
   return end >= 12 ? s.slice(0, end) : `${s}…`
 }
 
-/** 小封面：有封面用封面，没有就用分类前两个字做印章 */
-export const PostMark = ({ post, className = '' }) =>
+/** 小封面：有封面才放，没有就只留文字 */
+export const PostMark = ({ post }) =>
   hasCover(post) ? (
     // eslint-disable-next-line @next/next/no-img-element
-    <img className={`post-mark ${className}`} src={post.pageCoverThumbnail} alt='' loading='lazy' />
-  ) : (
-    <span className={`post-mark post-mark-seal ${className}`} aria-hidden='true'>
-      <Seal text={post.category || siteConfig('READING_SEAL', null, CONFIG) || siteConfig('AUTHOR')} />
-    </span>
-  )
+    <img className='post-mark' src={post.pageCoverThumbnail} alt='' loading='lazy' />
+  ) : null
 
 /**
  * 「从这里读起」：Notion 勾了 featured 的文章优先，一篇都没勾时用 READING_PICKS 里的 slug。
