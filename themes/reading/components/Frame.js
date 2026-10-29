@@ -125,6 +125,15 @@ export const postDay = post => {
   return post?.createdTime || ''
 }
 
+/** 最后编辑时间（毫秒），没有就退回发布时间 */
+export const updatedAt = post => Date.parse(post?.lastEditedDate) || post?.publishDate || 0
+
+/** 最后编辑日期 YYYY-MM-DD，按北京时间 */
+export const updatedDay = post => {
+  const t = updatedAt(post)
+  return t ? new Date(t).toLocaleDateString('sv-SE', { timeZone: 'Asia/Shanghai' }) : String(postDay(post))
+}
+
 /** 按年分组，年份倒序、组内按发布时间倒序 */
 export const groupByYear = posts => {
   const groups = {}
@@ -200,8 +209,9 @@ export const LockIcon = () => (
   </svg>
 )
 
-/** 一行文章：标题（加密文章带锁）+ 分类 + 月日 */
-export const EssayRow = ({ post }) => (
+/** 一行文章：标题（加密文章带锁）+ 分类 + 月日 + 封面（没有封面时用印章）。
+ *  updated 为 true 时日期换成「更新于 年.月.日」 */
+export const EssayRow = ({ post, updated }) => (
   <li className='essay-row'>
     <PageLink href={post.href}>
       <h3>
@@ -210,10 +220,21 @@ export const EssayRow = ({ post }) => (
       </h3>
       <span className='row-meta'>
         {post.category && <span className='row-cat'>{post.category}</span>}
-        <time dateTime={postDay(post)}>{String(postDay(post)).slice(5).replace('-', '.')}</time>
-        {hasCover(post) && (
+        {updated ? (
+          <time className='row-updated' dateTime={updatedDay(post)}>
+            更新于 {updatedDay(post).replaceAll('-', '.')}
+          </time>
+        ) : (
+          <time dateTime={postDay(post)}>{String(postDay(post)).slice(5).replace('-', '.')}</time>
+        )}
+        {hasCover(post) ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img className='row-cover' src={post.pageCoverThumbnail} alt='' loading='lazy' />
+        ) : (
+          // 没有封面：用分类前两个字盖一枚小印，列表右侧不空着
+          <span className='row-cover row-seal'>
+            <Seal text={post.category || siteConfig('READING_SEAL', null, CONFIG) || siteConfig('AUTHOR')} />
+          </span>
         )}
       </span>
     </PageLink>
