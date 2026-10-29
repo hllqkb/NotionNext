@@ -628,6 +628,46 @@ const Style = () => {
         #theme-reading .reading-picks a,
         #theme-reading .random-post > span { transform: none !important; transition: none; }
       }
+      /* notes & websites */
+      #theme-reading .notes-count { margin: 8px 0 0; font-size: 14px; color: var(--muted); }
+      #theme-reading .notes-year:first-of-type { border-top: 1px solid var(--ink); }
+      #theme-reading .note-list { list-style: none; margin: 0; padding: 0; position: relative; }
+      #theme-reading .note-list::before { content: ''; position: absolute; left: 4px; top: 22px; bottom: 22px; width: 1px; background: var(--line); }
+      #theme-reading .note { position: relative; padding: 14px 0 18px 26px; }
+      #theme-reading .note + .note { border-top: 1px solid var(--line-soft); }
+      #theme-reading .note::before { content: ''; position: absolute; left: 0; top: 23px; width: 9px; height: 9px; border-radius: 50%; background: var(--paper); border: 1px solid var(--muted); }
+      #theme-reading .note:first-child::before { background: var(--accent); border-color: var(--accent); }
+      #theme-reading .note-meta { display: flex; align-items: baseline; gap: 12px; margin: 0 0 4px; font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+      #theme-reading .note-meta time { color: var(--accent); }
+      #theme-reading .note-meta small { margin-left: 6px; font-size: 13px; color: var(--muted); }
+      #theme-reading .note-title { color: var(--ink); font-size: 16px; }
+      #theme-reading .note-body { font-size: 17px; line-height: 1.85; }
+      #theme-reading .note-body img { display: block; max-height: 420px; width: auto; margin: 6px 0 10px; border: 1px solid var(--line); }
+      #theme-reading .notes-more button { background: none; border: 1px solid var(--line); border-radius: 999px; padding: 6px 16px; font: inherit; font-size: 15px; color: var(--ink); cursor: pointer; }
+      #theme-reading .notes-more button:hover { border-color: var(--accent); color: var(--accent); }
+      #theme-reading .bookmark-card { display: flex; flex-direction: column; margin: 4px 0 12px; padding: 12px 16px; border: 1px solid var(--line); border-radius: 10px; text-decoration: none !important; color: var(--ink) !important; }
+      #theme-reading .bookmark-card:hover { border-color: var(--accent); }
+      #theme-reading .bookmark-card strong { font-weight: 500; font-size: 16px; }
+      #theme-reading .bookmark-card small { font-size: 13px; color: var(--muted); }
+
+      #theme-reading .site-group { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 24px; padding: 28px 0; border-bottom: 1px solid var(--line); }
+      #theme-reading .site-group:first-of-type { border-top: 1px solid var(--ink); }
+      #theme-reading .site-group .section-label { padding-top: 4px; font-size: 18px; letter-spacing: .06em; color: var(--ink); }
+      #theme-reading .site-group .section-label span { color: var(--accent); }
+      #theme-reading .site-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+      #theme-reading .site-card a { display: flex; flex-direction: column; height: 100%; padding: 16px 18px; }
+      #theme-reading .site-card strong { font-weight: 500; font-size: 18px; }
+      #theme-reading .site-card .card-desc { margin-top: 2px; font-size: 15px; }
+      #theme-reading .site-card small { margin-top: 6px; font-size: 13px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      #theme-reading .site-card:hover { transform: translateY(-2px); }
+
+      @media (max-width: 800px) {
+        #theme-reading .site-group { grid-template-columns: 1fr; gap: 12px; }
+      }
+      @media (max-width: 520px) {
+        #theme-reading .site-grid { grid-template-columns: 1fr; }
+        #theme-reading .note { padding-left: 22px; }
+      }
     `}</style>
   )
 }
