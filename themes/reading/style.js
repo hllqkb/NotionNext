@@ -547,6 +547,8 @@ const Style = () => {
       /* 手机：侧栏整个藏起来，目录收成标题下面的一条，默认合上 */
       @media (max-width: 800px) {
         #theme-reading .sidebar { display: none; }
+        /* flex 子项默认 min-width: auto，会被正文里的宽代码块、表格撑出屏幕，整页横向溢出 */
+        #theme-reading .reading-main { min-width: 0; width: 100%; }
         #theme-reading .toc-mobile { display: block; margin: -10px 0 30px; padding: 0; border: 1px solid var(--line); border-radius: 10px; background: var(--sidebar); font-size: 15px; }
         #theme-reading .toc-mobile summary { padding: 11px 16px; color: var(--ink); }
         #theme-reading .toc-count { margin-left: 10px; font-size: 13px; color: var(--muted); }
