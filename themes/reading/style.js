@@ -173,8 +173,8 @@ const Style = () => {
       #theme-reading .post-around small { display: block; font-size: 13px; color: var(--muted); }
 
       /* 代码块：高亮配色用 prism-themes 的 One Light / One Dark（conf/code.config.js 按深浅色加载）。
-         外框参考 Expressive Code（Astro Starlight / Fuwari 用的代码块）：顶部一条头部，左边语言名、右边复制，
-         下面是可横向滚动的代码。头部是 Prism toolbar 插件生成的 .toolbar，这里只改它的摆放和外观。 */
+         头部由 components/PrismMac.js 的 CODE_FRAME 生成：mac 圆点、语言名、复制、折叠在同一条里，
+         Prism toolbar 自带的 .toolbar 隐藏；超过 CODE_COLLAPSE_MIN_LINES 行的代码收起时底部渐隐。 */
       #theme-reading {
         --code-block-bg: hsl(230, 1%, 98%);
         --code-block-head: hsl(230, 4%, 94%);
@@ -184,19 +184,39 @@ const Style = () => {
         --code-block-head: hsl(220, 13%, 15%);
       }
       #theme-reading div.code-toolbar { display: flex; flex-direction: column; max-width: 100%; min-width: 0; margin: 1.2em 0; background: var(--code-block-bg); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; box-shadow: none; }
-      #theme-reading div.code-toolbar > .toolbar { order: -1; position: static; opacity: 1; display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 8px 0 16px; background: var(--code-block-head); border-bottom: 1px solid var(--line); }
-      #theme-reading div.code-toolbar > .toolbar > .toolbar-item:last-child { margin-left: auto; }
-      #theme-reading div.code-toolbar > .toolbar > .toolbar-item > span,
-      #theme-reading div.code-toolbar > .toolbar > .toolbar-item > button { font: 13px/1 var(--font); color: var(--muted); background: none; box-shadow: none; border-radius: 6px; padding: 0; }
-      #theme-reading div.code-toolbar > .toolbar > .toolbar-item > button { padding: 5px 10px; border: 1px solid var(--line); cursor: pointer; }
-      #theme-reading div.code-toolbar > .toolbar > .toolbar-item > button:hover,
-      #theme-reading div.code-toolbar > .toolbar > .toolbar-item > button:focus-visible { color: var(--accent); border-color: var(--accent); }
-      /* 纯文本块不显示语言名，只留复制 */
-      #theme-reading div.code-toolbar > pre[class*='language-plain'] ~ .toolbar > .toolbar-item:first-child:not(:last-child) { visibility: hidden; }
+      #theme-reading div.code-toolbar.code-frame > .toolbar { display: none; }
+      #theme-reading .code-frame-head { display: flex; align-items: center; gap: 12px; min-height: 38px; padding: 0 8px 0 14px; background: var(--code-block-head); border-bottom: 1px solid var(--line); transition: border-color .3s var(--ease); }
+      #theme-reading .code-frame.is-hidden .code-frame-head { border-bottom-color: transparent; }
+      #theme-reading .code-frame-dots { display: flex; gap: 6px; flex: none; }
+      #theme-reading .code-frame-dots > span { width: 11px; height: 11px; border-radius: 50%; }
+      #theme-reading .code-frame-dots > span:nth-child(1) { background: #ff5f57; }
+      #theme-reading .code-frame-dots > span:nth-child(2) { background: #febc2e; }
+      #theme-reading .code-frame-dots > span:nth-child(3) { background: #28c840; }
+      #theme-reading .code-frame-lang { font: 13px/1 var(--font); color: var(--muted); white-space: nowrap; }
+      #theme-reading .code-frame-actions { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+      #theme-reading .code-frame button { font: 13px/1 var(--font); color: var(--muted); background: none; border: 1px solid var(--line); border-radius: 6px; padding: 5px 10px; cursor: pointer; transition: color .2s, border-color .2s; }
+      #theme-reading .code-frame button:hover,
+      #theme-reading .code-frame button:focus-visible { color: var(--accent); border-color: var(--accent); }
+      #theme-reading .code-frame-copy[data-state='copied'] { color: var(--accent); border-color: var(--accent); }
+      #theme-reading .code-frame-toggle { display: inline-flex; align-items: center; padding: 4px 6px !important; }
+      #theme-reading .code-frame-toggle svg { width: 15px; height: 15px; transition: transform .3s var(--ease); }
+      #theme-reading .code-frame.is-hidden .code-frame-toggle svg { transform: rotate(-90deg); }
       #theme-reading div.code-toolbar > pre.notion-code { margin: 0 !important; padding: 14px 18px !important; border: 0 !important; border-radius: 0 !important; max-width: 100%; overflow-x: auto; font-size: 14px; line-height: 1.6; scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+      #theme-reading div.code-frame > pre.notion-code { overflow-y: hidden; transition: max-height .35s var(--ease), padding .35s var(--ease); }
+      #theme-reading div.code-frame.is-hidden > pre.notion-code { padding-top: 0 !important; padding-bottom: 0 !important; }
       /* Mermaid 图保留 notion.css 里给它的浅色衬底 */
       #theme-reading div.code-toolbar > pre.notion-code:not([class*='language-mermaid']) { background: transparent !important; }
       #theme-reading div.code-toolbar > pre.notion-code > code { white-space: pre; word-break: normal; overflow-wrap: normal; }
+      #theme-reading .code-frame-more { position: relative; display: flex; justify-content: center; padding: 6px 0 10px; }
+      #theme-reading .code-frame-more::before { content: ''; position: absolute; left: 0; right: 0; bottom: 100%; height: 72px; background: linear-gradient(to bottom, transparent, var(--code-block-bg)); pointer-events: none; transition: opacity .3s var(--ease); }
+      #theme-reading .code-frame:not(.is-folded) .code-frame-more::before { opacity: 0; }
+      #theme-reading .code-frame.is-hidden .code-frame-more { display: none; }
+      @media (prefers-reduced-motion: reduce) {
+        #theme-reading div.code-frame > pre.notion-code,
+        #theme-reading .code-frame-head,
+        #theme-reading .code-frame-toggle svg,
+        #theme-reading .code-frame-more::before { transition: none; }
+      }
       #theme-reading .notion-code-copy { display: none; }
 
       /* 分类筛选 */
