@@ -108,9 +108,10 @@ export const SiteFooter = ({ siteInfo }) => (
       {siteConfig('ENABLE_RSS') && (
         <a className='rss-link' href='/rss/feed.xml' type='application/rss+xml' title='RSS 订阅'>
           <RssIcon />
-          订阅
+          RSS
         </a>
       )}
+      {siteConfig('READING_FOLLOWIT_ACTION', null, CONFIG) && <PageLink href='/subscribe'>邮件订阅</PageLink>}
       {siteConfig('READING_FOOTER_RIGHT', null, CONFIG)}
     </span>
   </footer>
