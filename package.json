@@ -21,7 +21,7 @@
     "build": "cross-env BUILD_MODE=true next build",
     "start": "next start",
     "post-build": "next-sitemap --config next-sitemap.config.js",
-    "export": "node scripts/pinned.mjs && cross-env BUILD_MODE=true EXPORT=true FONT_SUBSET=true next build && next-sitemap --config next-sitemap.config.js && node scripts/img-allowlist.mjs && node scripts/og-images.mjs && node scripts/font-subset.mjs && npm run search-index",
+    "export": "node scripts/pinned.mjs && cross-env BUILD_MODE=true EXPORT=true FONT_SUBSET=true next build && next-sitemap --config next-sitemap.config.js && node scripts/img-allowlist.mjs && node scripts/og-images.mjs && cross-env READING_FONT_SYNTH_BOLD=true node scripts/font-subset.mjs && npm run search-index",
     "pinned": "node scripts/pinned.mjs",
     "search-index": "npx --yes pagefind@1.5.2 --site out && du -sh out/pagefind",
     "bundle-report": "cross-env ANALYZE=true next build",
