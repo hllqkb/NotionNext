@@ -26,19 +26,21 @@ const Slug = props => {
   const { locale } = useGlobal()
   const access = useProtectedPost(props.post, router, locale, props.postUnlockUnavailable, props.encryptedPost)
   const { showNotification, Notification } = useNotification()
+  const theme = siteConfig('THEME', BLOG.THEME, props.NOTION_CONFIG)
+  // In the reading theme the article replacing the lock form is the feedback.
+  const unlockToast = theme !== 'reading'
   const validPassword = async password => {
     const valid = await access.validPassword(password)
-    if (valid) showNotification(locale.COMMON.ARTICLE_UNLOCK_TIPS)
+    if (valid && unlockToast) showNotification(locale.COMMON.ARTICLE_UNLOCK_TIPS)
     return valid
   }
-  const theme = siteConfig('THEME', BLOG.THEME, props.NOTION_CONFIG)
   return (
     <>
       {access.unlockError && <p role='alert' className='p-4 text-center text-red-600'>{access.unlockError}</p>}
       {props.postUnlockUnavailable
         ? <ArticleLock unavailable post={props.post} />
         : <DynamicLayout theme={theme} layoutName='LayoutSlug' {...props} {...access} validPassword={validPassword} />}
-      {props.post?.password && !access.lock && <Notification />}
+      {unlockToast && props.post?.password && !access.lock && <Notification />}
       <TechGrow lock={access.lock} />
     </>
   )
