@@ -23,19 +23,25 @@ const WalineComponent = (props) => {
 
   useEffect(() => {
     if (!waline) {
+      // 表情包放在本站 public/vendor/waline-emojis@1.1.0/，不走 elemecdn / unpkg；
+      // Waline 会把表情地址原样写进评论 HTML，所以拼成站点绝对地址，后台和邮件里也能显示
+      const emojiBase = `${String(siteConfig('LINK') || '').replace(/\/$/, '')}/vendor/waline-emojis@1.1.0`
       waline = init({
         ...props,
         el: containerRef.current,
         serverURL: siteConfig('COMMENT_WALINE_SERVER_URL'),
         lang: siteConfig('LANG'),
-        reaction: true,
+        // 与 Waline 默认的 6 个文章反应同图同序（计数按位置存），只是换成本站地址
+        reaction: [
+          'agree',
+          'look_down',
+          'sunglasses',
+          'pick_nose',
+          'awkward',
+          'sleep'
+        ].map(name => `${emojiBase}/tieba/tieba_${name}.png`),
         dark: 'html.dark',
-        // 表情包放在本站 public/vendor/waline-emojis@1.1.0/，不走 elemecdn；
-        // Waline 会把表情地址原样写进评论 HTML，所以拼成站点绝对地址，后台和邮件里也能显示
-        emoji: ['tieba', 'weibo', 'bilibili'].map(
-          pack =>
-            `${String(siteConfig('LINK') || '').replace(/\/$/, '')}/vendor/waline-emojis@1.1.0/${pack}`
-        )
+        emoji: ['tieba', 'weibo', 'bilibili'].map(pack => `${emojiBase}/${pack}`)
       })
     }
 
