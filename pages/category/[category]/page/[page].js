@@ -1,6 +1,7 @@
 import BLOG from '@/blog.config'
 import { siteConfig } from '@/lib/config'
 import { fetchGlobalAllData } from '@/lib/db/SiteDataApi'
+import { trimListProps } from '@/lib/utils/trimListProps'
 import { DynamicLayout } from '@/themes/theme'
 
 /**
@@ -32,6 +33,7 @@ export async function getStaticProps({ params: { category, page } }) {
   )
 
   delete props.allPages
+  trimListProps(props)
   props.page = page
 
   props = { ...props, category, page }
