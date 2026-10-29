@@ -10,8 +10,6 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: BLOG.BUNDLE_ANALYZER
 })
 
-// 扫描项目 /themes下的目录名
-const themes = scanSubdirectories(path.resolve(__dirname, 'themes'))
 // 检测用户开启的多语言
 const locales = (function () {
   // 根据BLOG_NOTION_PAGE_ID 检查支持多少种语言数据.
@@ -161,27 +159,6 @@ function pruneTransientNotionDataCache(dataDir) {
   console.log(
     `Pruned transient Notion cache entries: removed=${removed} kept=${kept}`
   )
-}
-
-/**
- * 扫描指定目录下的文件夹名，用于获取所有主题
- * @param {*} directory
- * @returns
- */
-function scanSubdirectories(directory) {
-  const subdirectories = []
-
-  fs.readdirSync(directory).forEach(file => {
-    const fullPath = path.join(directory, file)
-    const stats = fs.statSync(fullPath)
-    if (stats.isDirectory()) {
-      subdirectories.push(file)
-    }
-
-    // subdirectories.push(file)
-  })
-
-  return subdirectories
 }
 
 /**
@@ -414,7 +391,7 @@ const nextConfig = {
 
     // 动态主题：添加 resolve.alias 配置，将动态路径映射到实际路径
     config.resolve.alias['@'] = path.resolve(__dirname)
-    // 默认主题静态引入（themes/theme.js），让 SSR 同步渲染布局和正文；?theme= 预览其他主题仍走动态 import
+    // 默认主题静态引入（themes/theme.js），让 SSR 同步渲染布局和正文；其他主题名回落到默认主题（只打包这一个）
     config.resolve.alias['@theme-default'] = path.resolve(
       __dirname,
       'themes',
@@ -430,7 +407,7 @@ const nextConfig = {
         '[ThemeResolver][webpack]',
         JSON.stringify({
           note:
-            'BLOG.THEME layouts are bundled via the @theme-default alias so SSR renders them; other themes (?theme=, Notion THEME) load via dynamic import(@/themes/<name>).',
+            'BLOG.THEME layouts are bundled via the @theme-default alias so SSR renders them; other theme names (?theme=, Notion THEME) fall back to it; only this theme is bundled.',
           envTheme: process.env.NEXT_PUBLIC_THEME || null,
           configTheme: BLOG.THEME,
           themeFolderPath: path.resolve(__dirname, 'themes', BLOG.THEME)
@@ -463,10 +440,6 @@ const nextConfig = {
     delete pages['/sitemap.xml']
     delete pages['/auth']
     return pages
-  },
-  publicRuntimeConfig: {
-    // 这里的配置既可以服务端获取到，也可以在浏览器端获取到
-    THEMES: themes
   }
 }
 

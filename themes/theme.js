@@ -1,5 +1,4 @@
 import BLOG, { LAYOUT_MAPPINGS } from '@/blog.config'
-import getConfig from 'next/config'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
 import { getQueryParam, getQueryVariable, isBrowser } from '../lib/utils'
@@ -8,8 +7,11 @@ import { getQueryParam, getQueryVariable, isBrowser } from '../lib/utils'
 // 静态引入后服务端和客户端首帧都同步拿到同一个布局，正文直接进 HTML，也不会 hydration mismatch。
 import * as DefaultTheme from '@theme-default'
 
-// 在next.config.js中扫描所有主题
-export const { THEMES = [] } = getConfig()?.publicRuntimeConfig || {}
+// 只打包默认主题。原来的 import(`@/themes/${name}`) 会让 webpack 把 themes/ 下全部文件做成一张映射表打进 _app，
+// ?theme= 和 Notion 配置里的其他主题名都回落到默认主题
+export const THEMES = [BLOG.THEME]
+const loadThemeModule = async themeFolderName =>
+  themeFolderName === BLOG.THEME ? DefaultTheme : null
 const baseLayoutCache = new Map()
 const layoutByThemeCache = new Map()
 let domFixTimer = null
@@ -113,7 +115,7 @@ const scheduleFixThemeDOM = (delay = 120) => {
 
 async function importThemeConfig(themeFolderName) {
   try {
-    const mod = await import(`@/themes/${themeFolderName}`)
+    const mod = await loadThemeModule(themeFolderName)
     return getThemeExport(mod, 'THEME_CONFIG')
   } catch (err) {
     console.error(`Failed to load theme config "${themeFolderName}":`, err)
@@ -123,7 +125,7 @@ async function importThemeConfig(themeFolderName) {
 
 async function importThemeLayout(themeFolderName, layoutName) {
   try {
-    const mod = await import(`@/themes/${themeFolderName}`)
+    const mod = await loadThemeModule(themeFolderName)
     return (
       getThemeExport(mod, layoutName) ||
       getThemeExport(mod, 'LayoutSlug') ||
