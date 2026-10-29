@@ -523,7 +523,6 @@ const LayoutSlug = props => {
           </aside>
         )}
         <RelatedPosts posts={related} />
-        {!lock && isArticle && <PostSubscribe />}
         {isArticle && (prev || next) && (
           <nav className='post-around reveal' aria-label='上一篇和下一篇'>
             {prev ? (
@@ -546,6 +545,8 @@ const LayoutSlug = props => {
           </section>
         )}
         {!lock && isArticle && siteConfig('READING_RECENT_COMMENTS', false, CONFIG) && <RecentComments path={path} />}
+        {/* 订阅放在评论之后、页尾之前：读完先看相关文章和上下篇，最后才是订阅 */}
+        {!lock && isArticle && <PostSubscribe />}
         <footer className='article-footer'>
           <PageLink href='/'>返回文章列表</PageLink>
           <a href='#content' onClick={e => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>
