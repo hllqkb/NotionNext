@@ -109,7 +109,7 @@ npx wrangler login
 npx wrangler kv namespace create STATE
 ```
 
-把输出里的 `id = "..."` 抄到 `wrangler.toml` 的 `[[kv_namespaces]]` 下替换 `REPLACE_WITH_KV_NAMESPACE_ID`。KV id 不是密钥，可以提交。
+把输出里的 `id = "..."` 抄到 `wrangler.toml` 的 `[[kv_namespaces]]` 下。KV id 不是密钥，可以提交。正式站的 KV 已经建好、id 已填，这一步只在重建 KV 时需要。
 
 ```bash
 npx wrangler deploy
