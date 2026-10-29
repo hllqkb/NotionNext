@@ -103,9 +103,34 @@ const PrismMac = ({ blockMap } = {}) => {
           .forEach(codeBlock => {
             codeBlock.dataset.prismMacEnhanced = 'true'
           })
+        loadMissingLanguages()
       } catch (err) {
         console.warn('[PrismMac] render failed:', err)
       }
+    }
+
+    // 打包里只有 js/ts/jsx/tsx/css/json 等少数语法；正文里有别的语言时才拉 autoloader，
+    // 加载完只重新高亮这些缺语法的代码块，由 autoloader 的 complete 钩子按需取语言包。
+    // autoloader 已在页面上时，renderPrismMac 高亮新代码块就会触发它，这里不用再管。
+    const loadMissingLanguages = () => {
+      if (window.Prism?.plugins?.autoloader) return
+      if (getCodesMissingGrammar(getNotionArticle()).length === 0) return
+
+      loadExternalResource(prismjsAutoLoader, 'js')
+        .then(() => {
+          if (isDisposed || !window.Prism?.plugins?.autoloader) return
+          window.Prism.plugins.autoloader.languages_path = prismjsPath
+          getCodesMissingGrammar(getNotionArticle()).forEach(code => {
+            try {
+              Prism.highlightElement(code)
+            } catch (err) {
+              console.warn('[PrismMac] prism highlight failed:', err)
+            }
+          })
+        })
+        .catch(err => {
+          console.warn('[PrismMac] prism autoloader load failed:', err)
+        })
     }
 
     const containsUnenhancedCodeBlock = node => {
@@ -180,17 +205,9 @@ const PrismMac = ({ blockMap } = {}) => {
 
       loadCodeStyleSheets()
 
-      // 先用本地 Prism 渲染，避免外部 autoloader 阻塞基础代码增强。
+      // 先用打包进来的 Prism 渲染，autoloader 只在有语言缺语法时才加载，不阻塞基础代码增强。
       renderCodeEnhancements()
       observeNewCodeBlocks(article)
-
-      loadExternalResource(prismjsAutoLoader, 'js')
-        .then(() => {
-          if (!isDisposed) renderCodeEnhancements()
-        })
-        .catch(err => {
-          console.warn('[PrismMac] prism autoloader load failed:', err)
-        })
 
       return true
     }
@@ -231,6 +248,15 @@ const getNotionArticle = () => {
 
   return candidates.sort((a, b) => score(b) - score(a))[0] || null
 }
+
+// 语言类名在打包的 Prism 里没有语法的代码块（plain/text 等核心自带，不算缺）
+const getCodesMissingGrammar = container =>
+  Array.from(container?.querySelectorAll('pre.notion-code code') || []).filter(
+    code => {
+      const language = Prism.util.getLanguage(code)
+      return language && language !== 'none' && !Prism.languages[language]
+    }
+  )
 
 const getNotionArticles = () => {
   const inArticleWrapper = Array.from(
@@ -956,17 +982,20 @@ function renderPrismMac(codeLineNumbers, codeMacBar) {
       })
     }
   }
-  // 重新渲染之前检查所有的多余text
-
-  try {
-    if (container && typeof Prism.highlightAllUnder === 'function') {
-      Prism.highlightAllUnder(container)
-    } else {
-      Prism.highlightAll()
+  // 只高亮还没套上 toolbar 的代码块（首次渲染、标签页/折叠里新插入的），
+  // 已增强过的不再整篇重写 DOM；要显示行号时还没出行号的也补一次
+  container?.querySelectorAll('pre.notion-code code').forEach(code => {
+    const wrapper = code.closest('pre')?.parentElement
+    const needsHighlight =
+      !wrapper?.classList.contains('code-toolbar') ||
+      (codeLineNumbers && !code.querySelector('.line-numbers-rows'))
+    if (!needsHighlight) return
+    try {
+      Prism.highlightElement(code)
+    } catch (err) {
+      console.warn('[PrismMac] prism highlight failed:', err)
     }
-  } catch (err) {
-    console.warn('[PrismMac] prism highlight failed:', err)
-  }
+  })
 
   const codeToolBars = container?.getElementsByClassName('code-toolbar')
   // Add pre-mac element for Mac Style UI

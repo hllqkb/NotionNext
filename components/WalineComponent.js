@@ -30,11 +30,12 @@ const WalineComponent = (props) => {
         lang: siteConfig('LANG'),
         reaction: true,
         dark: 'html.dark',
-        emoji: [
-          '//npm.elemecdn.com/@waline/emojis@1.1.0/tieba',
-          '//npm.elemecdn.com/@waline/emojis@1.1.0/weibo',
-          '//npm.elemecdn.com/@waline/emojis@1.1.0/bilibili'
-        ]
+        // 表情包放在本站 public/vendor/waline-emojis@1.1.0/，不走 elemecdn；
+        // Waline 会把表情地址原样写进评论 HTML，所以拼成站点绝对地址，后台和邮件里也能显示
+        emoji: ['tieba', 'weibo', 'bilibili'].map(
+          pack =>
+            `${String(siteConfig('LINK') || '').replace(/\/$/, '')}/vendor/waline-emojis@1.1.0/${pack}`
+        )
       })
     }
 
