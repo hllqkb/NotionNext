@@ -477,6 +477,7 @@ const Style = () => {
         #theme-reading .project-card { padding: 18px 18px 16px; }
         #theme-reading .card-top h2 { font-size: 21px; }
         #theme-reading .album-grid { gap: 20px 14px; }
+      }
 
       /* pagefind */
       #theme-reading #posts-wrapper + .body-hits { border-top: 1px solid var(--line); }

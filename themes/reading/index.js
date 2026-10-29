@@ -200,8 +200,13 @@ const usePagefind = keyword => {
       try {
         const pagefind = await import(/* webpackIgnore: true */ '/pagefind/pagefind.js')
         await pagefind.options({ excerptLength: 36 })
-        const search = await pagefind.search(keyword)
-        const hits = await Promise.all((search?.results || []).slice(0, 30).map(r => r.data()))
+        // 中文会被切成词再「任一命中」，「佛顶塔」会搜出只含「塔」的文章：
+        // 单个词用引号走短语匹配；多个词（多个引号短语不支持）宽搜后只留正文里每个词都原样出现的
+        const terms = keyword.toLowerCase().split(/\s+/).filter(Boolean)
+        const query = terms.length === 1 ? `"${keyword.replace(/"/g, '')}"` : keyword
+        const search = await pagefind.search(query)
+        const data = await Promise.all((search?.results || []).slice(0, 30).map(r => r.data()))
+        const hits = data.filter(d => terms.every(t => String(d.content || '').toLowerCase().includes(t)))
         if (!cancelled) setState({ status: 'done', hits })
       } catch {
         if (!cancelled) setState({ status: 'unavailable', hits: [] })
@@ -407,8 +412,8 @@ const LayoutSlug = props => {
             <Gallery images={galleryImages(post)} />
           </article>
         ) : (
-          // 全文索引只收文章正文；加密文章即使在浏览器里解锁了，静态 HTML 里也没有正文，这里再兜一层
-          <article id='article-wrapper' className='prose' {...(isArticle && !post.password ? { 'data-pagefind-body': '' } : {})}>
+          // 全文索引只收已发布文章的正文：隐藏（Invisible）不收；加密文章静态 HTML 里本来没有正文，这里再兜一层
+          <article id='article-wrapper' className='prose' {...(isArticle && post.status === 'Published' && !post.password ? { 'data-pagefind-body': '' } : {})}>
             <NotionPage post={post} />
           </article>
         )}
