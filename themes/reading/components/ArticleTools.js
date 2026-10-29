@@ -276,3 +276,161 @@ export const useFootnotes = key => {
     }
   }, [key])
 }
+
+/** 首发出处：Notion 的 source_url（网址属性）。按域名认出平台，认不出就显示域名 */
+const SOURCE_SITES = [
+  [/(^|\.)csdn\.net$/, 'CSDN'],
+  [/(^|\.)cnblogs\.com$/, '博客园'],
+  [/^mp\.weixin\.qq\.com$/, '公众号'],
+  [/(^|\.)hllqk\.cn$|^hllqkb\.github\.io$/, '旧博客']
+]
+export const sourceOf = post => {
+  const raw = Array.isArray(post?.source_url) ? post.source_url[0] : post?.source_url
+  if (!raw || !/^https?:\/\//.test(raw)) return null
+  let host = ''
+  try {
+    host = new URL(raw).hostname
+  } catch {
+    return null
+  }
+  const label = SOURCE_SITES.find(([re]) => re.test(host))?.[1] || host.replace(/^www\./, '')
+  return { label, url: raw }
+}
+
+export const SourceNote = ({ source }) =>
+  source ? (
+    <p className='source-note'>
+      首发于 {source.label}
+      <span aria-hidden='true'>·</span>
+      <a href={source.url} target='_blank' rel='noopener noreferrer'>
+        原文链接<span aria-hidden='true'> ↗</span>
+      </a>
+    </p>
+  ) : null
+
+/**
+ * 正文图片：加载完之前垫纸色底，加载失败换成「图片加载失败」占位（不再能点开放大）。
+ * error 事件不冒泡，用捕获阶段在 #article-wrapper 上统一接；挂载前已经失败的图在挂载时补查一遍
+ */
+export const useImageFallback = key => {
+  useEffect(() => {
+    const root = document.getElementById('article-wrapper')
+    if (!key || !root) return
+    const isTarget = img => img?.tagName === 'IMG' && img.closest('.notion-asset-wrapper-image, .photo-frame') && !img.closest('.medium-zoom-overlay')
+    const ready = img => img.classList.add('img-ready')
+    const broken = img => {
+      img.classList.add('img-broken')
+      img.removeAttribute('tabindex')
+      img.closest('.notion-asset-wrapper-image, .photo-frame')?.classList.add('has-broken-img')
+    }
+    const onLoad = e => isTarget(e.target) && ready(e.target)
+    const onError = e => isTarget(e.target) && broken(e.target)
+    root.querySelectorAll('.notion-asset-wrapper-image img, .photo-frame img').forEach(img => {
+      if (!img.complete) return
+      if (img.naturalWidth > 0) ready(img)
+      else broken(img)
+    })
+    root.addEventListener('load', onLoad, true)
+    root.addEventListener('error', onError, true)
+    return () => {
+      root.removeEventListener('load', onLoad, true)
+      root.removeEventListener('error', onError, true)
+    }
+  }, [key])
+}
+
+/**
+ * 正文图片放大（medium-zoom）的键盘支持：
+ * - 图片能 Tab 到，回车 / 空格打开；
+ * - 打开后焦点移到放大的那张图上（原图会被设成 visibility: hidden，焦点不移走就掉到 body）；
+ * - 打开期间 Tab 只停在放大图上，不会跑到被遮住的正文；Esc 在 document 上接，焦点在哪都能关；
+ * - 关闭后焦点回到原图。
+ * 打开状态按 medium-zoom 自己派发的 open / closed 事件记，不看 body 上的 class（那个要等下一帧才加）
+ */
+export const useZoomKeyboard = key => {
+  useEffect(() => {
+    const root = document.getElementById('article-wrapper')
+    if (!key || !root) return
+    // react-notion-x 在图片挂载时才接上 medium-zoom，这里先全部设成可聚焦，按键时再看有没有接上
+    root.querySelectorAll('.notion-asset-wrapper-image img:not(.img-broken)').forEach(img => {
+      img.tabIndex = 0
+      img.setAttribute('role', 'button')
+      img.setAttribute('aria-label', img.alt && img.alt !== 'notion image' ? `放大图片：${img.alt}` : '放大图片')
+    })
+    let active = null
+    let focusTimer = 0
+    const zoomed = () => document.querySelector('.medium-zoom-image--opened')
+    const focusZoomed = () => {
+      const el = zoomed()
+      if (!el) return false
+      // 放大图是原图的克隆，会把原图的 aria-label 一起抄过去，这里改成关闭的说法
+      el.tabIndex = -1
+      el.setAttribute('role', 'button')
+      el.setAttribute('aria-label', '关闭放大的图片（Esc）')
+      el.focus({ preventScroll: true })
+      return true
+    }
+    const restore = () => {
+      if (!active) return
+      const { original } = active
+      active = null
+      clearTimeout(focusTimer)
+      if (original.isConnected) original.focus({ preventScroll: true })
+    }
+    const close = () => {
+      if (!active) return
+      const { zoom } = active
+      if (zoom?.close) void zoom.close()
+      else zoomed()?.click()
+      // 关闭动画的 transitionend 没来时 medium-zoom 不发 closed，放大图没了就自己把焦点还回去
+      setTimeout(() => {
+        if (active && !zoomed()) restore()
+      }, 600)
+    }
+    const onKey = e => {
+      // 放大图已经没了（鼠标点掉、滚动关掉，但 closed 没来）就当已关闭，别继续拦 Tab
+      if (active && !zoomed()) restore()
+      if (active) {
+        if (e.key === 'Escape' || e.key === 'Esc') {
+          e.preventDefault()
+          close()
+        } else if (e.key === 'Tab') {
+          e.preventDefault()
+          focusZoomed()
+        } else if ((e.key === 'Enter' || e.key === ' ') && e.target === zoomed()) {
+          e.preventDefault()
+          close()
+        }
+        return
+      }
+      const img = e.target
+      if ((e.key === 'Enter' || e.key === ' ') && img?.classList?.contains('medium-zoom-image') && root.contains(img)) {
+        e.preventDefault()
+        img.click()
+      }
+    }
+    const onOpen = e => {
+      if (!root.contains(e.target)) return
+      active = { zoom: e.detail?.zoom, original: e.target }
+      // open 事件在克隆放大图之前派发，等克隆出来再把焦点移过去
+      let tries = 0
+      const tryFocus = () => {
+        if (!active || focusZoomed() || ++tries > 20) return
+        focusTimer = setTimeout(tryFocus, 16)
+      }
+      focusTimer = setTimeout(tryFocus, 0)
+    }
+    const onClosed = e => {
+      if (active && e.target === active.original) restore()
+    }
+    document.addEventListener('keydown', onKey, true)
+    document.addEventListener('medium-zoom:open', onOpen, true)
+    document.addEventListener('medium-zoom:closed', onClosed, true)
+    return () => {
+      clearTimeout(focusTimer)
+      document.removeEventListener('keydown', onKey, true)
+      document.removeEventListener('medium-zoom:open', onOpen, true)
+      document.removeEventListener('medium-zoom:closed', onClosed, true)
+    }
+  }, [key])
+}

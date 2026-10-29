@@ -19,12 +19,13 @@ export const galleryImages = post => {
 // 与 style.js 里 lightbox-out 的时长一致
 const CLOSE_MS = 140
 
-/** 摄影集：相框网格 + 大图浏览（← → 切换，Esc 关闭，关闭后焦点回到点开的那张） */
+/** 摄影集：相框网格 + 大图浏览（← → 切换，Esc 关闭，Tab 只在浏览层里转，关闭后焦点回到点开的那张） */
 const Gallery = ({ images }) => {
   const [index, setIndex] = useState(-1)
   const [closing, setClosing] = useState(false)
   const triggerRef = useRef(null)
   const closeBtnRef = useRef(null)
+  const boxRef = useRef(null)
   const open = index >= 0
   const go = useCallback(step => setIndex(i => (i + step + images.length) % images.length), [images.length])
 
@@ -53,6 +54,13 @@ const Gallery = ({ images }) => {
       if (e.key === 'Escape') close()
       if (e.key === 'ArrowRight') go(1)
       if (e.key === 'ArrowLeft') go(-1)
+      if (e.key === 'Tab') {
+        const items = [...(boxRef.current?.querySelectorAll('button') || [])]
+        if (items.length === 0) return
+        const i = items.indexOf(document.activeElement)
+        e.preventDefault()
+        items[(i + (e.shiftKey ? -1 : 1) + items.length) % items.length].focus()
+      }
     }
     window.addEventListener('keydown', onKey)
     document.body.style.overflow = 'hidden'
@@ -76,7 +84,7 @@ const Gallery = ({ images }) => {
         ))}
       </div>
       {open && (
-        <div className={`lightbox${closing ? ' closing' : ''}`} role='dialog' aria-modal='true' aria-label='图片浏览' onClick={close}>
+        <div ref={boxRef} className={`lightbox${closing ? ' closing' : ''}`} role='dialog' aria-modal='true' aria-label='图片浏览' onClick={close}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={current.src} alt={current.caption || ''} onClick={e => e.stopPropagation()} />
           <p className='lightbox-bar' onClick={e => e.stopPropagation()}>

@@ -15,7 +15,7 @@ import { RandomPost, ReadingPicks, RecentlyUpdated, wholeSentences } from './com
 const Comment = dynamic(() => import('@/components/Comment'), { ssr: false })
 import Toc, { useActiveHeading } from './components/Toc'
 import { ReadingProgress, RelatedPosts, SeriesBox, dekOf, getRelatedPosts, getSeries } from './components/Article'
-import { FontSizeControl, FontSizeScript, PageViews, RecentComments, ShareLink, StaleNote, useFootnotes } from './components/ArticleTools'
+import { FontSizeControl, FontSizeScript, PageViews, RecentComments, ShareLink, SourceNote, StaleNote, sourceOf, useFootnotes, useImageFallback, useZoomKeyboard } from './components/ArticleTools'
 import CONFIG from './config'
 import { Style } from './style'
 
@@ -354,6 +354,8 @@ const LayoutSlug = props => {
   const [rejected, setRejected] = useState(false)
   const activeHeading = useActiveHeading(lock ? null : post?.toc)
   useFootnotes(lock ? null : post?.id)
+  useImageFallback(lock ? null : post?.id)
+  useZoomKeyboard(lock ? null : post?.id)
 
   useEffect(() => {
     if (!post) {
@@ -415,6 +417,7 @@ const LayoutSlug = props => {
               </PageLink>
             ))}
           </div>
+          {isArticle && <SourceNote source={sourceOf(post)} />}
           {isArticle && <StaleNote post={post} buildTime={props.buildTime} />}
         </header>
         <SeriesBox series={series} />
