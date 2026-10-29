@@ -104,6 +104,8 @@ export async function onRequest(context) {
     'Content-Type': contentType,
     'Cache-Control': CACHE_CONTROL,
     'X-Content-Type-Options': 'nosniff',
+    // 站点图标等可能是 SVG，同源直接打开时禁止其中脚本执行
+    'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; sandbox",
     'X-Img-Proxy-Cache': 'MISS'
   })
   for (const name of ['content-length', 'etag', 'last-modified']) {

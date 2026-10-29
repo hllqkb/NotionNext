@@ -60,6 +60,7 @@ describe('functions/img 图片代理', () => {
     )
     expect(first.headers.get('x-img-proxy-cache')).toBe('MISS')
     expect(first.headers.get('set-cookie')).toBeNull()
+    expect(first.headers.get('content-security-policy')).toContain('sandbox')
     expect(await first.text()).toBe('png-bytes')
     expect(global.fetch.mock.calls[0][0]).toBe(
       `https://www.notion.so/image/${encodeURIComponent(ATTACHMENT)}?table=block&id=${BLOCK_ID}&cache=v2`
