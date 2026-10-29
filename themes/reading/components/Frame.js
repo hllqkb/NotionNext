@@ -1,7 +1,7 @@
 import { siteConfig } from '@/lib/config'
 import { useGlobal } from '@/lib/global'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import CONFIG from '../config'
 
 /**
@@ -24,9 +24,34 @@ export const Masthead = ({ siteInfo }) => {
   const links = [
     { href: '/', label: '文章', match: p => p === '/' || p.startsWith('/page') },
     { href: '/archive', label: '归档', match: p => p.startsWith('/archive') },
-    { href: '/category', label: '分类', match: p => p.startsWith('/category') },
-    { href: '/tag', label: '标签', match: p => p.startsWith('/tag') }
+    { href: '/category', label: '分类', match: p => p.startsWith('/category'), wide: true },
+    { href: '/tag', label: '标签', match: p => p.startsWith('/tag'), wide: true },
+    { href: '/about', label: '关于', match: p => p.startsWith('/about') }
   ]
+  // 「更多」里的独立页面；窄屏时分类、标签也收进来。/skills（#22）合并后放在这一组
+  const more = [
+    { href: '/projects', label: '项目' },
+    { href: '/gallery', label: '相册' },
+    { href: '/books', label: '书影' },
+    { href: '/links', label: '友链' }
+  ]
+  const narrowOnly = links.filter(l => l.wide)
+  const moreActive = more.some(l => path.startsWith(l.href))
+  const moreRef = useRef(null)
+  // 点菜单外面或按 Esc 收起
+  useEffect(() => {
+    const close = e => {
+      const el = moreRef.current
+      if (!el?.open) return
+      if (e.type === 'keydown' ? e.key === 'Escape' : !el.contains(e.target)) el.open = false
+    }
+    document.addEventListener('click', close)
+    document.addEventListener('keydown', close)
+    return () => {
+      document.removeEventListener('click', close)
+      document.removeEventListener('keydown', close)
+    }
+  }, [])
   return (
     <header className='masthead'>
       <PageLink className='brand' href='/'>
@@ -35,10 +60,25 @@ export const Masthead = ({ siteInfo }) => {
       </PageLink>
       <nav aria-label='主导航'>
         {links.map(l => (
-          <PageLink key={l.href} href={l.href} className={l.match(path) ? 'active' : ''}>
+          <PageLink key={l.href} href={l.href} className={`${l.match(path) ? 'active' : ''}${l.wide ? ' nav-wide' : ''}`}>
             {l.label}
           </PageLink>
         ))}
+        <details className='nav-more' ref={moreRef}>
+          <summary className={moreActive ? 'active' : ''}>更多</summary>
+          <div className='nav-more-panel'>
+            {narrowOnly.map(l => (
+              <PageLink key={l.href} href={l.href} className={`nav-narrow${l.match(path) ? ' active' : ''}`}>
+                {l.label}
+              </PageLink>
+            ))}
+            {more.map(l => (
+              <PageLink key={l.href} href={l.href} className={path.startsWith(l.href) ? 'active' : ''}>
+                {l.label}
+              </PageLink>
+            ))}
+          </div>
+        </details>
         <button type='button' onClick={toggleDarkMode} aria-label='切换深浅色'>
           {isDarkMode ? '浅色' : '深色'}
         </button>
