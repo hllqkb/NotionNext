@@ -34,7 +34,8 @@ jest.mock('@/lib/db/SiteDataApi', () => ({ resolvePostProps: jest.fn() }))
 jest.mock('@/lib/build/staticPaths', () => ({ getStaticPathsBase: jest.fn() }))
 jest.mock('@/lib/utils/post', () => ({ checkSlugHasNoSlash: jest.fn() }))
 jest.mock('@/themes/theme', () => ({
-  DynamicLayout: jest.fn(() => <p>Theme article layout</p>)
+  DynamicLayout: jest.fn(() => <p>Theme article layout</p>),
+  getCurrentTheme: jest.fn((router, theme) => theme)
 }))
 jest.mock('@/components/Notification', () => () => ({
   showNotification: jest.fn(),
