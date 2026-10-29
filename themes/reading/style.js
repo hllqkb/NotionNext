@@ -364,7 +364,8 @@ const Style = () => {
       #theme-reading .page-lede p { margin: 0; }
       #theme-reading .page-prose { font-size: 18px; line-height: 1.95; }
       #theme-reading .page-prose p { margin: 0 0 1em; }
-      #theme-reading .page-prose ul, #theme-reading .page-prose ol { margin: 0 0 1em; padding-left: 1.3em; }
+      #theme-reading .page-prose ul, #theme-reading .page-prose ol { margin: 0 0 1em; padding-left: 1.3em; list-style: disc; }
+      #theme-reading .page-prose ol { list-style: decimal; }
       #theme-reading .page-prose li { margin: .25em 0; }
       #theme-reading .page-prose li::marker { color: var(--accent); }
       #theme-reading .page-prose a { color: var(--accent); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
