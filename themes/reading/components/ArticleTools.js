@@ -98,7 +98,8 @@ export const ShareLink = ({ url, title }) => {
 
 const walineServer = () => String(siteConfig('COMMENT_WALINE_SERVER_URL') || '').replace(/\/$/, '')
 
-/** 阅读量：用 Waline 的文章计数，每次打开 +1；请求失败或没有数就什么都不显示 */
+/** 阅读量：用 Waline 的文章计数，每次打开 +1；请求失败或没有数就什么都不显示。
+ *  数字回来之前先占好位置（看不见），手机上 byline 不会因为它晚到而折行把正文往下推 */
 export const PageViews = ({ path }) => {
   const [count, setCount] = useState(0)
   const sent = useRef('')
@@ -123,7 +124,12 @@ export const PageViews = ({ path }) => {
       alive = false
     }
   }, [path])
-  return count > 0 ? <span className='pageviews'>阅读 {count.toLocaleString()}</span> : null
+  if (!walineServer()) return null
+  return (
+    <span className='pageviews' style={count > 0 ? undefined : { visibility: 'hidden' }} aria-hidden={count > 0 ? undefined : true}>
+      阅读 {count > 0 ? count.toLocaleString() : '00'}
+    </span>
+  )
 }
 
 /**
