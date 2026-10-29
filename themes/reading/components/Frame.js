@@ -33,6 +33,8 @@ export const Masthead = ({ siteInfo }) => {
     { href: '/projects', label: '项目' },
     { href: '/gallery', label: '相册' },
     { href: '/books', label: '书影' },
+    { href: '/notes', label: '笔记' },
+    { href: '/websites', label: '网址' },
     { href: '/links', label: '友链' },
     { href: '/skills', label: 'Skills' }
   ]

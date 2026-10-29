@@ -3,6 +3,7 @@ import { siteConfig } from '@/lib/config'
 import { Fragment } from 'react'
 import CONFIG from '../config'
 import { PageLink, Seal, hasCover, postDay } from './Frame'
+import { LayoutNotes, LayoutWebsites } from './MorePages'
 
 /**
  * 独立页面（Notion 里 type=Page 的 about / projects / links / books / gallery）。
@@ -13,7 +14,7 @@ import { PageLink, Seal, hasCover, postDay } from './Frame'
  */
 
 /** 页面顶层的 Notion 块，按 Notion 里的顺序 */
-const topBlocks = post => {
+export const topBlocks = post => {
   const blocks = post?.blockMap?.block || {}
   const get = id => blocks[id]?.value?.value || blocks[id]?.value
   return (get(post?.id)?.content || [])
@@ -22,10 +23,10 @@ const topBlocks = post => {
     .map(b => ({ ...b, children: (b.content || []).map(get).filter(Boolean) }))
 }
 
-const plain = b => (b?.properties?.title || []).map(s => s[0]).join('').trim()
+export const plain = b => (b?.properties?.title || []).map(s => s[0]).join('').trim()
 
 /** Notion 富文本片段：链接、粗体、斜体、行内代码、删除线 */
-const RichText = ({ segs = [] }) =>
+export const RichText = ({ segs = [] }) =>
   segs.map(([text, marks = []], i) => {
     if (text === '‣') return null
     let node = text
@@ -42,7 +43,7 @@ const RichText = ({ segs = [] }) =>
 const Rich = ({ block }) => <RichText segs={block?.properties?.title} />
 
 /** 极简块渲染：段落、标题、列表、引用、提示、分割线、图片 */
-const Blocks = ({ blocks }) => {
+export const Blocks = ({ blocks }) => {
   const out = []
   for (let i = 0; i < blocks.length; i++) {
     const b = blocks[i]
@@ -70,13 +71,22 @@ const Blocks = ({ blocks }) => {
       const src = b.format?.display_source || b.properties?.source?.[0]?.[0]
       // eslint-disable-next-line @next/next/no-img-element
       if (src) out.push(<img key={b.id} src={mapImgUrl(src, b)} alt={(b.properties?.caption || []).map(s => s[0]).join('')} loading='lazy' />)
+    } else if (t === 'bookmark' && b.properties?.link) {
+      const href = b.properties.link[0][0]
+      const title = (b.properties.title || []).map(x => x[0]).join('') || host(href)
+      out.push(
+        <PageLink key={b.id} className='bookmark-card' href={href}>
+          <strong>{title}</strong>
+          <small>{host(href)}</small>
+        </PageLink>
+      )
     } else if (t === 'text' && plain(b)) out.push(<p key={b.id}><Rich block={b} /></p>)
   }
   return out
 }
 
 /** 按标题切分：返回 [{ heading, blocks }]，第一段 heading 为空（标题前的引言） */
-const splitBy = (blocks, types) => {
+export const splitBy = (blocks, types) => {
   const parts = [{ heading: null, blocks: [] }]
   for (const b of blocks) {
     if (types.includes(b.type)) parts.push({ heading: b, blocks: [] })
@@ -111,7 +121,7 @@ const toCard = ({ heading, blocks }) => {
   return { id: heading.id, name: plain(heading), fields, links, desc: rest }
 }
 
-const host = href => {
+export const host = href => {
   try {
     return new URL(href).host.replace(/^www\./, '')
   } catch {
@@ -120,7 +130,7 @@ const host = href => {
 }
 
 /** 页头：小字 + 大标题 + 红句号 + 一句话 */
-const PageHead = ({ eyebrow, title, lede, side }) => (
+export const PageHead = ({ eyebrow, title, lede, side }) => (
   <header className='list-head page-head'>
     <div>
       {eyebrow && <p className='eyebrow'>{eyebrow}</p>}
@@ -134,9 +144,9 @@ const PageHead = ({ eyebrow, title, lede, side }) => (
   </header>
 )
 
-const Wrap = ({ name, children }) => <div className={`page special-page page-${name}`}>{children}</div>
+export const Wrap = ({ name, children }) => <div className={`page special-page page-${name}`}>{children}</div>
 
-const fmtDay = d => String(d || '').replaceAll('-', '.').replaceAll('/', '.')
+export const fmtDay = d => String(d || '').replaceAll('-', '.').replaceAll('/', '.')
 
 /** 关于 + Now：标题含 Now 或「最近」的那一节做成卡片，「更新于：」一行是卡片日期 */
 export const LayoutAbout = ({ post }) => {
@@ -351,7 +361,9 @@ const PAGE_LAYOUTS = {
   projects: LayoutProjects,
   links: LayoutLinks,
   books: LayoutBooks,
-  gallery: LayoutGallery
+  gallery: LayoutGallery,
+  notes: LayoutNotes,
+  websites: LayoutWebsites
 }
 
 export const pageLayoutFor = post =>
