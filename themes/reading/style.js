@@ -575,6 +575,64 @@ const Style = () => {
       @media (max-width: 520px) {
         #theme-reading .body-hit-head { flex-direction: column; gap: 2px; }
       }
+
+      /* article-page：第二批（字号、复制链接、阅读量、过时提示、脚注、键盘） */
+      /* 正文第一个块不要上边距：一级标题自带的 1.8em 上边距 + 顶线会和页头分隔线叠成一大块空白、两条线 */
+      #theme-reading .prose .notion-page > :is(.notion-viewport:first-child + *, :first-child:not(.notion-viewport)) { margin-top: 0 !important; }
+      #theme-reading .prose .notion-page > :is(.notion-viewport:first-child + .notion-h1, .notion-h1:first-child) { border-top: 0; padding-top: 0; }
+
+      /* 正文字号三档：默认档仍是上面的 20px / 手机 18px，没 JS 时不受影响 */
+      html[data-reading-size='s'] #theme-reading .prose { font-size: 18px; }
+      html[data-reading-size='l'] #theme-reading .prose { font-size: 22px; }
+      #theme-reading .font-size { display: flex; align-items: center; gap: 6px; border-top: 1px solid var(--line); margin-top: 18px; padding-top: 14px; font-size: 13px; }
+      #theme-reading .font-size > span { margin-right: auto; }
+      #theme-reading .font-size button { min-width: 30px; height: 28px; padding: 0 6px; border: 1px solid var(--line); border-radius: 6px; background: transparent; color: var(--muted); font: inherit; cursor: pointer; }
+      #theme-reading .font-size button:hover { color: var(--accent); border-color: var(--accent); }
+      #theme-reading .font-size button[aria-pressed='true'] { color: var(--paper); background: var(--accent); border-color: var(--accent); }
+      #theme-reading .font-size-mobile { display: none; }
+
+      /* 复制链接 / 分享 */
+      #theme-reading .share-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 12px; }
+      #theme-reading .share-row button { font: inherit; font-size: 14px; color: var(--accent); background: transparent; border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--line)); border-radius: 999px; padding: 3px 14px; cursor: pointer; }
+      #theme-reading .share-row button:hover { background: color-mix(in srgb, var(--accent) 8%, transparent); }
+      #theme-reading .share-row input { flex: 1 1 240px; min-width: 0; font: inherit; font-size: 14px; color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 4px 10px; }
+
+      /* 阅读量、过时提示 */
+      #theme-reading .pageviews { font-variant-numeric: tabular-nums; }
+      #theme-reading .stale-note { margin: 22px 0 0; padding: 10px 16px; border-left: 3px solid var(--accent); background: var(--quote-bg); border-radius: 0 8px 8px 0; font-size: 15px; line-height: 1.75; color: var(--muted); }
+
+      /* 最近评论 */
+      #theme-reading .recent-comments { margin-top: 40px; }
+      #theme-reading .recent-comments h2 { font-size: 15px; font-weight: 400; color: var(--muted); letter-spacing: .12em; margin: 0 0 6px; }
+      #theme-reading .recent-comments ul { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+      #theme-reading .recent-comments li + li { border-top: 1px solid var(--line-soft); }
+      #theme-reading .recent-comments a { display: flex; gap: 12px; padding: 10px 0; font-size: 15px; }
+      #theme-reading .recent-comments strong { font-weight: 400; color: var(--accent); white-space: nowrap; }
+      #theme-reading .recent-comments span { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+      /* 脚注 */
+      #theme-reading .fn-ref { font-size: .7em; line-height: 0; margin: 0 1px; }
+      #theme-reading .fn-ref a, #theme-reading .fn-back { color: var(--accent); }
+      #theme-reading .prose .fn-def { font-size: .85em; color: var(--muted); scroll-margin-top: 80px; }
+      #theme-reading .fn-num { margin-right: .4em; color: var(--accent); font-variant-numeric: tabular-nums; }
+      #theme-reading .fn-ref a:target, #theme-reading .prose .fn-def:target { background: color-mix(in srgb, var(--accent) 14%, transparent); }
+      #theme-reading .fn-ref a { scroll-margin-top: 80px; }
+
+      /* 键盘：跳到正文 + 统一的焦点框 */
+      #theme-reading .skip-link { position: fixed; left: 16px; top: 10px; z-index: 60; padding: 6px 14px; border-radius: 6px; background: var(--ink); color: var(--paper); font-size: 15px; transform: translateY(-160%); transition: transform 160ms var(--ease); }
+      #theme-reading .skip-link:focus { transform: none; color: var(--paper); }
+      #theme-reading :is(a, button, summary, input):focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
+
+      @media (max-width: 800px) {
+        #theme-reading .font-size-mobile { display: flex; margin: -14px 0 28px; padding-top: 0; border-top: 0; }
+      }
+      @media (max-width: 520px) {
+        html[data-reading-size='s'] #theme-reading .prose { font-size: 16px; }
+        html[data-reading-size='l'] #theme-reading .prose { font-size: 20px; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #theme-reading .skip-link { transition: none; }
+      }
     `}</style>
   )
 }

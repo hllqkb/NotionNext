@@ -112,21 +112,22 @@ export const SeriesBox = ({ series }) => {
 }
 
 /**
- * 相关文章打分：共同标签每个 2 分，同分类 1 分；至少要有一个共同标签，
- * 只同分类不算（「技术分享」占了大半，靠它凑出来的不相关）。排除自己、加密文章和同系列文章
+ * 相关文章打分：共同标签每个 2 分，同分类 1 分，0 分的不要。
+ * 同分计发布时间离当前文章近的在前（同一阶段写的更可能有关，「技术分享」这种大分类也不至于随机）。
+ * 排除自己、加密文章和同系列文章（系列目录里已经有了）
  */
 export const getRelatedPosts = (post, pages = [], series, count = 4) => {
   const tags = new Set(post?.tags || [])
-  if (tags.size === 0) return []
   const inSeries = new Set((series?.posts || []).map(p => p.slug))
+  const at = post?.publishDate || 0
   return pages
     .filter(p => !samePost(p, post) && !p.password && !inSeries.has(p.slug))
     .map(p => {
       const shared = (p.tags || []).filter(t => tags.has(t)).length
-      return { p, shared, score: shared * 2 + (post.category && p.category === post.category ? 1 : 0) }
+      return { p, score: shared * 2 + (post.category && p.category === post.category ? 1 : 0) }
     })
-    .filter(x => x.shared > 0)
-    .sort((a, b) => b.score - a.score || (b.p.publishDate || 0) - (a.p.publishDate || 0))
+    .filter(x => x.score > 0)
+    .sort((a, b) => b.score - a.score || Math.abs((a.p.publishDate || 0) - at) - Math.abs((b.p.publishDate || 0) - at))
     .slice(0, count)
     .map(x => x.p)
 }

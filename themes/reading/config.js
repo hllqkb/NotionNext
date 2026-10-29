@@ -13,6 +13,9 @@ const CONFIG = {
   READING_GALLERY_TAG: '摄影集', // 带这个标签的文章按摄影集版式展示（图片网格 + 大图浏览）
   READING_STREAK: true, // 首页显示写作打卡点阵
   READING_COMMENTS: true, // 文章底部评论区（Waline，服务在 talk.hllqk.cn，见 conf/comment.config.js）
+  READING_PAGEVIEWS: true, // 文章页显示阅读量（Waline 文章计数，失败时不显示）
+  READING_RECENT_COMMENTS: false, // 文末最近评论（Waline）。评论库里还有测试和不当留言，清理后再打开
+  READING_STALE_CATEGORY: '技术分享', // 这个分类的文章发布满一年，标题下提示内容可能过时
   READING_LICENSE: 'CC BY-NC-SA 4.0', // 文末版权声明里的许可协议
   READING_LICENSE_URL: 'https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans',
   CUSTOM_RIGHT_CLICK_CONTEXT_MENU: false // 自定义右键菜单的图标依赖 Font Awesome，本主题不加载，改用浏览器原生菜单
