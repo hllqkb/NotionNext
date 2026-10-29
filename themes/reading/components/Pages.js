@@ -4,7 +4,7 @@ import { Fragment } from 'react'
 import CONFIG from '../config'
 import { PageLink, Seal, hasCover, postDay } from './Frame'
 import { LayoutNotes, LayoutWebsites } from './MorePages'
-import { PinnedRepos, pinnedRepos } from './Pinned'
+import { MyRepos, PinnedRepos, myRepos, pinnedRepos } from './Pinned'
 
 /**
  * 独立页面（Notion 里 type=Page 的 about / projects / links / books / gallery）。
@@ -186,8 +186,12 @@ export const LayoutAbout = ({ post }) => {
 }
 
 /** 状态：进行中 / 维护中 用朱红，其他（已归档、停更）用灰 */
-const StatusTag = ({ value }) =>
-  value ? <span className={`status-tag${/进行|维护|活跃|在做/.test(value) ? ' live' : ''}`}>{value}</span> : null
+const StatusTag = ({ value }) => {
+  if (!value) return null
+  const live = /进行|维护|活跃|在做/.test(value)
+  // 「待确认」这类占位不展示给读者，按完成处理
+  return <span className={`status-tag${live ? ' live' : ''}`}>{live || !/待/.test(value) ? value : '完成'}</span>
+}
 
 /** 项目：三级标题是项目名，下面一句话 + 「状态：」「技术：」「源码：」「演示：」 */
 export const LayoutProjects = ({ post }) => {
@@ -195,30 +199,32 @@ export const LayoutProjects = ({ post }) => {
   return (
     <Wrap name='projects'>
       <PageHead eyebrow='Projects' title={post.title} lede={intro.blocks.length > 0 && <div className='intro-text page-lede'><Blocks blocks={intro.blocks} /></div>} />
-      {/* GitHub 置顶在前（构建时同步），Notion 里写的项目卡片在后；置顶拿不到时只剩 Notion 卡片 */}
+      {/* GitHub 数据构建时同步：自己的仓库按 star 排，再是参与贡献的置顶；两份都没有时才用 Notion 里写的项目卡片 */}
+      <MyRepos />
       <PinnedRepos />
-      {cards.length > 0 && pinnedRepos().length > 0 && <h2 className='section-label own-label'>自己做的<span>{cards.length}</span></h2>}
-      <div className='card-grid'>
-        {cards.map(toCard).map(c => (
-          <article key={c.id} className='page-card project-card reveal'>
-            <div className='card-top'>
-              <h2>{c.name}</h2>
-              <StatusTag value={c.fields['状态']} />
-            </div>
-            <div className='card-desc'><Blocks blocks={c.desc} /></div>
-            {c.fields['技术'] && <p className='card-meta'>{c.fields['技术']}</p>}
-            {c.links.length > 0 && (
-              <p className='card-links'>
-                {c.links.map(l => (
-                  <PageLink key={l.href} href={l.href}>
-                    {l.label}<span aria-hidden='true'>↗</span>
-                  </PageLink>
-                ))}
-              </p>
-            )}
-          </article>
-        ))}
-      </div>
+      {!myRepos().length && !pinnedRepos().length && (
+        <div className='card-grid'>
+          {cards.map(toCard).map(c => (
+            <article key={c.id} className='page-card project-card reveal'>
+              <div className='card-top'>
+                <h2>{c.name}</h2>
+                <StatusTag value={c.fields['状态']} />
+              </div>
+              <div className='card-desc'><Blocks blocks={c.desc} /></div>
+              {c.fields['技术'] && <p className='card-meta'>{c.fields['技术']}</p>}
+              {c.links.length > 0 && (
+                <p className='card-links'>
+                  {c.links.map(l => (
+                    <PageLink key={l.href} href={l.href}>
+                      {l.label}<span aria-hidden='true'>↗</span>
+                    </PageLink>
+                  ))}
+                </p>
+              )}
+            </article>
+          ))}
+        </div>
+      )}
     </Wrap>
   )
 }
