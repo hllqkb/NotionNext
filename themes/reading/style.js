@@ -301,6 +301,8 @@ const Style = () => {
       #theme-reading .prose b, #theme-reading .prose strong { font-weight: 600; color: var(--accent); }
       #theme-reading .prose .notion-link { color: var(--accent); border-bottom: 1px solid currentColor; opacity: 1; }
       #theme-reading .prose .notion-list { padding-left: 1.5em; margin: 0 0 1.2em; }
+      /* Notion 每个列表项是一个单独的 ul/ol，连续的项之间只留项内段落的间距，不按段落间距拉开 */
+      #theme-reading .prose .notion-list:has(+ .notion-list) { margin-bottom: .35em; }
       #theme-reading .prose .notion-hr { border-top: 1px solid var(--line); margin: 36px 0; }
       #theme-reading .prose .notion-asset-wrapper img { border-radius: 8px; }
       #theme-reading .prose .notion-code { background: var(--code-block-bg) !important; border: 1px solid var(--line); border-radius: 10px; font-size: 14px; }
@@ -349,6 +351,7 @@ const Style = () => {
         #theme-reading .row-cover { width: 48px; height: 34px; }
         #theme-reading .intro-side { display: none; }
         #theme-reading .dot { width: 9px; height: 9px; }
+        #theme-reading .dots { width: 100%; flex-wrap: nowrap; gap: 0; justify-content: space-between; }
         #theme-reading .photo-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
         #theme-reading .post-around { grid-template-columns: 1fr; }
         #theme-reading .post-around a.next { text-align: left; }
