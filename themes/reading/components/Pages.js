@@ -220,7 +220,7 @@ export const LayoutLinks = ({ post }) => {
           const href = c.links[0]?.href
           const body = (
             <>
-              <span className='link-avatar' aria-hidden='true'>{c.name.slice(0, 1)}</span>
+              <span className='link-avatar' aria-hidden='true'>{c.name.replace(/^[\s（(【\[《「]+/, '').slice(0, 1)}</span>
               <span className='link-text'>
                 <strong>{c.name}</strong>
                 <span className='card-desc'>{c.desc.map(plain).join(' ')}</span>

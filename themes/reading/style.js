@@ -346,6 +346,7 @@ const Style = () => {
       #theme-reading .rss-icon { flex: none; }
 
       /* pages */
+      #theme-reading .masthead { position: relative; z-index: 20; }
       #theme-reading .nav-more { position: relative; }
       #theme-reading .nav-more summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; }
       #theme-reading .nav-more summary::-webkit-details-marker { display: none; }
@@ -446,6 +447,8 @@ const Style = () => {
       }
       @media (max-width: 520px) {
         #theme-reading .masthead nav .nav-wide { display: none; }
+        #theme-reading .masthead { flex-wrap: wrap; row-gap: 12px; }
+        #theme-reading .masthead nav { width: 100%; justify-content: space-between; gap: 0; font-size: 15px; }
         #theme-reading .nav-more-panel .nav-narrow { display: block; }
         #theme-reading .nav-more-panel { right: -8px; }
         #theme-reading .page-head { align-items: flex-start; }
