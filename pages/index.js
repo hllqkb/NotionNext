@@ -10,6 +10,8 @@ import { formatNotionBlock } from '@/lib/db/notion/getPostBlocks'
 import { generateRobotsTxt } from '@/lib/utils/robots.txt'
 import { generateRss, shouldGenerateRssForLocale } from '@/lib/utils/rss'
 import { generateSitemapXml } from '@/lib/utils/sitemap.xml'
+import { generateLlmsTxt } from '@/lib/utils/llmsTxt'
+import { writeOgManifest } from '@/lib/build/ogManifest'
 import { DynamicLayout } from '@/themes/theme'
 import { generateRedirectJson } from '@/lib/utils/redirect'
 import { checkDataFromAlgolia } from '@/lib/plugins/algolia'
@@ -116,6 +118,9 @@ export async function getStaticProps(req) {
     }
     // 生成
     generateSitemapXml(props)
+    generateLlmsTxt(props)
+    // 分享图在 next build 之后由 scripts/og-images.mjs 按这份清单画
+    writeOgManifest(props)
     // 检查数据是否需要从algolia删除
     await checkDataFromAlgolia(props)
     if (siteConfig('UUID_REDIRECT', false, props?.NOTION_CONFIG)) {

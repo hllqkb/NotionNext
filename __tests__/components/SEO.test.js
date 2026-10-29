@@ -206,28 +206,28 @@ describe('SEO share image and canonical', () => {
     ext: {}
   }
 
-  it('keeps the article cover and self canonical for posts', () => {
+  it('uses the generated share image and self canonical for posts', () => {
     const { container } = renderWith(
       { SEO_OG_IMAGE: '/og-default.png' },
       { post: { ...post, pageCoverThumbnail: 'https://example.com/c.png' } },
       '/[prefix]/[slug]'
     )
     expect(attr(container, 'meta[property="og:image"]', 'content')).toBe(
-      'https://example.com/c.png'
+      'https://example.com/og/article/hello.png'
     )
     expect(attr(container, 'link[rel="canonical"]', 'href')).toBe(
       'https://example.com/article/hello'
     )
   })
 
-  it('uses the default image for posts without a cover', () => {
+  it('encodes non-ascii slugs in the generated share image path', () => {
     const { container } = renderWith(
       { SEO_OG_IMAGE: '/og-default.png' },
-      { post: { ...post, pageCoverThumbnail: '' } },
+      { post: { ...post, slug: 'article/你好', pageCoverThumbnail: '' } },
       '/[prefix]/[slug]'
     )
     expect(attr(container, 'meta[property="og:image"]', 'content')).toBe(
-      'https://example.com/og-default.png'
+      'https://example.com/og/article/%E4%BD%A0%E5%A5%BD.png'
     )
   })
 
