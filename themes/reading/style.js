@@ -286,7 +286,8 @@ const Style = () => {
       #theme-reading .post-relock { font: inherit; color: var(--muted); background: none; border: 1px solid var(--line); border-radius: 4px; padding: 0 8px; cursor: pointer; }
       #theme-reading .post-relock:hover, #theme-reading .post-relock:focus-visible { color: var(--accent); border-color: var(--accent); }
       #theme-reading .article-footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 24px; font-size: 16px; }
-      #theme-reading .site-footer { max-width: 1080px; margin: 80px auto 0; padding: 24px 56px 32px; display: flex; justify-content: space-between; gap: 18px; font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); }
+      /* 分隔线只画在内容宽度上，和页眉的线对齐（border 会画满含内边距的整宽） */
+      #theme-reading .site-footer { --fp: 56px; max-width: 1080px; margin: 80px auto 0; padding: 24px var(--fp) 32px; display: flex; justify-content: space-between; gap: 18px; font-size: 13px; color: var(--muted); background: linear-gradient(var(--line), var(--line)) top center / calc(100% - 2 * var(--fp)) 1px no-repeat; }
 
       /* Notion 正文：沿用阅读版式 */
       #theme-reading .prose { font-size: 20px; line-height: 1.9; }
@@ -326,7 +327,7 @@ const Style = () => {
         #theme-reading .chapter-menu { border: 0; padding: 0; }
         #theme-reading .article-head h1 { font-size: 34px; }
         #theme-reading .year-group { grid-template-columns: 74px minmax(0, 1fr); gap: 20px; }
-        #theme-reading .site-footer { padding-inline: 24px; }
+        #theme-reading .site-footer { --fp: 24px; }
       }
       @media (max-width: 520px) {
         #theme-reading { font-size: 17px; }
@@ -357,7 +358,7 @@ const Style = () => {
         #theme-reading .post-around a.next { text-align: left; }
         #theme-reading .prose { font-size: 18px; }
         #theme-reading .article-head h1 { font-size: 30px; }
-        #theme-reading .site-footer { flex-direction: column; gap: 4px; padding-inline: 20px; }
+        #theme-reading .site-footer { flex-direction: column; gap: 4px; --fp: 20px; }
       }
 
       /* 搜索与订阅 */
