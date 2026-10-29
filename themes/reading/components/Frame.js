@@ -186,38 +186,58 @@ export const Seal = ({ text }) => {
   )
 }
 
-/** 写作打卡：最近 26 周，每周一个点，写过文章的周点亮，颜色随篇数加深 */
+/** 写作打卡：GitHub 贡献图式方块，最近 13 周，每列一周（周一到周日），每格一天，颜色随篇数加深 */
 export const WritingStreak = ({ pages = [], buildTime }) => {
-  const WEEKS = 26
-  const week = 7 * 24 * 3600 * 1000
+  const WEEKS = 13
+  const DAY = 24 * 3600 * 1000
   // 静态 HTML 和 hydration 首帧用构建时刻，挂载后再换成访问时的当前时间
   const [now, setNow] = useState(buildTime || null)
   useEffect(() => setNow(Date.now()), [])
   if (!now) return null
-  const counts = new Array(WEEKS).fill(0)
+  // 日期一律按北京时间的 YYYY-MM-DD，用 UTC 零点做加减避免夏令时/时区偏移
+  const todayKey = new Date(now).toLocaleDateString('sv-SE', { timeZone: 'Asia/Shanghai' })
+  const today = Date.parse(todayKey)
+  const weekday = (new Date(today).getUTCDay() + 6) % 7 // 周一 = 0
+  const start = today - (weekday + (WEEKS - 1) * 7) * DAY
+  const perDay = {}
   for (const p of pages) {
-    const t = p.publishDate || Date.parse(postDay(p))
-    if (!t) continue
-    const ago = Math.floor((now - t) / week)
-    if (ago >= 0 && ago < WEEKS) counts[WEEKS - 1 - ago]++
+    const key = String(postDay(p)).slice(0, 10)
+    if (key) perDay[key] = (perDay[key] || 0) + 1
   }
-  const total = counts.reduce((a, b) => a + b, 0)
+  const cells = []
+  const weekCounts = new Array(WEEKS).fill(0)
+  for (let i = 0; i < WEEKS * 7; i++) {
+    const t = start + i * DAY
+    const d = new Date(t)
+    const key = d.toISOString().slice(0, 10)
+    const future = t > today
+    const n = future ? 0 : perDay[key] || 0
+    weekCounts[Math.floor(i / 7)] += n
+    cells.push({ key, n, future, today: t === today })
+  }
+  const total = weekCounts.reduce((a, b) => a + b, 0)
   let streak = 0
-  for (let i = WEEKS - 1; i >= 0 && counts[i] > 0; i--) streak++
+  for (let i = WEEKS - 1; i >= 0 && weekCounts[i] > 0; i--) streak++
+  const streakText = streak > 1 ? `连续写作 ${streak} 周` : streak === 1 ? '本周已落笔' : '本周尚未落笔'
   return (
-    <div className='streak reveal' aria-label={`近 ${WEEKS} 周写了 ${total} 篇`}>
-      <div className='streak-label'>
-        写作打卡
-        <small>
-          近半年 {total} 篇{streak > 1 ? ` · 连续 ${streak} 周` : ''}
-        </small>
-      </div>
-      <div className='dots'>
-        {counts.map((n, i) => (
-          <span key={i} className={`dot level-${Math.min(n, 3)}${i === WEEKS - 1 ? ' this-week' : ''}`} title={`${WEEKS - 1 - i === 0 ? '本周' : `${WEEKS - 1 - i} 周前`}：${n} 篇`} />
+    <figure className='streak'>
+      <div className='heat-grid' role='img' aria-label={`写作打卡：近 ${WEEKS} 周共 ${total} 篇，${streakText}`}>
+        {cells.map(c => (
+          <span
+            key={c.key}
+            className={`cell level-${Math.min(c.n, 3)}${c.today ? ' today' : ''}${c.future ? ' future' : ''}`}
+            title={c.future ? undefined : `${c.key}${c.today ? '（今天）' : ''}：${c.n} 篇`}
+          />
         ))}
       </div>
-    </div>
+      <figcaption className='streak-label'>
+        <span>写作打卡</span>
+        <span className='streak-summary'>
+          近 {WEEKS} 周 · {total} 篇
+        </span>
+        <span className='streak-note'>{streakText}</span>
+      </figcaption>
+    </figure>
   )
 }
 

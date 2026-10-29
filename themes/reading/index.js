@@ -7,7 +7,7 @@ import { siteConfig } from '@/lib/config'
 import { isBrowser } from '@/lib/utils'
 import { useRouter } from 'next/router'
 import { useEffect, useRef, useState } from 'react'
-import { CategoryChips, LockIcon, Masthead, PageLink, Seal, SiteFooter, WritingStreak, YearGroups, filterByCategory, hasCover, postDay, useReveal } from './components/Frame'
+import { CategoryChips, LockIcon, Masthead, PageLink, SiteFooter, WritingStreak, YearGroups, filterByCategory, hasCover, postDay, useReveal } from './components/Frame'
 import Gallery, { galleryImages } from './components/Gallery'
 import { LayoutAbout, LayoutBooks, LayoutGallery, LayoutLinks, LayoutProjects, pageLayoutFor } from './components/Pages'
 import { SkillsBoard } from './components/Skills'
@@ -152,7 +152,9 @@ const LayoutIndex = props => {
           </h1>
           <p className='intro-text'>{siteConfig('READING_HOME_INTRO', null, CONFIG)}</p>
         </div>
+        {/* 首屏要留给推荐文章：打卡、诗句收成标题右侧一行，整块头部压到一屏的三分之一左右 */}
         <div className='intro-side'>
+          {siteConfig('READING_STREAK', true, CONFIG) && <WritingStreak pages={props.allNavPages || posts} buildTime={props.buildTime} />}
           <p className='vertical-title'>
             {String(siteConfig('READING_VERTICAL_TITLE', null, CONFIG) || '')
               .split(/\s+/)
@@ -161,10 +163,8 @@ const LayoutIndex = props => {
                 <span key={line}>{line}</span>
               ))}
           </p>
-          <Seal text={siteConfig('READING_SEAL', null, CONFIG) || siteConfig('AUTHOR')} />
         </div>
       </header>
-      {siteConfig('READING_STREAK', true, CONFIG) && <WritingStreak pages={props.allNavPages || posts} buildTime={props.buildTime} />}
       <div className='collection-bar'>
         <p>
           全部 {postCount || posts.length} 篇
