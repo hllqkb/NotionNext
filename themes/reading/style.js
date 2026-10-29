@@ -668,6 +668,17 @@ const Style = () => {
         #theme-reading .site-grid { grid-template-columns: 1fr; }
         #theme-reading .note { padding-left: 22px; }
       }
+
+      /* projects: GitHub pinned */
+      #theme-reading .pinned { margin-bottom: 34px; }
+      #theme-reading .pinned > .section-label, #theme-reading .own-label { margin-bottom: 14px; }
+      #theme-reading .pinned > .section-label small { margin-left: auto; font-size: 13px; letter-spacing: 0; color: var(--muted); }
+      #theme-reading .project-card h3 { margin: 0; font-size: 21px; font-weight: 500; line-height: 1.4; word-break: break-word; }
+      #theme-reading .repo-owner { display: block; font-size: 13px; color: var(--muted); font-weight: 400; }
+      #theme-reading .repo-meta { display: flex; gap: 16px; align-items: center; font-variant-numeric: tabular-nums; }
+      #theme-reading .repo-meta span { display: inline-flex; align-items: center; gap: 6px; }
+      #theme-reading .lang-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+      #theme-reading .pinned-grid { list-style: none; }
     `}</style>
   )
 }
