@@ -404,7 +404,10 @@ const nextConfig = {
 
     // styles/notion.css 要跟 react-notion-x 原版样式一起在 NotionPage 里按页引入，
     // 但 pages router 只允许 _app 引入项目内的全局 CSS：复制 Next 给 _app 用的全局 CSS 规则，单独放行这一个文件
-    const cssRules = config.module.rules.find(rule => rule && rule.oneOf)
+    // 服务端编译时 Next 用一条不限来源的 ignore-loader 处理全部全局 CSS，没有 _app 规则，也不需要放行
+    const cssRules = isServer
+      ? null
+      : config.module.rules.find(rule => rule && rule.oneOf)
     const appGlobalCssRule = cssRules?.oneOf.find(
       rule =>
         String(rule.test) === String(/(?<!\.module)\.css$/) &&
