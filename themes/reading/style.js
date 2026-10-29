@@ -10,7 +10,8 @@ const Style = () => {
         --paper: #f7f6f0;
         --sidebar: #f0eee7;
         --ink: #34352e;
-        --muted: #78786e;
+        /* 纸色、侧栏、引用底上都要过 4.5:1（原 #78786e 只有 3.8–4.1） */
+        --muted: #6b6b61;
         --line: #dfdfd4;
         --line-soft: #e8e7df;
         --accent: #aa533b;
@@ -40,7 +41,8 @@ const Style = () => {
 
       #theme-reading a { color: inherit; text-decoration: none; }
       #theme-reading a:hover { color: var(--accent); }
-      #theme-reading ::selection { background: #e4cebc; }
+      /* 选区底是浅色，字也固定成深墨色，深色模式下才看得清 */
+      #theme-reading ::selection { background: #e4cebc; color: #34352e; }
       #theme-reading .page { max-width: 1080px; margin: auto; padding: 0 56px; }
 
       /* 页头 */
@@ -198,6 +200,17 @@ const Style = () => {
       #theme-reading .code-frame button:hover,
       #theme-reading .code-frame button:focus-visible { color: var(--accent); border-color: var(--accent); }
       #theme-reading .code-frame-copy[data-state='copied'] { color: var(--accent); border-color: var(--accent); }
+      /* One Light / One Dark 里注释、字符串、数字等在代码底色上不到 4.5:1，调深（浅色）或调亮（深色）到 5:1 左右，色相不变 */
+      #theme-reading .prose .token:is(.comment, .prolog, .cdata) { color: #6a6b73; }
+      #theme-reading .prose .token:is(.string, .char, .attr-value, .regex, .inserted) { color: #327a31; }
+      #theme-reading .prose .token:is(.attr-name, .property, .tag, .deleted, .symbol) { color: #b13c32; }
+      #theme-reading .prose .token:is(.number, .boolean, .constant, .class-name) { color: #935600; }
+      #theme-reading .prose .token:is(.function, .variable) { color: #285cc4; }
+      .dark #theme-reading .prose .token:is(.comment, .prolog, .cdata) { color: #a1a8b5; }
+      .dark #theme-reading .prose .token:is(.string, .char, .attr-value, .regex, .inserted) { color: #98c379; }
+      .dark #theme-reading .prose .token:is(.attr-name, .property, .tag, .deleted, .symbol) { color: #e06c75; }
+      .dark #theme-reading .prose .token:is(.number, .boolean, .constant, .class-name) { color: #d19a66; }
+      .dark #theme-reading .prose .token:is(.function, .variable) { color: #61afef; }
       #theme-reading .code-frame-toggle { display: inline-flex; align-items: center; padding: 4px 6px !important; }
       #theme-reading .code-frame-toggle svg { width: 15px; height: 15px; transition: transform .3s var(--ease); }
       #theme-reading .code-frame.is-hidden .code-frame-toggle svg { transform: rotate(-90deg); }
@@ -309,6 +322,10 @@ const Style = () => {
       #theme-reading .prose .notion-code { background: var(--code-block-bg) !important; border: 1px solid var(--line); border-radius: 10px; font-size: 14px; }
       #theme-reading .prose .notion-inline-code { background: var(--code-bg); color: var(--ink); padding: 2px 5px; border-radius: 4px; }
       #theme-reading .prose .notion-callout { background: var(--quote-bg); border: 0; border-radius: 8px; }
+      /* styles/notion.css 给深色 quote / callout 强制了蓝色渐变，reading 主题里换回纸色系 */
+      .dark #theme-reading .prose .notion-quote { background: var(--quote-bg) !important; color: var(--muted) !important; border: 0 !important; }
+      .dark #theme-reading .prose .notion-callout { background: var(--quote-bg) !important; color: var(--ink) !important; border: 0 !important; border-radius: 8px; }
+      .dark #theme-reading .prose .notion-callout :is(.notion-callout-text, .notion-text) { color: inherit !important; }
       #theme-reading .prose .notion-table { font-size: 17px; }
 
       @media (max-width: 1050px) {
@@ -358,6 +375,10 @@ const Style = () => {
         #theme-reading .post-around a.next { text-align: left; }
         #theme-reading .prose { font-size: 18px; }
         #theme-reading .article-head h1 { font-size: 30px; }
+        /* 手机上正文标题要比文章标题小一级（原来章节 32px 大过文章标题 30px） */
+        #theme-reading .prose .notion-h1 { font-size: 26px; }
+        #theme-reading .prose .notion-h2 { font-size: 23px; }
+        #theme-reading .prose .notion-h3 { font-size: 20px; }
         #theme-reading .site-footer { flex-direction: column; gap: 4px; --fp: 20px; }
       }
 
@@ -744,6 +765,9 @@ const Style = () => {
       /* 宽表格、长公式只在自己的框里横向滚动，不撑宽正文 */
       #theme-reading .prose .notion-simple-table { display: block; width: max-content; max-width: 100%; overflow-x: auto; scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
       #theme-reading .prose .notion-simple-table td { min-width: 6em; }
+      /* 简单表格原来跟着全局 14px，表里的行内代码再乘 85% 只剩 12px */
+      #theme-reading .prose .notion-simple-table { font-size: 16px; line-height: 1.65; }
+      #theme-reading .prose .notion-simple-table .notion-inline-code { font-size: .9375em; }
       #theme-reading .prose :is(.notion-equation-block, .katex-display) { display: block; max-width: 100%; overflow-x: auto; overflow-y: hidden; scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
       #theme-reading .prose :is(.notion-collection, .notion-table) { max-width: 100%; overflow-x: auto; }
 
