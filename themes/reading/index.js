@@ -403,7 +403,9 @@ const LayoutSlug = props => {
   const [password, setPassword] = useState('')
   const [rejected, setRejected] = useState(false)
   const [bodyMounted, setBodyMounted] = useState(false)
-  const bodyReady = !lock && bodyMounted
+  // 画廊文章渲染的是同步的 Gallery，不经过动态正文，直接就绪
+  const galleryBody = (post?.tags || []).includes(siteConfig('READING_GALLERY_TAG', null, CONFIG))
+  const bodyReady = !lock && (galleryBody || bodyMounted)
   const activeHeading = useActiveHeading(bodyReady ? post?.toc : null)
   useFootnotes(bodyReady ? post?.id : null)
   useImageFallback(bodyReady ? post?.id : null)
