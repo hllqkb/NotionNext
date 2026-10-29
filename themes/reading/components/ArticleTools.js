@@ -340,8 +340,12 @@ export const useImageFallback = key => {
 }
 
 /**
- * 正文图片放大（medium-zoom）的键盘支持：图片能 Tab 到，回车 / 空格打开；
- * 打开期间 Tab 不会跑到被遮住的页面上；关闭后焦点回到打开前的位置
+ * 正文图片放大（medium-zoom）的键盘支持：
+ * - 图片能 Tab 到，回车 / 空格打开；
+ * - 打开后焦点移到放大的那张图上（原图会被设成 visibility: hidden，焦点不移走就掉到 body）；
+ * - 打开期间 Tab 只停在放大图上，不会跑到被遮住的正文；Esc 在 document 上接，焦点在哪都能关；
+ * - 关闭后焦点回到原图。
+ * 打开状态按 medium-zoom 自己派发的 open / closed 事件记，不看 body 上的 class（那个要等下一帧才加）
  */
 export const useZoomKeyboard = key => {
   useEffect(() => {
@@ -353,11 +357,50 @@ export const useZoomKeyboard = key => {
       img.setAttribute('role', 'button')
       img.setAttribute('aria-label', img.alt && img.alt !== 'notion image' ? `放大图片：${img.alt}` : '放大图片')
     })
-    let returnTo = null
-    const isOpen = () => document.body.classList.contains('medium-zoom--opened')
+    let active = null
+    let focusTimer = 0
+    const zoomed = () => document.querySelector('.medium-zoom-image--opened')
+    const focusZoomed = () => {
+      const el = zoomed()
+      if (!el) return false
+      // 放大图是原图的克隆，会把原图的 aria-label 一起抄过去，这里改成关闭的说法
+      el.tabIndex = -1
+      el.setAttribute('role', 'button')
+      el.setAttribute('aria-label', '关闭放大的图片（Esc）')
+      el.focus({ preventScroll: true })
+      return true
+    }
+    const restore = () => {
+      if (!active) return
+      const { original } = active
+      active = null
+      clearTimeout(focusTimer)
+      if (original.isConnected) original.focus({ preventScroll: true })
+    }
+    const close = () => {
+      if (!active) return
+      const { zoom } = active
+      if (zoom?.close) void zoom.close()
+      else zoomed()?.click()
+      // 关闭动画的 transitionend 没来时 medium-zoom 不发 closed，放大图没了就自己把焦点还回去
+      setTimeout(() => {
+        if (active && !zoomed()) restore()
+      }, 600)
+    }
     const onKey = e => {
-      if (isOpen()) {
-        if (e.key === 'Tab') e.preventDefault()
+      // 放大图已经没了（鼠标点掉、滚动关掉，但 closed 没来）就当已关闭，别继续拦 Tab
+      if (active && !zoomed()) restore()
+      if (active) {
+        if (e.key === 'Escape' || e.key === 'Esc') {
+          e.preventDefault()
+          close()
+        } else if (e.key === 'Tab') {
+          e.preventDefault()
+          focusZoomed()
+        } else if ((e.key === 'Enter' || e.key === ' ') && e.target === zoomed()) {
+          e.preventDefault()
+          close()
+        }
         return
       }
       const img = e.target
@@ -368,18 +411,23 @@ export const useZoomKeyboard = key => {
     }
     const onOpen = e => {
       if (!root.contains(e.target)) return
-      const active = document.activeElement
-      returnTo = active && active !== document.body ? active : e.target
+      active = { zoom: e.detail?.zoom, original: e.target }
+      // open 事件在克隆放大图之前派发，等克隆出来再把焦点移过去
+      let tries = 0
+      const tryFocus = () => {
+        if (!active || focusZoomed() || ++tries > 20) return
+        focusTimer = setTimeout(tryFocus, 16)
+      }
+      focusTimer = setTimeout(tryFocus, 0)
     }
-    const onClosed = () => {
-      const el = returnTo
-      returnTo = null
-      if (el?.isConnected) el.focus({ preventScroll: true })
+    const onClosed = e => {
+      if (active && e.target === active.original) restore()
     }
     document.addEventListener('keydown', onKey, true)
     document.addEventListener('medium-zoom:open', onOpen, true)
     document.addEventListener('medium-zoom:closed', onClosed, true)
     return () => {
+      clearTimeout(focusTimer)
       document.removeEventListener('keydown', onKey, true)
       document.removeEventListener('medium-zoom:open', onOpen, true)
       document.removeEventListener('medium-zoom:closed', onClosed, true)
