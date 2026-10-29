@@ -1,8 +1,9 @@
 import KaTeX from 'katex'
-import { memo, useEffect, useState } from 'react'
+import { memo, useMemo } from 'react'
 
 /**
  * 数学公式
+ * 渲染期同步生成 HTML，静态导出的页面里直接带公式；服务端和客户端输入相同，输出一致
  * @param {*} param0
  * @returns
  */
@@ -18,9 +19,8 @@ const TeX = ({
 }) => {
   const Component = asComponent || (block ? 'div' : 'span')
   const content = (children ?? math)
-  const [state, setState] = useState({ innerHtml: '' })
 
-  useEffect(() => {
+  const state = useMemo(() => {
     try {
       const innerHtml = KaTeX.renderToString(content, {
         displayMode: true,
@@ -29,19 +29,17 @@ const TeX = ({
         ...settings
       })
 
-      setState({ innerHtml })
+      return { innerHtml }
     } catch (error) {
       if (error instanceof KaTeX.ParseError || error instanceof TypeError) {
         if (renderError) {
-          setState({ errorElement: renderError(error) })
-        } else {
-          setState({ innerHtml: error.message })
+          return { errorElement: renderError(error) }
         }
-      } else {
-        throw error
+        return { innerHtml: error.message }
       }
+      throw error
     }
-  }, [block, content, errorColor, renderError, settings])
+  }, [content, errorColor, renderError, settings])
 
   if ('errorElement' in state) {
     return state.errorElement
