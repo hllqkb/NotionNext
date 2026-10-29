@@ -12,6 +12,8 @@ const CONFIG = {
   READING_DEFAULT_CATEGORY: '随笔', // Notion 里没选 category 的文章归到这个分类
   READING_GALLERY_TAG: '摄影集', // 带这个标签的文章按摄影集版式展示（图片网格 + 大图浏览）
   READING_STREAK: true, // 首页显示写作打卡点阵
+  // 首页「从这里读起」：优先取 Notion 里勾了 featured 的文章（最多 3 篇）；一篇都没勾时用这里的 slug，逗号分隔
+  READING_PICKS: 'article/csdn-150206503-sift-7,article/csdn-150112173-ml2023spring-hw4-bossline-0-95125,article/ai-coding-faster-stuck',
   READING_COMMENTS: true, // 文章底部评论区（Waline，服务在 talk.hllqk.cn，见 conf/comment.config.js）
   READING_PAGEVIEWS: true, // 文章页显示阅读量（Waline 文章计数，失败时不显示）
   READING_RECENT_COMMENTS: false, // 文末最近评论（Waline）。评论库里还有测试和不当留言，清理后再打开
