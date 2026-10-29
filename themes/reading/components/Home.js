@@ -1,6 +1,6 @@
 import { siteConfig } from '@/lib/config'
 import CONFIG from '../config'
-import { EssayRow, LockIcon, PageLink, hasCover, postDay, updatedAt } from './Frame'
+import { CoverThumb, EssayRow, LockIcon, PageLink, hasCover, postDay, updatedAt } from './Frame'
 
 /**
  * 摘要只保留完整的句子：Notion 里的摘要常被截在半句（自动摘要按字数截断），
@@ -16,10 +16,7 @@ export const wholeSentences = text => {
 
 /** 小封面：有封面才放，没有就只留文字 */
 export const PostMark = ({ post }) =>
-  hasCover(post) ? (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img className='post-mark' src={post.pageCoverThumbnail} alt='' loading='lazy' />
-  ) : null
+  hasCover(post) ? <CoverThumb post={post} className='post-mark' /> : null
 
 /**
  * 「从这里读起」：Notion 勾了 featured 的文章优先，一篇都没勾时用 READING_PICKS 里的 slug。
