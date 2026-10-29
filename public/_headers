@@ -6,3 +6,6 @@
 
 /images/*
   Cache-Control: public, max-age=86400
+
+/skills/*/SKILL.md
+  Content-Type: text/plain; charset=utf-8

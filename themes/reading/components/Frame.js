@@ -28,12 +28,13 @@ export const Masthead = ({ siteInfo }) => {
     { href: '/tag', label: '标签', match: p => p.startsWith('/tag'), wide: true },
     { href: '/about', label: '关于', match: p => p.startsWith('/about') }
   ]
-  // 「更多」里的独立页面；窄屏时分类、标签也收进来。/skills（#22）合并后放在这一组
+  // 「更多」里的独立页面；窄屏时分类、标签也收进来
   const more = [
     { href: '/projects', label: '项目' },
     { href: '/gallery', label: '相册' },
     { href: '/books', label: '书影' },
-    { href: '/links', label: '友链' }
+    { href: '/links', label: '友链' },
+    { href: '/skills', label: 'Skills' }
   ]
   const narrowOnly = links.filter(l => l.wide)
   const moreActive = more.some(l => path.startsWith(l.href))
