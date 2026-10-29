@@ -7,5 +7,10 @@
 /images/*
   Cache-Control: public, max-age=86400
 
+# CSDN 文章里的行内公式图存成了 .svg 文件名，内容其实是 PNG（共 76 个）；
+# 按 svg 发出去浏览器会拒绝渲染，正文里显示「图片加载失败」
+/images/csdn/*.svg
+  Content-Type: image/png
+
 /skills/*/SKILL.md
   Content-Type: text/plain; charset=utf-8
