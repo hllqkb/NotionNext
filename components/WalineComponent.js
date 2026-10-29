@@ -30,10 +30,11 @@ const WalineComponent = (props) => {
         lang: siteConfig('LANG'),
         reaction: true,
         dark: 'html.dark',
+        // 表情包放在本站 public/vendor/waline-emojis@1.1.0/，不走 elemecdn
         emoji: [
-          '//npm.elemecdn.com/@waline/emojis@1.1.0/tieba',
-          '//npm.elemecdn.com/@waline/emojis@1.1.0/weibo',
-          '//npm.elemecdn.com/@waline/emojis@1.1.0/bilibili'
+          '/vendor/waline-emojis@1.1.0/tieba',
+          '/vendor/waline-emojis@1.1.0/weibo',
+          '/vendor/waline-emojis@1.1.0/bilibili'
         ]
       })
     }
