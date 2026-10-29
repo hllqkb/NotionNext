@@ -265,35 +265,38 @@ const LayoutSearch = props => {
         </p>
         <SearchBox keyword={keyword} />
       </div>
-      {keyword && total === 0 && status !== 'loading' && (
-        <p className='empty search-empty'>
-          没有找到和「{keyword}」相关的文章。{status === 'unavailable' && '正文索引暂时不可用，这次只搜了标题、摘要、分类和标签。'}可以换个词，或者去
-          <PageLink href='/archive'>归档</PageLink>、<PageLink href='/tag'>标签</PageLink>里翻翻。
-        </p>
-      )}
-      {keyword && posts.length > 0 && <YearGroups posts={posts} />}
-      {keyword && bodyHits.length > 0 && (
-        <section className='year-group body-hits' aria-label='正文命中'>
-          <h2 className='year-label'>正文</h2>
-          <ul>
-            {bodyHits.map(({ hit, post }) => (
-              <li key={post.id} className='essay-row body-hit'>
-                <PageLink href={post.href}>
-                  <span className='body-hit-head'>
-                    <h3>{post.title}</h3>
-                    <span className='row-meta'>
-                      {post.category && <span className='row-cat'>{post.category}</span>}
-                      <time dateTime={postDay(post)}>{String(postDay(post)).replaceAll('-', '.')}</time>
+      {/* 结果按 ?s= 在客户端填进来，静态 HTML 里这里是空的：先占住一屏，页脚从一开始就在视口外 */}
+      <div className='search-results'>
+        {keyword && total === 0 && status !== 'loading' && (
+          <p className='empty search-empty'>
+            没有找到和「{keyword}」相关的文章。{status === 'unavailable' && '正文索引暂时不可用，这次只搜了标题、摘要、分类和标签。'}可以换个词，或者去
+            <PageLink href='/archive'>归档</PageLink>、<PageLink href='/tag'>标签</PageLink>里翻翻。
+          </p>
+        )}
+        {keyword && posts.length > 0 && <YearGroups posts={posts} />}
+        {keyword && bodyHits.length > 0 && (
+          <section className='year-group body-hits' aria-label='正文命中'>
+            <h2 className='year-label'>正文</h2>
+            <ul>
+              {bodyHits.map(({ hit, post }) => (
+                <li key={post.id} className='essay-row body-hit'>
+                  <PageLink href={post.href}>
+                    <span className='body-hit-head'>
+                      <h3>{post.title}</h3>
+                      <span className='row-meta'>
+                        {post.category && <span className='row-cat'>{post.category}</span>}
+                        <time dateTime={postDay(post)}>{String(postDay(post)).replaceAll('-', '.')}</time>
+                      </span>
                     </span>
-                  </span>
-                  {/* excerpt 是 Pagefind 从本站静态 HTML 里截的纯文本，只带 <mark> 高亮 */}
-                  <p className='body-hit-excerpt' dangerouslySetInnerHTML={{ __html: hit.excerpt }} />
-                </PageLink>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+                    {/* excerpt 是 Pagefind 从本站静态 HTML 里截的纯文本，只带 <mark> 高亮 */}
+                    <p className='body-hit-excerpt' dangerouslySetInnerHTML={{ __html: hit.excerpt }} />
+                  </PageLink>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+      </div>
     </>
   )
 }
@@ -411,11 +414,15 @@ const LayoutSlug = props => {
               </span>
             )}
             {isArticle && !lock && siteConfig('READING_PAGEVIEWS', true, CONFIG) && <PageViews path={path} />}
-            {(post.tags || []).map(t => (
-              <PageLink key={t} href={`/tag/${encodeURIComponent(t)}`}>
-                #{t}
-              </PageLink>
-            ))}
+            {post.tags?.length > 0 && (
+              <span className='byline-tags'>
+                {post.tags.map(t => (
+                  <PageLink key={t} href={`/tag/${encodeURIComponent(t)}`}>
+                    #{t}
+                  </PageLink>
+                ))}
+              </span>
+            )}
             {post.password && !lock && relock && (
               <button
                 type='button'

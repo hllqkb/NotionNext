@@ -10,7 +10,7 @@ import useAdjustStyle from '@/hooks/useAdjustStyle'
 import { GlobalContextProvider } from '@/lib/global'
 import { getBaseLayoutByTheme } from '@/themes/theme'
 import { useRouter } from 'next/router'
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import { getQueryParam } from '../lib/utils'
 import ErrorHandler from '@/lib/utils/errorHandler'
 
@@ -19,11 +19,18 @@ import BLOG from '@/blog.config'
 import ExternalPlugins from '@/components/ExternalPlugins'
 import PWAInstaller from '@/components/PWAInstaller'
 import SEO from '@/components/SEO'
-import { zhCN } from '@clerk/localizations'
 import dynamic from 'next/dynamic'
-// import { ClerkProvider } from '@clerk/nextjs'
+// 中文文案（zh-CN 约 64KB）和 ClerkProvider 一起放在动态边界后面，没配 Clerk 时不进 _app
 const ClerkProvider = dynamic(() =>
-  import('@clerk/nextjs').then(m => m.ClerkProvider)
+  Promise.all([
+    import('@clerk/nextjs'),
+    import('@clerk/localizations/zh-CN')
+  ]).then(([{ ClerkProvider }, { zhCN }]) => {
+    const LocalizedClerkProvider = props => (
+      <ClerkProvider localization={zhCN} {...props} />
+    )
+    return LocalizedClerkProvider
+  })
 )
 const AppErrorBoundary = ErrorHandler.createErrorBoundary(
   <div style={{ padding: '2rem', textAlign: 'center', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
@@ -50,29 +57,6 @@ const MyApp = ({ Component, pageProps }) => {
     return queryTheme || notionTheme || configTheme
   }, [queryTheme, notionTheme, configTheme])
 
-  useEffect(() => {
-    const source = queryTheme
-      ? 'url:theme'
-      : notionTheme
-        ? 'notion:config'
-        : 'blog/env:config'
-    console.log(
-      '[ThemeResolver][runtime-final]',
-      JSON.stringify(
-        {
-          note: 'This is the final theme used for rendering.',
-          configTheme,
-          notionTheme: notionTheme || null,
-          queryTheme: queryTheme || null,
-          finalTheme: theme,
-          source
-        },
-        null,
-        2
-      )
-    )
-  }, [configTheme, notionTheme, queryTheme, theme])
-
   // 整体布局
   const GLayout = useCallback(
     props => {
@@ -98,7 +82,7 @@ const MyApp = ({ Component, pageProps }) => {
   return (
     <>
       {enableClerk ? (
-        <ClerkProvider localization={zhCN}>{content}</ClerkProvider>
+        <ClerkProvider>{content}</ClerkProvider>
       ) : (
         content
       )}

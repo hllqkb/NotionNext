@@ -38,6 +38,8 @@ const Style = () => {
       }
       .dark body { background: #1c1b18; }
       body { background: #f7f6f0; }
+      /* 一直留出滚动条的位置：页面从短变长出现滚动条时，居中的版心不会整体横移 */
+      html { scrollbar-gutter: stable; }
 
       #theme-reading a { color: inherit; text-decoration: none; }
       #theme-reading a:hover { color: var(--accent); }
@@ -309,6 +311,11 @@ const Style = () => {
       #theme-reading .post-lock button:disabled { opacity: .5; cursor: default; }
       #theme-reading .post-lock [role='alert'] { color: var(--accent); margin: 12px 0 0; font-size: 15px; }
       #theme-reading .byline { display: flex; flex-wrap: wrap; gap: 10px; color: var(--muted); font-size: 15px; }
+      /* 手机上标签固定另起一行：回退字体和文楷宽度不同，挤在同一行时字体一换就折行，把正文整体往下推 */
+      #theme-reading .byline-tags { display: contents; }
+      @media (max-width: 520px) {
+        #theme-reading .byline-tags { display: flex; flex-wrap: wrap; gap: 10px; flex-basis: 100%; }
+      }
       #theme-reading .post-relock { font: inherit; color: var(--muted); background: none; border: 1px solid var(--line); border-radius: 4px; padding: 0 8px; cursor: pointer; }
       #theme-reading .post-relock:hover, #theme-reading .post-relock:focus-visible { color: var(--accent); border-color: var(--accent); }
       #theme-reading .article-footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 24px; font-size: 16px; }
@@ -398,6 +405,7 @@ const Style = () => {
       /* 搜索与订阅 */
       #theme-reading .search-clear { margin-left: 12px; color: var(--muted); font-size: 13px; }
       #theme-reading .search-empty a { margin: 0 2px; }
+      #theme-reading .search-results { min-height: 100vh; }
       #theme-reading .notfound-search { margin-top: 22px; max-width: 340px; }
       #theme-reading .notfound-search .search-box { max-width: none; }
       #theme-reading .footer-right { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 14px; }
