@@ -1,0 +1,91 @@
+{
+  "user": "hllqkb",
+  "source": "rest",
+  "fetchedAt": "2026-10-29T06:27:16.154Z",
+  "items": [
+    {
+      "name": "NotionNext",
+      "owner": "hllqkb",
+      "url": "https://github.com/hllqkb/NotionNext",
+      "homepage": "https://hllqkb-blog.pages.dev",
+      "description": "就是这个博客：NotionNext 的 fork，自写 reading 主题，文章在 Notion 里写。",
+      "language": "JavaScript",
+      "languageColor": "#f1e05a",
+      "stars": 0,
+      "fork": true,
+      "archived": false,
+      "pushedAt": "2026-10-29T06:18:45Z",
+      "status": "进行中"
+    },
+    {
+      "name": "Claudio",
+      "owner": "hllqkb",
+      "url": "https://github.com/hllqkb/Claudio",
+      "homepage": null,
+      "description": "AI Music Radio - 个人化 AI 音乐电台，结合网易云歌单 + Claude AI 编排 + TTS 播报",
+      "language": "TypeScript",
+      "languageColor": "#3178c6",
+      "stars": 50,
+      "fork": false,
+      "archived": false,
+      "pushedAt": "2026-05-04T16:56:49Z",
+      "status": "完成"
+    },
+    {
+      "name": "Spring-AI-Ailibaba-Best-Practices",
+      "owner": "hllqkb",
+      "url": "https://github.com/hllqkb/Spring-AI-Ailibaba-Best-Practices",
+      "homepage": null,
+      "description": "基于个人知识库的AI问答系统SSE流/Agent智能体/知识图谱RAG/FunctionCall/历史消息/图片生成/图片理解/Embedding/VectorDatabase/RAG",
+      "language": "Java",
+      "languageColor": "#b07219",
+      "stars": 39,
+      "fork": false,
+      "archived": false,
+      "pushedAt": "2025-09-07T10:50:31Z",
+      "status": "完成"
+    },
+    {
+      "name": "VueNotepad",
+      "owner": "hllqkb",
+      "url": "https://github.com/hllqkb/VueNotepad",
+      "homepage": null,
+      "description": "It's not particularly valuable, based on Vue3, A notepad project for frontend-backend separation using nodejs, electron, vditor, mysql, vuex, vite, and elementplus 没什么含金量的,基于Vue3,nodejs,electron,vditor,mysql,vuex,vite,elementplus的前后端分离的记事本项目",
+      "language": "CSS",
+      "languageColor": "#663399",
+      "stars": 3,
+      "fork": false,
+      "archived": false,
+      "pushedAt": "2025-02-17T11:47:23Z",
+      "status": "完成"
+    },
+    {
+      "name": "Persistent-memory-Neko",
+      "owner": "hllqkb",
+      "url": "https://github.com/hllqkb/Persistent-memory-Neko",
+      "homepage": null,
+      "description": "RAG (Retrieval-Augmented Generation) 对话系统实现",
+      "language": "Python",
+      "languageColor": "#3572A5",
+      "stars": 1,
+      "fork": false,
+      "archived": false,
+      "pushedAt": "2025-09-11T02:11:56Z",
+      "status": "完成"
+    },
+    {
+      "name": "neko-ai",
+      "owner": "hllqkb",
+      "url": "https://github.com/hllqkb/neko-ai",
+      "homepage": null,
+      "description": "一个具有持久记忆功能的智能AI助手API服务，基于FastAPI和Neo4j图数据库",
+      "language": "Python",
+      "languageColor": "#3572A5",
+      "stars": 1,
+      "fork": false,
+      "archived": false,
+      "pushedAt": "2025-09-10T11:57:33Z",
+      "status": "完成"
+    }
+  ]
+}
