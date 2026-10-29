@@ -479,6 +479,93 @@ const Style = () => {
         #theme-reading .album-grid { gap: 20px 14px; }
       }
 
+      /* article-page */
+      /* 正文栏收到 680px（一行约 34 字），两栏整体居中 */
+      #theme-reading .reading-shell { grid-template-columns: 216px minmax(0, 680px); justify-content: center; }
+      /* 正文节奏：notion.css 的 .notion-text 写死了 margin: 1px 0 !important，这里按主题覆盖回来 */
+      #theme-reading .prose .notion-text { margin: 0 0 1em !important; padding: 0 !important; line-height: 1.85; text-wrap: pretty; }
+      #theme-reading .prose .notion-list li { line-height: 1.85; }
+      #theme-reading .prose :is(.notion-list, .notion-callout, .notion-quote, .notion-toggle) .notion-text { margin: 0 0 .35em !important; }
+      #theme-reading .prose :is(.notion-list, .notion-callout, .notion-quote, .notion-toggle) .notion-text:last-child { margin-bottom: 0 !important; }
+      #theme-reading .article-head h1,
+      #theme-reading .prose .notion-h,
+      #theme-reading .related h2 { text-wrap: balance; }
+
+      /* 导语：比正文大一档、浅一档 */
+      #theme-reading .dek { margin: -6px 0 26px; font-size: 22px; line-height: 1.75; color: var(--muted); text-wrap: pretty; }
+
+      /* 顶部阅读进度：一条 2px 朱红线，只动 transform */
+      #theme-reading .read-progress { position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 50; pointer-events: none; }
+      #theme-reading .read-progress span { display: block; height: 100%; background: var(--accent); transform: scaleX(0); transform-origin: 0 50%; }
+
+      /* 目录当前章节：朱红字 + 左侧一道短竖线 */
+      /* 别处有全局 .toc { flex-wrap: wrap }，条目一多就折成被截断的第二列，这里拉回单列滚动 */
+      #theme-reading .toc { position: relative; flex-wrap: nowrap; }
+      #theme-reading .toc a { position: relative; transition: color 160ms var(--ease); }
+      #theme-reading .toc a.active { color: var(--accent); }
+      #theme-reading .toc a::before { content: ''; position: absolute; left: -10px; top: .45em; bottom: .45em; width: 2px; border-radius: 1px; background: var(--accent); transform: scaleY(0); transition: transform 160ms var(--ease); }
+      #theme-reading .toc a.active::before { transform: scaleY(1); }
+      #theme-reading .sidebar .toc { padding-left: 12px; }
+      #theme-reading .toc-mobile { display: none; }
+
+      /* 系列目录 */
+      #theme-reading .series-box { margin: -10px 0 34px; border: 1px solid var(--line); border-radius: 10px; font-size: 16px; }
+      #theme-reading .series-box summary { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; padding: 12px 18px; cursor: pointer; list-style: none; }
+      #theme-reading .series-box summary::-webkit-details-marker { display: none; }
+      #theme-reading .series-box summary::after { content: '展开'; margin-left: auto; font-size: 13px; color: var(--muted); }
+      #theme-reading .series-box details[open] summary::after { content: '收起'; }
+      #theme-reading .series-tag { font-size: 13px; color: var(--paper); background: var(--accent); border-radius: 4px; padding: 0 7px; }
+      #theme-reading .series-box strong { font-weight: 400; }
+      #theme-reading .series-count { font-size: 14px; color: var(--muted); }
+      #theme-reading .series-box ol { margin: 0; padding: 4px 18px 14px 46px; border-top: 1px solid var(--line-soft); font-size: 15px; line-height: 1.7; color: var(--muted); max-height: 360px; overflow: auto; }
+      #theme-reading .series-box li { padding: 3px 0; }
+      #theme-reading .series-box li::marker { font-variant-numeric: tabular-nums; }
+      #theme-reading .series-box li a { color: var(--ink); }
+      #theme-reading .series-box li a:hover { color: var(--accent); }
+      #theme-reading .series-box li.current { color: var(--accent); }
+
+      /* 图注：图 1 · 说明（只给带说明的图片编号） */
+      #theme-reading .prose { counter-reset: figure; }
+      #theme-reading .prose .notion-asset-wrapper-image .notion-asset-caption { font-size: 14px; line-height: 1.6; color: var(--muted); text-align: center; padding: 8px 0 0; }
+      #theme-reading .prose .notion-asset-wrapper-image .notion-asset-caption::before { counter-increment: figure; content: '图 ' counter(figure) ' · '; color: var(--accent); }
+
+      /* 相关文章：日期 | 标题 | 分类 的紧凑列表 */
+      #theme-reading .related { margin-top: 44px; }
+      #theme-reading .related h2 { font-size: 15px; font-weight: 400; color: var(--muted); letter-spacing: .12em; margin: 0 0 6px; }
+      #theme-reading .related ul { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--ink); }
+      #theme-reading .related li + li { border-top: 1px solid var(--line-soft); }
+      #theme-reading .related a { display: grid; grid-template-columns: 96px minmax(0, 1fr) auto; gap: 18px; align-items: baseline; padding: 12px 0; transition: transform 160ms var(--ease); }
+      #theme-reading .related a:hover,
+      #theme-reading .related a:focus-visible { transform: translateX(2px); }
+      #theme-reading .related time { font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+      #theme-reading .related-title { font-size: 17px; line-height: 1.6; overflow-wrap: anywhere; }
+      #theme-reading .related-cat { font-size: 13px; color: var(--accent); white-space: nowrap; }
+
+      @media (max-width: 1050px) {
+        #theme-reading .reading-shell { grid-template-columns: 190px minmax(0, 680px); }
+      }
+      /* 手机：侧栏整个藏起来，目录收成标题下面的一条，默认合上 */
+      @media (max-width: 800px) {
+        #theme-reading .sidebar { display: none; }
+        /* flex 子项默认 min-width: auto，会被正文里的宽代码块、表格撑出屏幕，整页横向溢出 */
+        #theme-reading .reading-main { min-width: 0; width: 100%; }
+        #theme-reading .toc-mobile { display: block; margin: -10px 0 30px; padding: 0; border: 1px solid var(--line); border-radius: 10px; background: var(--sidebar); font-size: 15px; }
+        #theme-reading .toc-mobile summary { padding: 11px 16px; color: var(--ink); }
+        #theme-reading .toc-count { margin-left: 10px; font-size: 13px; color: var(--muted); }
+        #theme-reading .toc-mobile .toc { padding: 2px 16px 14px 26px; max-height: 50vh; }
+        #theme-reading .dek { font-size: 19px; }
+        #theme-reading .article-head { padding-bottom: 30px; margin-bottom: 28px; }
+      }
+      @media (max-width: 520px) {
+        #theme-reading .dek { font-size: 18px; margin-bottom: 20px; }
+        #theme-reading .related a { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+        #theme-reading .related-cat { display: none; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #theme-reading .related a,
+        #theme-reading .toc a::before { transform: none; transition: none; }
+        #theme-reading .toc a:not(.active)::before { opacity: 0; }
+      }
       /* pagefind */
       #theme-reading #posts-wrapper + .body-hits { border-top: 1px solid var(--line); }
       #theme-reading .body-hit a { flex-direction: column; align-items: stretch; gap: 4px; }
