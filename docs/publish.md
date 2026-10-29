@@ -68,3 +68,9 @@ curl -X POST "https://api.cloudflare.com/client/v4/pages/webhooks/deploy_hooks/<
 5. 状态变成 Success 后，打开文章 URL 确认内容是这次改的版本。成功之前不要当它已经上线。
 
 构建失败时，在那条部署记录里点进去看日志，修好后在页面上 Retry deployment，或再点一次快捷指令。
+
+## 四、用脚本或 API 改 Notion 正文
+
+构建会把每篇文章的正文缓存在 `.next/cache`，缓存 key 里带着页面的 `last_edited_time`，Cloudflare 每次构建都会沿用这个缓存。在 Notion App 里正常编辑时，这个时间会自动更新；用脚本或 API 直接写块（`saveTransactionsFanout` 之类）则不会更新它，下次构建就会继续用旧正文。
+
+所以凡是用脚本改了正文，改完后在同一次操作里给所在页面补一条 `update {last_edited_time: 当前时间}`，再触发构建。具体写法见 `~/personal/notion-import/README.md`。
