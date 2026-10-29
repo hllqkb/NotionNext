@@ -15,6 +15,7 @@ import { RandomPost, ReadingPicks, RecentlyUpdated, wholeSentences } from './com
 const Comment = dynamic(() => import('@/components/Comment'), { ssr: false })
 import Toc, { useActiveHeading } from './components/Toc'
 import { ReadingProgress, RelatedPosts, SeriesBox, dekOf, getRelatedPosts, getSeries } from './components/Article'
+import { FontSizeControl, FontSizeScript, PageViews, RecentComments, ShareLink, StaleNote, useFootnotes } from './components/ArticleTools'
 import CONFIG from './config'
 import { Style } from './style'
 
@@ -352,6 +353,7 @@ const LayoutSlug = props => {
   const [password, setPassword] = useState('')
   const [rejected, setRejected] = useState(false)
   const activeHeading = useActiveHeading(lock ? null : post?.toc)
+  useFootnotes(lock ? null : post?.id)
 
   useEffect(() => {
     if (!post) {
@@ -372,14 +374,20 @@ const LayoutSlug = props => {
   const dek = dekOf(post)
   const series = isArticle ? getSeries(post, allNavPages) : null
   const related = isArticle && !lock ? getRelatedPosts(post, allNavPages, series) : []
+  const path = `/${post.slug}`
   return (
     <div className='reading-shell'>
+      <FontSizeScript />
+      <a className='skip-link' href='#article-wrapper'>
+        跳到正文
+      </a>
       <ReadingProgress />
       <aside className='sidebar' aria-label='阅读导航'>
         <PageLink className='all-articles' href='/'>
           全部文章
         </PageLink>
         {!lock && <Toc toc={post.toc} active={activeHeading} />}
+        {!lock && !isGallery && <FontSizeControl />}
         <div className='sidebar-note'>
           <p>{siteConfig('READING_SIDEBAR_NOTE', null, CONFIG)}</p>
           <span>{siteConfig('AUTHOR')}</span>
@@ -400,15 +408,18 @@ const LayoutSlug = props => {
                 {stats.chars.toLocaleString()} 字 · 约 {stats.minutes} 分钟
               </span>
             )}
+            {isArticle && !lock && siteConfig('READING_PAGEVIEWS', true, CONFIG) && <PageViews path={path} />}
             {(post.tags || []).map(t => (
               <PageLink key={t} href={`/tag/${encodeURIComponent(t)}`}>
                 #{t}
               </PageLink>
             ))}
           </div>
+          {isArticle && <StaleNote post={post} buildTime={props.buildTime} />}
         </header>
         <SeriesBox series={series} />
         {!lock && <Toc toc={post.toc} active={activeHeading} mobile />}
+        {!lock && !isGallery && <FontSizeControl className='font-size-mobile' />}
         {lock ? (
           <form
             className='post-lock'
@@ -465,6 +476,7 @@ const LayoutSlug = props => {
               </a>{' '}
               协议
             </p>
+            <ShareLink url={pageUrl} title={post.title} />
           </aside>
         )}
         <RelatedPosts posts={related} />
@@ -489,6 +501,7 @@ const LayoutSlug = props => {
             <LazyComment post={post} />
           </section>
         )}
+        {!lock && isArticle && siteConfig('READING_RECENT_COMMENTS', false, CONFIG) && <RecentComments path={path} />}
         <footer className='article-footer'>
           <PageLink href='/'>返回文章列表</PageLink>
           <a href='#content' onClick={e => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>
