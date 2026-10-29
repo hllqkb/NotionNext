@@ -589,6 +589,27 @@ const Style = () => {
       #theme-reading .related-title { font-size: 17px; line-height: 1.6; overflow-wrap: anywhere; }
       #theme-reading .related-cat { font-size: 13px; color: var(--accent); white-space: nowrap; }
 
+      /* 邮件订阅：一句说明 + 输入框 + 朱红按钮，线框跟正文同色系，不弹窗 */
+      #theme-reading .post-subscribe { margin-top: 44px; padding-top: 14px; border-top: 1px solid var(--ink); }
+      #theme-reading .post-subscribe h2 { font-size: 15px; font-weight: 400; color: var(--muted); letter-spacing: .12em; margin: 0 0 10px; }
+      #theme-reading .subscribe-form { max-width: 460px; }
+      #theme-reading .subscribe-form label { display: block; margin: 0 0 10px; font-size: 16px; }
+      #theme-reading .subscribe-form div { display: flex; gap: 10px; }
+      #theme-reading .subscribe-form input { flex: 1; min-width: 0; font: inherit; font-size: 16px; color: var(--ink); background: transparent; border: 1px solid var(--line); border-radius: 4px; padding: 7px 12px; }
+      #theme-reading .subscribe-form input::placeholder { color: var(--muted); opacity: 1; }
+      #theme-reading .subscribe-form input:focus { outline: none; border-color: var(--accent); }
+      #theme-reading .subscribe-form button { font: inherit; font-size: 16px; color: var(--paper); background: var(--accent); border: 0; border-radius: 4px; padding: 7px 20px; cursor: pointer; white-space: nowrap; transition: opacity 160ms var(--ease); }
+      #theme-reading .subscribe-form button:hover { opacity: .88; }
+      #theme-reading .subscribe-form button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+      #theme-reading .subscribe-alt { margin: 10px 0 0; font-size: 14px; color: var(--muted); }
+      #theme-reading .subscribe-alt a, #theme-reading .subscribe-feed { color: var(--accent); }
+      #theme-reading .subscribe-page { display: grid; gap: 36px; max-width: 640px; padding: 24px 0 0; }
+      #theme-reading .subscribe-page section { border-top: 1px solid var(--ink); padding-top: 14px; }
+      #theme-reading .subscribe-page h2 { font-size: 15px; font-weight: 400; color: var(--muted); letter-spacing: .12em; margin: 0 0 10px; }
+      #theme-reading .subscribe-page p { margin: 0 0 8px; }
+      #theme-reading .subscribe-hint { margin-top: 12px !important; font-size: 14px; color: var(--muted); }
+      #theme-reading .subscribe-feed { overflow-wrap: anywhere; }
+
       @media (max-width: 1050px) {
         #theme-reading .reading-shell { grid-template-columns: 190px minmax(0, 680px); }
       }

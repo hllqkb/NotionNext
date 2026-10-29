@@ -10,6 +10,7 @@ import { CategoryChips, LockIcon, Masthead, PageLink, Seal, SiteFooter, WritingS
 import Gallery, { galleryImages } from './components/Gallery'
 import { LayoutAbout, LayoutBooks, LayoutGallery, LayoutLinks, LayoutProjects, pageLayoutFor } from './components/Pages'
 import { SkillsBoard } from './components/Skills'
+import { PostSubscribe, SubscribePage } from './components/Subscribe'
 import { RandomPost, ReadingPicks, RecentlyUpdated, wholeSentences } from './components/Home'
 
 const Comment = dynamic(() => import('@/components/Comment'), { ssr: false })
@@ -502,6 +503,7 @@ const LayoutSlug = props => {
           </aside>
         )}
         <RelatedPosts posts={related} />
+        {!lock && isArticle && <PostSubscribe />}
         {isArticle && (prev || next) && (
           <nav className='post-around reveal' aria-label='上一篇和下一篇'>
             {prev ? (
@@ -582,6 +584,9 @@ const LayoutTagIndex = props => {
 /** Skills：可安装的 Claude skills */
 const LayoutSkills = props => <SkillsBoard data={props.skillsData} />
 
+/** 订阅：RSS 和邮件 */
+const LayoutSubscribe = () => <SubscribePage />
+
 /** 404 */
 const Layout404 = props => (
   <header className='list-head'>
@@ -621,6 +626,7 @@ export {
   LayoutSearch,
   LayoutSkills,
   LayoutSlugOrPage as LayoutSlug,
+  LayoutSubscribe,
   LayoutTagIndex,
   CONFIG as THEME_CONFIG
 }

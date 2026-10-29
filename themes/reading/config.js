@@ -20,6 +20,8 @@ const CONFIG = {
   READING_STALE_CATEGORY: '技术分享', // 这个分类的文章发布满一年，标题下提示内容可能过时
   READING_LICENSE: 'CC BY-NC-SA 4.0', // 文末版权声明里的许可协议
   READING_LICENSE_URL: 'https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans',
+  // 邮件订阅（follow.it，feed 名 hllqkb-blog）的表单提交地址，公开的；留空就不显示邮件订阅表单
+  READING_FOLLOWIT_ACTION: 'https://api.follow.it/subscription-form/RUgxWldlVVdJQUNyUnRkVm8xSGpoRXR6bDZRUldYN04zYVI0QTc5VEd5NmZmNFZWeDVGSEQzM0txVGlYcVFWRkV4OGxEK1JrMEk2NVo3NG1YZ1Yxc3dad0FHbWMzRERkV2w3WVJWalM0ZkhpaHJDUVcvVVUzMlkveDJJTzk2YUR8eEkzaEppYnhNbzcxVitlTWdlTERqY0V5Y05uazhqYldGajdvUjBOYmhRYz0=/8',
   CUSTOM_RIGHT_CLICK_CONTEXT_MENU: false // 自定义右键菜单的图标依赖 Font Awesome，本主题不加载，改用浏览器原生菜单
 }
 export default CONFIG
