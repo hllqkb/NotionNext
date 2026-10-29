@@ -1,4 +1,5 @@
 import { siteConfig } from '@/lib/config'
+import { ownThumbnail } from '@/lib/db/notion/ownImages'
 import { useGlobal } from '@/lib/global'
 import { useRouter } from 'next/router'
 import { useEffect, useRef, useState } from 'react'
@@ -156,6 +157,24 @@ export const hasCover = post => {
   return !!src && !/bg_image|HOME_BANNER/.test(src) && src !== siteConfig('HOME_BANNER_IMAGE')
 }
 
+/** 列表小封面：本站图用 240 宽 WebP 并带宽高，其余图片照原地址 */
+export const CoverThumb = ({ post, className }) => {
+  const src = post.pageCoverThumbnail
+  const thumb = ownThumbnail(src)
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      className={className}
+      src={thumb?.src || src}
+      width={thumb?.width}
+      height={thumb?.height}
+      alt=''
+      loading='lazy'
+      decoding='async'
+    />
+  )
+}
+
 /** 印章：朱红方印。中文取前两个字竖排，英文（如 hllqk）横排 */
 export const Seal = ({ text }) => {
   const raw = String(text || '').trim()
@@ -228,10 +247,7 @@ export const EssayRow = ({ post, updated }) => (
         ) : (
           <time dateTime={postDay(post)}>{String(postDay(post)).slice(5).replace('-', '.')}</time>
         )}
-        {hasCover(post) && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img className='row-cover' src={post.pageCoverThumbnail} alt='' loading='lazy' />
-        )}
+        {hasCover(post) && <CoverThumb post={post} className='row-cover' />}
       </span>
     </PageLink>
   </li>

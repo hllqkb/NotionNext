@@ -1,6 +1,7 @@
 'use client'
 
 import NotionPage from '@/components/NotionPage'
+import { ownImageSources } from '@/lib/db/notion/ownImages'
 import dynamic from 'next/dynamic'
 import { siteConfig } from '@/lib/config'
 import { isBrowser } from '@/lib/utils'
@@ -82,6 +83,24 @@ const SearchBox = ({ keyword = '' }) => (
   </form>
 )
 
+// 最近一篇的大封面：本站图用多尺寸 WebP；首页内容区最宽 1080 - 2×56 = 968px，其余图片照原地址
+const LEAD_COVER_SIZES = '(max-width: 1080px) 100vw, 968px'
+const LeadCoverImage = ({ src }) => {
+  const own = ownImageSources(src)
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={own?.webp || own?.original || src}
+      srcSet={own?.srcSet || undefined}
+      sizes={own?.srcSet ? LEAD_COVER_SIZES : undefined}
+      width={own?.width}
+      height={own?.height}
+      alt=''
+      fetchPriority='high'
+    />
+  )
+}
+
 /** 最近一篇：先标题和摘要，封面放在后面 */
 const LeadStory = ({ post }) => (
   <article className={`lead-story reveal${hasCover(post) ? ' has-cover' : ''}`}>
@@ -104,8 +123,7 @@ const LeadStory = ({ post }) => (
     </div>
     {hasCover(post) && (
       <PageLink href={post.href} className='lead-cover' tabIndex={-1} aria-hidden='true'>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={post.pageCoverThumbnail} alt='' fetchPriority='high' />
+        <LeadCoverImage src={post.pageCoverThumbnail} />
       </PageLink>
     )}
   </article>

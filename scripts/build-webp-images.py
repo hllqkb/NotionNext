@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
-"""把本站托管的迁移配图（public/images/wechat、public/images/csdn）转成多尺寸 WebP。
+"""把本站托管的配图（public/images/wechat、csdn，以及外链图副本 mirror）转成多尺寸 WebP。
 
 每张位图 x.png 生成：
   x.webp        原尺寸
-  x-480.webp    宽 480（仅当原图更宽）
+  x-240.webp    宽 240（仅当原图更宽；列表缩略图用）
+  x-480.webp    宽 480（同上）
   x-960.webp    宽 960（同上）
   x-1440.webp   宽 1440（同上）
 原图保留作回退；SVG（公式图）和动图 GIF 不转。
 
 同时写出 lib/db/notion/ownImages.json：{"/images/wechat/x.png": [宽, 高]}，
-没有 WebP 的条目为 [宽, 高, 0]，渲染层据此补宽高、拼 srcset。
+没有 WebP 的条目为 [宽, 高, 0]（只留了 240 缩略图的为 [宽, 高, 0, 1]），渲染层据此补宽高、拼 srcset。
 
 可重复运行：WebP 比原图新时跳过。依赖 Pillow，建议在 venv 里跑：
   python3 -m venv .venv && .venv/bin/pip install Pillow
@@ -27,9 +28,12 @@ from PIL import Image
 
 ROOT = Path(__file__).resolve().parent.parent
 PUBLIC = ROOT / "public"
-DEFAULT_DIRS = ("images/wechat", "images/csdn")
+# mirror/<原域名>/<原路径>：外链封面下载到本站的副本，见 lib/db/notion/ownImages.js mirroredOwnUrl
+DEFAULT_DIRS = ("images/wechat", "images/csdn", "images/mirror")
 MANIFEST = ROOT / "lib" / "db" / "notion" / "ownImages.json"
-WIDTHS = (480, 960, 1440)
+WIDTHS = (240, 480, 960, 1440)
+# 列表缩略图尺寸：原尺寸 WebP 不划算的图也单独留这一档
+THUMB_WIDTH = 240
 RASTER_SUFFIXES = {".png", ".jpg", ".jpeg", ".gif"}
 QUALITY = 80
 
@@ -64,7 +68,7 @@ def save_webp(img: Image.Image, dest: Path, width: int | None) -> None:
 
 
 def convert(src: Path, stats: Stats) -> list[int]:
-    """转换一张图，返回清单条目 [宽, 高] 或 [宽, 高, 0]。"""
+    """转换一张图，返回清单条目 [宽, 高]、[宽, 高, 0]，或只留了缩略图的 [宽, 高, 0, 1]。"""
     with Image.open(src) as opened:
         width, height = opened.size
         animated = getattr(opened, "is_animated", False)
@@ -80,11 +84,16 @@ def convert(src: Path, stats: Stats) -> list[int]:
         img = opened.convert("RGBA" if opened.mode in ("RGBA", "LA", "P") else "RGB")
 
     save_webp(img, full, None)
-    # 极少数小图 WebP 反而更大：删掉，渲染层直接用原图
+    # 极少数小图 WebP 反而更大：删掉，渲染层直接用原图；原图比缩略图宽时仍留缩略图给列表用
     if full.stat().st_size >= src.stat().st_size:
-        for p in paths.values():
-            p.unlink(missing_ok=True)
+        for w, p in paths.items():
+            if w != THUMB_WIDTH:
+                p.unlink(missing_ok=True)
         stats.skipped += 1
+        if THUMB_WIDTH in paths:
+            save_webp(img, paths[THUMB_WIDTH], THUMB_WIDTH)
+            stats.variants += 1
+            return [width, height, 0, 1]
         return [width, height, 0]
     stats.webp_full += 1
     for w, dest in paths.items():
@@ -104,7 +113,7 @@ def main() -> None:
     before = 0
     after = 0
     for rel in args.dirs:
-        for src in sorted((PUBLIC / rel).iterdir()):
+        for src in sorted((PUBLIC / rel).rglob("*")):
             if src.suffix.lower() not in RASTER_SUFFIXES:
                 continue
             stats.originals += 1
