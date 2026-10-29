@@ -261,34 +261,53 @@ export const CategoryChips = ({ posts, value, onChange }) => {
 export const filterByCategory = (posts, cat) => (cat ? (posts || []).filter(p => p.category === cat) : posts || [])
 
 /** 滚动淡入：.reveal 进入视口时加 .in；新渲染出来的 .reveal（如切换分类）也会被接管。
- *  返回 true 后根节点才加 reveal-ready，没有 JS 时内容照常显示。 */
+ *  返回 true 后根节点才加 reveal-ready，没有 JS 时内容照常显示。
+ *  位置只从 IntersectionObserver 的回调里读（浏览器在正常渲染帧里算好），不调用 getBoundingClientRect，
+ *  所以 hydration 和 DOM 变动时不会强制同步重算样式。 */
 export const useReveal = () => {
   const [ready, setReady] = useState(false)
   useEffect(() => {
     const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
     if (reduce || !('IntersectionObserver' in window)) return
-    const show = el => el.classList.add('in')
+    let first = true
     const io = new IntersectionObserver(
-      entries =>
+      entries => {
+        // 每个元素被 observe 后都会先收到一次初始回调；顶边已进视口（或已滚过）的直接显示，
+        // 首批处理完才加 reveal-ready，首屏块在隐藏规则生效前就有 .in，不会先藏再淡入
         entries.forEach(e => {
-          if (e.isIntersecting) {
-            show(e.target)
+          if (e.isIntersecting || e.boundingClientRect.top < window.innerHeight) {
+            e.target.classList.add('in')
             io.unobserve(e.target)
           }
-        }),
+        })
+        if (first) {
+          first = false
+          setReady(true)
+        }
+      },
       { rootMargin: '0px 0px -8% 0px' }
     )
-    // 主题加载后 NotionNext 会替换根节点，所以每次都从 document 重新找。
-    // 顶边已进视口的直接显示：它们在 reveal-ready 加上之前就有 .in，首屏不会先藏再淡入
-    const watch = () =>
-      document.querySelectorAll('#theme-reading .reveal:not(.in)').forEach(el => {
-        if (el.getBoundingClientRect().top < window.innerHeight) show(el)
-        else io.observe(el)
-      })
-    watch()
-    const mo = new MutationObserver(watch)
+    const observe = el => {
+      if (!el.classList.contains('in') && el.closest('#theme-reading')) io.observe(el)
+    }
+    // 主题加载后 NotionNext 会替换根节点，所以从 document 找，并观察 body 上新增的节点
+    const initial = document.querySelectorAll('#theme-reading .reveal:not(.in)')
+    initial.forEach(observe)
+    if (initial.length === 0) {
+      first = false
+      setReady(true)
+    }
+    // 只看新增节点本身和它的子树，不重新扫描整页
+    const mo = new MutationObserver(records =>
+      records.forEach(r =>
+        r.addedNodes.forEach(n => {
+          if (n.nodeType !== 1) return
+          if (n.matches('.reveal')) observe(n)
+          n.querySelectorAll('.reveal').forEach(observe)
+        })
+      )
+    )
     mo.observe(document.body, { childList: true, subtree: true })
-    setReady(true)
     return () => {
       io.disconnect()
       mo.disconnect()
