@@ -62,8 +62,8 @@ const BookmarkCord = () => {
       </svg>
       <style jsx global>{`
         #theme-reading .bookmark-cord {
-          position: fixed; top: 0; right: 28px; z-index: 40;
-          display: flex; justify-content: center; width: 32px; padding: 0 0 6px;
+          position: fixed; top: 0; right: 8px; z-index: 40;
+          display: flex; justify-content: center; width: 28px; padding: 0 0 6px;
           background: none; border: 0; color: var(--accent); cursor: pointer;
           transform: translateY(-100%); visibility: hidden;
           transition: transform 520ms var(--ease), visibility 0s linear 520ms;
@@ -88,10 +88,16 @@ const BookmarkCord = () => {
           35% { transform: translateY(8px); }
           100% { transform: none; }
         }
-        @media (max-width: 520px) {
-          /* 手机上只占右侧 20px 页边，不压正文 */
-          #theme-reading .bookmark-cord { right: 0; width: 20px; }
+        /* 只占右侧页边，不压正文：文章页边宽 >1050px 40、≤1050px 30、≤800px 24、≤520px 20 */
+        @media (max-width: 1050px) {
+          #theme-reading .bookmark-cord { right: 2px; width: 24px; }
+        }
+        @media (max-width: 800px) {
+          #theme-reading .bookmark-cord { width: 20px; }
           #theme-reading .bookmark-cord svg { width: 20px; height: 97px; }
+        }
+        @media (max-width: 520px) {
+          #theme-reading .bookmark-cord { right: 0; }
         }
         @media (prefers-reduced-motion: reduce) {
           #theme-reading .bookmark-cord { transform: none; opacity: 0; transition: opacity 200ms, visibility 0s linear 200ms; }
