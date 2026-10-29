@@ -4,6 +4,7 @@ import { Fragment } from 'react'
 import CONFIG from '../config'
 import { PageLink, Seal, hasCover, postDay } from './Frame'
 import { LayoutNotes, LayoutWebsites } from './MorePages'
+import { PinnedRepos, pinnedRepos } from './Pinned'
 
 /**
  * 独立页面（Notion 里 type=Page 的 about / projects / links / books / gallery）。
@@ -194,6 +195,9 @@ export const LayoutProjects = ({ post }) => {
   return (
     <Wrap name='projects'>
       <PageHead eyebrow='Projects' title={post.title} lede={intro.blocks.length > 0 && <div className='intro-text page-lede'><Blocks blocks={intro.blocks} /></div>} />
+      {/* GitHub 置顶在前（构建时同步），Notion 里写的项目卡片在后；置顶拿不到时只剩 Notion 卡片 */}
+      <PinnedRepos />
+      {cards.length > 0 && pinnedRepos().length > 0 && <h2 className='section-label own-label'>自己做的<span>{cards.length}</span></h2>}
       <div className='card-grid'>
         {cards.map(toCard).map(c => (
           <article key={c.id} className='page-card project-card reveal'>
