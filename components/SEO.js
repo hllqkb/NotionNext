@@ -453,6 +453,14 @@ const getSEOMeta = (props, router, locale) => {
         slug: 'archive',
         type: 'website'
       }
+    case '/subscribe':
+      return {
+        title: `订阅 | ${siteInfo?.title}`,
+        description: '用 RSS 或邮件订阅新文章',
+        image: siteImage,
+        slug: 'subscribe',
+        type: 'website'
+      }
     case '/page/[page]':
       return {
         title: `${page} | Page | ${siteInfo?.title}`,
