@@ -7,7 +7,7 @@ import { useGlobal } from '@/lib/global'
 import useProtectedPost from '@/hooks/useProtectedPost'
 import ArticleLock from '@/components/ArticleLock'
 import { checkSlugHasNoSlash } from '@/lib/utils/post'
-import { DynamicLayout } from '@/themes/theme'
+import { DynamicLayout, getCurrentTheme } from '@/themes/theme'
 import { useRouter } from 'next/router'
 import PropTypes from 'prop-types'
 import { getStaticPathsBase } from '@/lib/build/staticPaths'
@@ -28,7 +28,7 @@ const Slug = props => {
   const { showNotification, Notification } = useNotification()
   const theme = siteConfig('THEME', BLOG.THEME, props.NOTION_CONFIG)
   // In the reading theme the article replacing the lock form is the feedback.
-  const unlockToast = theme !== 'reading'
+  const unlockToast = getCurrentTheme(router, theme) !== 'reading'
   const validPassword = async password => {
     const valid = await access.validPassword(password)
     if (valid && unlockToast) showNotification(locale.COMMON.ARTICLE_UNLOCK_TIPS)
