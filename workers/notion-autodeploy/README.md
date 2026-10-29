@@ -146,8 +146,10 @@ npx wrangler secret put DEPLOY_HOOK_URL
    - `confirmed`：RSS 显示新构建已上线，`builtAt` 是构建时间
    - `retried`：超过 `CONFIRM_MINUTES` 没等到，已经重新 POST
    - `build-timeout`：超时了，但今天已经发满，放弃这一次
+   - `config-error`：密钥形状不对，这一轮什么都不做。`DEPLOY_HOOK_URL` 必须以 `https://api.cloudflare.com/` 开头，`NOTION_TOKEN` 必须以 `ntn_` 或 `secret_` 开头。比如把 Notion token 误填进了 `DEPLOY_HOOK_URL`
+   - `error`：请求 Notion 或 Hook 出错。报错先清洗再打日志：两个密钥的原值、形如 `ntn_…` / `secret_…` 的字符串、`deploy_hooks/<id>` 都换成 `[redacted]`，URL 解析失败只记 `invalid DEPLOY_HOOK_URL (not an https URL)`，日志里不会出现密钥原文
 
-2. 查当前状态（只有时间、计数和线上页面数，没有密钥和页面 id）：`https://notion-autodeploy.<你的子域>.workers.dev/status`
+2. 查当前状态（只有时间、计数和线上页面数，没有密钥和页面 id；`configError` 不是 `null` 就说明密钥填错了，内容是哪一项不对，不含原值）：`https://notion-autodeploy.<你的子域>.workers.dev/status`
 
 3. 验收：在 Notion 里改一篇已发布文章的一个字，放下手机。约 10–15 分钟后日志出现 `deployed`，Cloudflare Pages 的 Deployments 列表多一条 Source 为 Deploy Hook 的构建。构建 Success 后打开那篇文章，看到改动就算通过。从改完到上线应该在 30 分钟内。
 
