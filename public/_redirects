@@ -3,3 +3,66 @@
 /search/:kw/page/:n /search?s=:kw 301
 /search/:kw/ /search?s=:kw 301
 /search/:kw /search?s=:kw 301
+
+# 2026-10-29 分类和标签重整（taxonomy-plan.md）：旧分类页、被删标签页 301 到新分类
+# 中文路径编码和不编码各写一份；/* 接分页 /page/N 和尾斜杠
+# 旧「技术分享」拆成 7 个新分类，没有单一对应，去分类索引
+/category/技术分享 /category 301
+/category/技术分享/* /category 301
+/category/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB /category 301
+/category/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/* /category 301
+/category/心情随笔 /category/%E9%9A%8F%E7%AC%94 301
+/category/心情随笔/* /category/%E9%9A%8F%E7%AC%94 301
+/category/%E5%BF%83%E6%83%85%E9%9A%8F%E7%AC%94 /category/%E9%9A%8F%E7%AC%94 301
+/category/%E5%BF%83%E6%83%85%E9%9A%8F%E7%AC%94/* /category/%E9%9A%8F%E7%AC%94 301
+# 只有 NotionNext 示例文章用过
+/category/知行合一 /category 301
+/category/知行合一/* /category 301
+/category/%E7%9F%A5%E8%A1%8C%E5%90%88%E4%B8%80 /category 301
+/category/%E7%9F%A5%E8%A1%8C%E5%90%88%E4%B8%80/* /category 301
+# 和分类重名的标签 → 同名新分类
+/tag/环境配置 /category/%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE 301
+/tag/环境配置/* /category/%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE 301
+/tag/%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE /category/%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE 301
+/tag/%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/* /category/%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE 301
+/tag/建站 /category/%E5%BB%BA%E7%AB%99%E4%B8%8E%E5%8D%9A%E5%AE%A2 301
+/tag/建站/* /category/%E5%BB%BA%E7%AB%99%E4%B8%8E%E5%8D%9A%E5%AE%A2 301
+/tag/%E5%BB%BA%E7%AB%99 /category/%E5%BB%BA%E7%AB%99%E4%B8%8E%E5%8D%9A%E5%AE%A2 301
+/tag/%E5%BB%BA%E7%AB%99/* /category/%E5%BB%BA%E7%AB%99%E4%B8%8E%E5%8D%9A%E5%AE%A2 301
+/tag/开发 /category/%E5%BC%80%E5%8F%91%E7%AC%94%E8%AE%B0 301
+/tag/开发/* /category/%E5%BC%80%E5%8F%91%E7%AC%94%E8%AE%B0 301
+/tag/%E5%BC%80%E5%8F%91 /category/%E5%BC%80%E5%8F%91%E7%AC%94%E8%AE%B0 301
+/tag/%E5%BC%80%E5%8F%91/* /category/%E5%BC%80%E5%8F%91%E7%AC%94%E8%AE%B0 301
+# 原来打「工具」的已发布文章多数归到开发笔记
+/tag/工具 /category/%E5%BC%80%E5%8F%91%E7%AC%94%E8%AE%B0 301
+/tag/工具/* /category/%E5%BC%80%E5%8F%91%E7%AC%94%E8%AE%B0 301
+/tag/%E5%B7%A5%E5%85%B7 /category/%E5%BC%80%E5%8F%91%E7%AC%94%E8%AE%B0 301
+/tag/%E5%B7%A5%E5%85%B7/* /category/%E5%BC%80%E5%8F%91%E7%AC%94%E8%AE%B0 301
+/tag/AI /category/AI%20%E4%B8%8E%E5%B7%A5%E5%85%B7 301
+/tag/AI/* /category/AI%20%E4%B8%8E%E5%B7%A5%E5%85%B7 301
+/tag/AI /category/AI%20%E4%B8%8E%E5%B7%A5%E5%85%B7 301
+/tag/AI/* /category/AI%20%E4%B8%8E%E5%B7%A5%E5%85%B7 301
+# LLM 改名为大模型
+/tag/LLM /tag/%E5%A4%A7%E6%A8%A1%E5%9E%8B 301
+/tag/LLM/* /tag/%E5%A4%A7%E6%A8%A1%E5%9E%8B 301
+/tag/LLM /tag/%E5%A4%A7%E6%A8%A1%E5%9E%8B 301
+/tag/LLM/* /tag/%E5%A4%A7%E6%A8%A1%E5%9E%8B 301
+# 来源标签，两篇分属不同分类
+/tag/公众号 /category 301
+/tag/公众号/* /category 301
+/tag/%E5%85%AC%E4%BC%97%E5%8F%B7 /category 301
+/tag/%E5%85%AC%E4%BC%97%E5%8F%B7/* /category 301
+/tag/番剧 /category/%E9%9A%8F%E7%AC%94 301
+/tag/番剧/* /category/%E9%9A%8F%E7%AC%94 301
+/tag/%E7%95%AA%E5%89%A7 /category/%E9%9A%8F%E7%AC%94 301
+/tag/%E7%95%AA%E5%89%A7/* /category/%E9%9A%8F%E7%AC%94 301
+# 来源标签
+/tag/旧博客 /category/%E9%9A%8F%E7%AC%94 301
+/tag/旧博客/* /category/%E9%9A%8F%E7%AC%94 301
+/tag/%E6%97%A7%E5%8D%9A%E5%AE%A2 /category/%E9%9A%8F%E7%AC%94 301
+/tag/%E6%97%A7%E5%8D%9A%E5%AE%A2/* /category/%E9%9A%8F%E7%AC%94 301
+# 来源标签
+/tag/博客园 /category/%E9%9A%8F%E7%AC%94 301
+/tag/博客园/* /category/%E9%9A%8F%E7%AC%94 301
+/tag/%E5%8D%9A%E5%AE%A2%E5%9B%AD /category/%E9%9A%8F%E7%AC%94 301
+/tag/%E5%8D%9A%E5%AE%A2%E5%9B%AD/* /category/%E9%9A%8F%E7%AC%94 301
