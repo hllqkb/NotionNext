@@ -276,3 +276,113 @@ export const useFootnotes = key => {
     }
   }, [key])
 }
+
+/** 首发出处：Notion 的 source_url（网址属性）。按域名认出平台，认不出就显示域名 */
+const SOURCE_SITES = [
+  [/(^|\.)csdn\.net$/, 'CSDN'],
+  [/(^|\.)cnblogs\.com$/, '博客园'],
+  [/^mp\.weixin\.qq\.com$/, '公众号'],
+  [/(^|\.)hllqk\.cn$|^hllqkb\.github\.io$/, '旧博客']
+]
+export const sourceOf = post => {
+  const raw = Array.isArray(post?.source_url) ? post.source_url[0] : post?.source_url
+  if (!raw || !/^https?:\/\//.test(raw)) return null
+  let host = ''
+  try {
+    host = new URL(raw).hostname
+  } catch {
+    return null
+  }
+  const label = SOURCE_SITES.find(([re]) => re.test(host))?.[1] || host.replace(/^www\./, '')
+  return { label, url: raw }
+}
+
+export const SourceNote = ({ source }) =>
+  source ? (
+    <p className='source-note'>
+      首发于 {source.label}
+      <span aria-hidden='true'>·</span>
+      <a href={source.url} target='_blank' rel='noopener noreferrer'>
+        原文链接<span aria-hidden='true'> ↗</span>
+      </a>
+    </p>
+  ) : null
+
+/**
+ * 正文图片：加载完之前垫纸色底，加载失败换成「图片加载失败」占位（不再能点开放大）。
+ * error 事件不冒泡，用捕获阶段在 #article-wrapper 上统一接；挂载前已经失败的图在挂载时补查一遍
+ */
+export const useImageFallback = key => {
+  useEffect(() => {
+    const root = document.getElementById('article-wrapper')
+    if (!key || !root) return
+    const isTarget = img => img?.tagName === 'IMG' && img.closest('.notion-asset-wrapper-image, .photo-frame') && !img.closest('.medium-zoom-overlay')
+    const ready = img => img.classList.add('img-ready')
+    const broken = img => {
+      img.classList.add('img-broken')
+      img.removeAttribute('tabindex')
+      img.closest('.notion-asset-wrapper-image, .photo-frame')?.classList.add('has-broken-img')
+    }
+    const onLoad = e => isTarget(e.target) && ready(e.target)
+    const onError = e => isTarget(e.target) && broken(e.target)
+    root.querySelectorAll('.notion-asset-wrapper-image img, .photo-frame img').forEach(img => {
+      if (!img.complete) return
+      if (img.naturalWidth > 0) ready(img)
+      else broken(img)
+    })
+    root.addEventListener('load', onLoad, true)
+    root.addEventListener('error', onError, true)
+    return () => {
+      root.removeEventListener('load', onLoad, true)
+      root.removeEventListener('error', onError, true)
+    }
+  }, [key])
+}
+
+/**
+ * 正文图片放大（medium-zoom）的键盘支持：图片能 Tab 到，回车 / 空格打开；
+ * 打开期间 Tab 不会跑到被遮住的页面上；关闭后焦点回到打开前的位置
+ */
+export const useZoomKeyboard = key => {
+  useEffect(() => {
+    const root = document.getElementById('article-wrapper')
+    if (!key || !root) return
+    // react-notion-x 在图片挂载时才接上 medium-zoom，这里先全部设成可聚焦，按键时再看有没有接上
+    root.querySelectorAll('.notion-asset-wrapper-image img:not(.img-broken)').forEach(img => {
+      img.tabIndex = 0
+      img.setAttribute('role', 'button')
+      img.setAttribute('aria-label', img.alt && img.alt !== 'notion image' ? `放大图片：${img.alt}` : '放大图片')
+    })
+    let returnTo = null
+    const isOpen = () => document.body.classList.contains('medium-zoom--opened')
+    const onKey = e => {
+      if (isOpen()) {
+        if (e.key === 'Tab') e.preventDefault()
+        return
+      }
+      const img = e.target
+      if ((e.key === 'Enter' || e.key === ' ') && img?.classList?.contains('medium-zoom-image') && root.contains(img)) {
+        e.preventDefault()
+        img.click()
+      }
+    }
+    const onOpen = e => {
+      if (!root.contains(e.target)) return
+      const active = document.activeElement
+      returnTo = active && active !== document.body ? active : e.target
+    }
+    const onClosed = () => {
+      const el = returnTo
+      returnTo = null
+      if (el?.isConnected) el.focus({ preventScroll: true })
+    }
+    document.addEventListener('keydown', onKey, true)
+    document.addEventListener('medium-zoom:open', onOpen, true)
+    document.addEventListener('medium-zoom:closed', onClosed, true)
+    return () => {
+      document.removeEventListener('keydown', onKey, true)
+      document.removeEventListener('medium-zoom:open', onOpen, true)
+      document.removeEventListener('medium-zoom:closed', onClosed, true)
+    }
+  }, [key])
+}

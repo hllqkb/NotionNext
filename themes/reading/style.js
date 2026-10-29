@@ -736,6 +736,27 @@ const Style = () => {
       #theme-reading .repo-meta span { display: inline-flex; align-items: center; gap: 6px; }
       #theme-reading .lang-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
       #theme-reading .pinned-grid { list-style: none; }
+
+      /* article-page：第三批（首发出处、宽表格和公式、图片占位） */
+      #theme-reading .source-note { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; margin: 14px 0 0; font-size: 14px; color: var(--muted); }
+      #theme-reading .source-note a { color: var(--accent); border-bottom: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); }
+
+      /* 宽表格、长公式只在自己的框里横向滚动，不撑宽正文 */
+      #theme-reading .prose .notion-simple-table { display: block; width: max-content; max-width: 100%; overflow-x: auto; scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+      #theme-reading .prose .notion-simple-table td { min-width: 6em; }
+      #theme-reading .prose :is(.notion-equation-block, .katex-display) { display: block; max-width: 100%; overflow-x: auto; overflow-y: hidden; scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+      #theme-reading .prose :is(.notion-collection, .notion-table) { max-width: 100%; overflow-x: auto; }
+
+      /* 图片：加载完之前垫纸色底；加载失败换成占位，不再能点开放大 */
+      #theme-reading .prose .notion-asset-wrapper-image img:not(.img-ready),
+      #theme-reading .photo-frame img:not(.img-ready) { background: var(--sidebar); }
+      #theme-reading .prose .notion-asset-wrapper-image img.img-broken,
+      #theme-reading .photo-frame img.img-broken { visibility: hidden; pointer-events: none; }
+      #theme-reading .prose .has-broken-img > div,
+      #theme-reading .photo-frame.has-broken-img { position: relative; min-height: 120px; background: var(--sidebar); border-radius: 8px; }
+      #theme-reading .prose .has-broken-img > div::after,
+      #theme-reading .photo-frame.has-broken-img::after { content: '图片加载失败'; position: absolute; inset: 0; display: grid; place-items: center; font-size: 14px; color: var(--muted); }
+      #theme-reading .photo-frame.has-broken-img { cursor: default; }
     `}</style>
   )
 }
