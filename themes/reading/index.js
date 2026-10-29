@@ -73,7 +73,7 @@ const SearchBox = ({ keyword = '' }) => (
       id='reading-search'
       name='s'
       type='search'
-      placeholder='搜索标题、摘要或标签'
+      placeholder='搜索标题、标签或正文'
       defaultValue={keyword}
     />
   </form>
@@ -185,9 +185,62 @@ const LayoutPostList = props => {
   )
 }
 
-/** 搜索结果：关键词来自 ?s=，在 pages/search 里过滤好 */
+/**
+ * 正文命中：只在搜索页、有关键词时才加载 /pagefind/pagefind.js 和分片索引（构建时 pagefind 生成）
+ * 本地 dev 没有索引，加载失败就只显示标题匹配
+ */
+const usePagefind = keyword => {
+  const [state, setState] = useState({ status: 'idle', hits: [] })
+  useEffect(() => {
+    if (!keyword) {
+      setState({ status: 'idle', hits: [] })
+      return
+    }
+    let cancelled = false
+    setState({ status: 'loading', hits: [] })
+    ;(async () => {
+      try {
+        const pagefind = await import(/* webpackIgnore: true */ '/pagefind/pagefind.js')
+        await pagefind.options({ excerptLength: 36 })
+        // 中文会被切成词再「任一命中」，「佛顶塔」会搜出只含「塔」的文章：
+        // 单个词用引号走短语匹配；多个词（多个引号短语不支持）宽搜后只留正文里每个词都原样出现的
+        const terms = keyword.toLowerCase().split(/\s+/).filter(Boolean)
+        const query = terms.length === 1 ? `"${keyword.replace(/"/g, '')}"` : keyword
+        const search = await pagefind.search(query)
+        const data = await Promise.all((search?.results || []).slice(0, 30).map(r => r.data()))
+        const hits = data.filter(d => terms.every(t => String(d.content || '').toLowerCase().includes(t)))
+        if (!cancelled) setState({ status: 'done', hits })
+      } catch {
+        if (!cancelled) setState({ status: 'unavailable', hits: [] })
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [keyword])
+  return state
+}
+
+/** /foo.html、/foo/ 和 /foo 视为同一篇 */
+const normalizePath = url => {
+  let path = String(url || '').split(/[?#]/)[0]
+  try {
+    path = decodeURIComponent(path)
+  } catch {}
+  return path.replace(/\.html$/, '').replace(/\/$/, '') || '/'
+}
+
+/** 搜索结果：关键词来自 ?s=，标题匹配在 pages/search 里过滤好，正文命中由 Pagefind 补在后面 */
 const LayoutSearch = props => {
-  const { keyword, posts = [] } = props
+  const { keyword, posts = [], allPosts = [] } = props
+  const { status, hits } = usePagefind(keyword)
+  // 只保留已发布文章的命中，标题已经匹配到的不重复列
+  const byPath = new Map(allPosts.map(p => [normalizePath(p.href), p]))
+  const titled = new Set(posts.map(p => normalizePath(p.href)))
+  const bodyHits = hits
+    .map(h => ({ hit: h, post: byPath.get(normalizePath(h.url)) }))
+    .filter(x => x.post && !titled.has(normalizePath(x.post.href)))
+  const total = posts.length + bodyHits.length
   return (
     <>
       <header className='list-head'>
@@ -197,7 +250,7 @@ const LayoutSearch = props => {
       </header>
       <div className='collection-bar'>
         <p>
-          {keyword ? `「${keyword}」共 ${posts.length} 篇` : '输入关键词，回车搜索'}
+          {keyword ? `「${keyword}」共 ${total} 篇${status === 'loading' ? '，正文检索中…' : ''}` : '输入关键词，回车搜索'}
           {keyword && (
             <PageLink className='search-clear' href='/search'>
               清空
@@ -206,13 +259,34 @@ const LayoutSearch = props => {
         </p>
         <SearchBox keyword={keyword} />
       </div>
-      {keyword && posts.length === 0 ? (
+      {keyword && total === 0 && status !== 'loading' && (
         <p className='empty search-empty'>
-          没有找到和「{keyword}」相关的文章。搜索只看标题、摘要、分类和标签，可以换个词，或者去
+          没有找到和「{keyword}」相关的文章。{status === 'unavailable' && '正文索引暂时不可用，这次只搜了标题、摘要、分类和标签。'}可以换个词，或者去
           <PageLink href='/archive'>归档</PageLink>、<PageLink href='/tag'>标签</PageLink>里翻翻。
         </p>
-      ) : (
-        keyword && <YearGroups posts={posts} />
+      )}
+      {keyword && posts.length > 0 && <YearGroups posts={posts} />}
+      {keyword && bodyHits.length > 0 && (
+        <section className='year-group body-hits' aria-label='正文命中'>
+          <h2 className='year-label'>正文</h2>
+          <ul>
+            {bodyHits.map(({ hit, post }) => (
+              <li key={post.id} className='essay-row body-hit'>
+                <PageLink href={post.href}>
+                  <span className='body-hit-head'>
+                    <h3>{post.title}</h3>
+                    <span className='row-meta'>
+                      {post.category && <span className='row-cat'>{post.category}</span>}
+                      <time dateTime={postDay(post)}>{String(postDay(post)).replaceAll('-', '.')}</time>
+                    </span>
+                  </span>
+                  {/* excerpt 是 Pagefind 从本站静态 HTML 里截的纯文本，只带 <mark> 高亮 */}
+                  <p className='body-hit-excerpt' dangerouslySetInnerHTML={{ __html: hit.excerpt }} />
+                </PageLink>
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
     </>
   )
@@ -298,7 +372,7 @@ const LayoutSlug = props => {
             {post.category && day && <span>·</span>}
             {day && <time dateTime={day}>{String(day).replaceAll('-', ' / ')}</time>}
           </p>
-          <h1>{post.title}</h1>
+          <h1 data-pagefind-meta='title'>{post.title}</h1>
           {dek && <p className='dek'>{dek}</p>}
           <div className='byline'>
             {stats.chars > 0 && !lock && (
@@ -348,7 +422,8 @@ const LayoutSlug = props => {
             <Gallery images={galleryImages(post)} />
           </article>
         ) : (
-          <article id='article-wrapper' className='prose'>
+          // 全文索引只收已发布文章的正文：隐藏（Invisible）不收；加密文章静态 HTML 里本来没有正文，这里再兜一层
+          <article id='article-wrapper' className='prose' {...(isArticle && post.status === 'Published' && !post.password ? { 'data-pagefind-body': '' } : {})}>
             <NotionPage post={post} />
           </article>
         )}
