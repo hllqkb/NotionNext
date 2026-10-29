@@ -22,7 +22,10 @@ import { getPageCanCopy } from '@/lib/utils/copyPermission'
 const ExternalPlugin = props => {
   // 读取自Notion的配置
   const { NOTION_CONFIG } = props
-  const { lang } = useGlobal()
+  const { lang, theme } = useGlobal()
+  const router = useRouter()
+  // reading 主题有自己的 reveal 淡入，AOS / animate.css / custom.css|js 对它没用，晚到生效还会触发整页样式重算
+  const isReading = (router?.query?.theme || theme) === 'reading'
   const [pluginsIdle, setPluginsIdle] = useState(false)
   const innerLinkPages = props?.allLinkPages || props?.allNavPages
   const DISABLE_PLUGIN = siteConfig('DISABLE_PLUGIN', null, NOTION_CONFIG)
@@ -175,14 +178,16 @@ const ExternalPlugin = props => {
     const cancelTasks = []
     cancelTasks.push(
       scheduleTask(() => {
-        loadExternalResource('/css/custom.css', 'css')
-        loadExternalResource('/js/custom.js', 'js')
+        if (!isReading) {
+          loadExternalResource('/css/custom.css', 'css')
+          loadExternalResource('/js/custom.js', 'js')
+        }
 
         if (IMG_SHADOW) {
           loadExternalResource('/css/img-shadow.css', 'css')
         }
 
-        if (ANIMATE_CSS_URL) {
+        if (ANIMATE_CSS_URL && !isReading) {
           loadExternalResource(ANIMATE_CSS_URL, 'css')
         }
 
@@ -199,9 +204,8 @@ const ExternalPlugin = props => {
     return () => {
       cancelTasks.forEach(cancel => cancel?.())
     }
-  }, [ANIMATE_CSS_URL, IMG_SHADOW, externalCssList, externalJsList])
+  }, [ANIMATE_CSS_URL, IMG_SHADOW, externalCssList, externalJsList, isReading])
 
-  const router = useRouter()
   useEffect(() => {
     // 异步渲染谷歌广告
     if (ADSENSE_GOOGLE_ID) {
@@ -286,7 +290,7 @@ const ExternalPlugin = props => {
       {TIANLI_KEY && <TianliGPT />}
       <VConsole />
       {ENABLE_NPROGRSS && <LoadingProgress />}
-      {pluginsIdle && <AosAnimation />}
+      {pluginsIdle && !isReading && <AosAnimation />}
       {ANALYTICS_51LA_ID && ANALYTICS_51LA_CK && <LA51 />}
       {AI_CHAT_API || DOCS_CHAT_API ? <DocsChat /> : COZE_BOT_ID && <Coze />}
 
