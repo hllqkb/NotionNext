@@ -16,11 +16,17 @@ id = "b1a2b1d996754bbab4ee950ed7a7b35f"
 NOTION_DATABASE_ID = "aa8cdaa272b682a4904e81214563f827"
 # Rebuild only after this many minutes without new edits.
 QUIET_MINUTES = "10"
-# Hard cap on hook-triggered builds per day (UTC+8). 6 x 31 = 186 builds/month max.
+# Hard cap on hook-triggered builds per day (UTC+8), retries included.
+# 6 x 31 = 186 builds/month max.
 MAX_BUILDS_PER_DAY = "6"
-# Edits to pages with these status values are ignored (comma separated).
-IGNORE_STATUSES = "Draft"
+# Status values that put a page on the site (comma separated), same as the build.
+LIVE_STATUSES = "Published,Invisible"
 STATUS_PROPERTY = "status"
+DATE_PROPERTY = "date"
+# A build counts once this site's /rss/feed.xml lastBuildDate is after the hook.
+SITE_URL = "https://hllqkb-blog.pages.dev"
+# Give up on a build that has not shown up after this long and retry.
+CONFIRM_MINUTES = "60"
 
 # Secrets (never put them in this file):
 #   npx wrangler secret put NOTION_TOKEN
