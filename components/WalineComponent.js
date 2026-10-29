@@ -26,8 +26,10 @@ const WalineComponent = (props) => {
     fetch(`${server}/api/comment?type=count&url=${encodeURIComponent(window.location.pathname)}`, {
       signal: controller.signal
     })
-      .then(res => {
-        if (!res.ok) throw new Error(String(res.status))
+      .then(res => (res.ok ? res.json() : Promise.reject(new Error(String(res.status)))))
+      .then(json => {
+        // Waline 出错时也可能是 HTTP 200，错误码在 errno
+        if (json?.errno !== 0) throw new Error(String(json?.errno))
       })
       .catch(() => {
         // 组件卸载时的 abort 不算连不上

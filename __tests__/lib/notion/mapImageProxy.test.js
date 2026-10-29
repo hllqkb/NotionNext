@@ -117,6 +117,7 @@ describe('imgProxy 地址校验', () => {
     'https://example.com:8443/a.png',
     'https://www.notion.so/image/x',
     'https://foo.notion.site/a.png',
+    'https://images.unsplash.com/photo-1?w=400',
     'not a url'
   ])('外链键拒绝 %s', src => {
     expect(externalSourceKey(src)).toBeNull()
