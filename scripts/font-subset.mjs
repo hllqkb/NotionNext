@@ -58,7 +58,10 @@ const decode = text =>
   })
 
 const SKIP_TAGS = new Set(['script', 'style', 'noscript', 'template', 'svg', 'textarea'])
-const BOLD_TAGS = new Set(['b', 'strong'])
+const VOID_TAGS = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'source', 'track', 'wbr'])
+// 渲染成 600 以上字重的元素：加粗标签、表头、Tailwind 加粗类、notion.css 里加粗的几个标题类
+const BOLD_TAGS = new Set(['b', 'strong', 'th'])
+const BOLD_CLASS = /(?:^|\s)(?:font-(?:semibold|bold|extrabold|black)|notion-title|notion-collection-header-title|notion-tabs-tab)(?:\s|$)/
 
 /** 取 <body> 里渲染出来的文字，返回全部码位和加粗文字码位 */
 const collectText = html => {
@@ -66,17 +69,19 @@ const collectText = html => {
   const bold = new Set()
   const start = html.search(/<body[\s>]/i)
   const body = start >= 0 ? html.slice(start) : html
-  const tag = /<(\/?)([a-zA-Z][a-zA-Z0-9-]*)[^>]*?(\/?)>|<!--[\s\S]*?-->/g
+  const tag = /<(\/?)([a-zA-Z][a-zA-Z0-9-]*)((?:[^>"']|"[^"]*"|'[^']*')*)>|<!--[\s\S]*?-->/g
+  // 打开中的元素：{ name, bold }；skip 记录正在跳过的 script/style 等
+  const stack = []
   let skip = null
-  let boldDepth = 0
   let last = 0
   const addText = text => {
     if (skip || !text) return
+    const isBold = stack.some(e => e.bold)
     for (const ch of decode(text)) {
       const cp = ch.codePointAt(0)
       if (cp < 0x20 || /\s/.test(ch)) continue
       all.add(cp)
-      if (boldDepth > 0) bold.add(cp)
+      if (isBold) bold.add(cp)
     }
   }
   for (const m of body.matchAll(tag)) {
@@ -84,17 +89,19 @@ const collectText = html => {
     last = m.index + m[0].length
     if (!m[2]) continue
     const name = m[2].toLowerCase()
-    const closing = m[1] === '/'
+    const selfClosing = /\/\s*$/.test(m[3])
     if (skip) {
-      if (closing && name === skip) skip = null
+      if (m[1] && name === skip) skip = null
       continue
     }
-    if (closing) {
-      if (BOLD_TAGS.has(name)) boldDepth = Math.max(0, boldDepth - 1)
-    } else if (SKIP_TAGS.has(name) && !m[3]) {
-      skip = name
-    } else if (BOLD_TAGS.has(name) && !m[3]) {
-      boldDepth++
+    if (m[1]) {
+      const i = stack.map(e => e.name).lastIndexOf(name)
+      if (i >= 0) stack.length = i
+    } else if (SKIP_TAGS.has(name)) {
+      if (!selfClosing) skip = name
+    } else if (!VOID_TAGS.has(name) && !selfClosing) {
+      const cls = m[3].match(/\sclass\s*=\s*(?:"([^"]*)"|'([^']*)')/)
+      stack.push({ name, bold: BOLD_TAGS.has(name) || BOLD_CLASS.test(cls ? cls[1] ?? cls[2] : '') })
     }
   }
   addText(body.slice(last))
