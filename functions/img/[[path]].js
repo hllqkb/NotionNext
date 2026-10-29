@@ -5,8 +5,8 @@
  * - Notion 上传文件：src 是 attachment:<uuid>:<文件名>，或 Notion 的 S3 / 文件 CDN 地址；blockId 在白名单里即可
  * - 正文外链图：src 是 http(s) 地址，(blockId, 地址) 必须成对出现在白名单里；仍经 Notion /image/ 取图，
  *   沿用它绕 Referer 防盗链的效果，Function 自己不直连外站
- * - 白名单 /img-allowlist.json 由 scripts/img-allowlist.mjs 构建时扫 out/ 得到，
- *   别人的 Notion 公开页面或任意外链即便拼出合法地址也拿不到
+ * - 白名单 /img-allowlist.json 由 scripts/img-allowlist.mjs 构建时扫 out/ 得到；名单外的组合只 302 到
+ *   Notion 原中转地址，本站不取图、不缓存，别人没法借本站流量转发任意 Notion 公开页面或外链
  * - 缓存键只用 table + blockId + 原图键（Notion 文件去掉签名参数，外链用完整地址），签名过期换新不影响命中
  * - 上游失败返回 502，不缓存
  */
@@ -73,7 +73,12 @@ export async function onRequest(context) {
   } catch {
     return plain(502, 'Allowlist unavailable')
   }
-  if (!allowlist.has(allowlistKey(blockId, src))) return plain(403, 'Forbidden')
+  const upstream = `${NOTION_IMAGE_ORIGIN}${encodeURIComponent(src)}?table=${table}&id=${blockId}&cache=v2`
+  // 名单外的组合（加密文章解锁后才渲染的图、Notion 标签页里后渲染的图等构建时扫不到）
+  // 不由本站取图，跳回 Notion 原中转地址，等于改代理之前的行为
+  if (!allowlist.has(allowlistKey(blockId, src))) {
+    return plain(302, null, { Location: upstream })
+  }
 
   const cache = caches.default
   const cacheKey = new Request(
@@ -90,7 +95,6 @@ export async function onRequest(context) {
     })
   }
 
-  const upstream = `${NOTION_IMAGE_ORIGIN}${encodeURIComponent(src)}?table=${table}&id=${blockId}&cache=v2`
   let response = null
   try {
     response = await fetch(upstream, {
