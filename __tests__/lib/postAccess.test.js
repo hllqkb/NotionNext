@@ -154,20 +154,41 @@ it('propagates an upstream failure so ISR can keep its successful version', asyn
   ).rejects.toThrow('Unable to load article body')
 })
 
-it.each([undefined, secret])('exports only a safe lock page even with a valid password (%s)', async password => {
-  process.env.EXPORT = 'true'
-  try {
-    const props = await resolvePostProps({ ...options, password })
-    expect(props.postUnlockUnavailable).toBe(true)
-    expect(props.post.password).toBe('protected')
-    expect(props.post.blockMap).toBeUndefined()
-    expect(JSON.stringify(props)).not.toContain(marker)
-    expect(JSON.stringify(props)).not.toContain(digest)
-    expect(fetchNotionPageBlocks).not.toHaveBeenCalled()
-  } finally {
-    delete process.env.EXPORT
-  }
-})
+// Static exports have no unlock API: protected articles ship as ciphertext
+// that only the right password opens in the browser (lib/utils/postDecryption.js).
+it.each([undefined, secret])(
+  'exports a protected article only as ciphertext the password can unlock (%s)',
+  async password => {
+    process.env.EXPORT = 'true'
+    // decryptPost is browser code; node provides the same WebCrypto/atob globals
+    global.window = { crypto: globalThis.crypto }
+    try {
+      const props = await resolvePostProps({ ...options, password })
+      const { encryptedPost, ...plain } = props
+
+      // No plaintext body or password material anywhere outside the ciphertext
+      expect(plain.post.password).toBe('protected')
+      expect(plain.post.blockMap).toBeUndefined()
+      expect(JSON.stringify(props)).not.toContain(marker)
+      expect(JSON.stringify(props)).not.toContain(digest)
+      expect(JSON.stringify(props)).not.toContain(secret)
+
+      // The article is unlockable, not marked as unavailable
+      expect(props.postUnlockUnavailable).not.toBe(true)
+      expect(encryptedPost).toBeTruthy()
+
+      const { decryptPost } = require('@/lib/utils/postDecryption')
+      const unlocked = await decryptPost(secret, encryptedPost, id)
+      expect(JSON.stringify(unlocked.post)).toContain(marker)
+      expect(JSON.stringify(unlocked)).not.toContain(digest)
+      expect(await decryptPost('wrong password', encryptedPost, id)).toBeNull()
+    } finally {
+      delete process.env.EXPORT
+      delete global.window
+    }
+  },
+  30000
+)
 
 it('exports public content while removing a nested protected article', async () => {
   process.env.EXPORT = 'true'
