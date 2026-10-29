@@ -113,6 +113,22 @@ describe('createFeed', () => {
     })
   })
 
+  it('turns same-site image proxy paths into absolute URLs', async () => {
+    await createFeed({
+      siteInfo,
+      NOTION_CONFIG,
+      posts: [{ id: 'post-1', title: 'Hello', slug: 'hello', summary: 's' }],
+      allPages: [],
+      subPath: '',
+      renderContent: () =>
+        Promise.resolve('<img src="/img/block/x?src=a"/><img src="/images/a.webp"/>')
+    })
+
+    expect(addItemMock.mock.calls[0][0].content).toBe(
+      '<img src="https://example.com/img/block/x?src=a"/><img src="/images/a.webp"/>'
+    )
+  })
+
   it('falls back to publishDate when publishDay is missing', async () => {
     await createFeed({
       siteInfo,
