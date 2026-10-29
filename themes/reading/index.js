@@ -1,6 +1,5 @@
 'use client'
 
-import NotionPage from '@/components/NotionPage'
 import { ownImageSources } from '@/lib/db/notion/ownImages'
 import dynamic from 'next/dynamic'
 import { siteConfig } from '@/lib/config'
@@ -15,6 +14,8 @@ import { PostSubscribe, SubscribePage } from './components/Subscribe'
 import { RandomPost, ReadingPicks, RecentlyUpdated, wholeSentences } from './components/Home'
 
 const Comment = dynamic(() => import('@/components/Comment'), { ssr: false })
+// 正文组件动态引入（SSR 照常输出），它带的 Notion/KaTeX 样式就只进文章页，不进全站 CSS
+const NotionPage = dynamic(() => import('@/components/NotionPage'))
 import Toc, { useActiveHeading } from './components/Toc'
 import BookmarkCord from './components/BookmarkCord'
 import { ReadingProgress, RelatedPosts, SeriesBox, dekOf, getRelatedPosts, getSeries } from './components/Article'

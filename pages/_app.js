@@ -1,10 +1,7 @@
 // import '@/styles/animate.css' // @see https://animate.style/
 import '@/styles/globals.css'
 import '@/styles/utility-patterns.css'
-
-// core styles shared by all of react-notion-x (required)
-import 'react-notion-x/src/styles.css' // 原版的react-notion-x
-import '@/styles/notion.css' //  重写部分notion样式
+// react-notion-x 和 styles/notion.css 跟着 components/NotionPage.js 按页加载
 
 import useAdjustStyle from '@/hooks/useAdjustStyle'
 import { GlobalContextProvider } from '@/lib/global'

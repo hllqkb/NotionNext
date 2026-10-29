@@ -402,6 +402,27 @@ const nextConfig = {
       'lib/utils/throttle.js'
     )
 
+    // styles/notion.css 要跟 react-notion-x 原版样式一起在 NotionPage 里按页引入，
+    // 但 pages router 只允许 _app 引入项目内的全局 CSS：复制 Next 给 _app 用的全局 CSS 规则，单独放行这一个文件
+    const cssRules = config.module.rules.find(rule => rule && rule.oneOf)
+    const appGlobalCssRule = cssRules?.oneOf.find(
+      rule =>
+        String(rule.test) === String(/(?<!\.module)\.css$/) &&
+        rule.issuer?.and?.some(
+          issuer => issuer instanceof RegExp && /_app/.test(issuer.source)
+        )
+    )
+    if (cssRules && !appGlobalCssRule) {
+      throw new Error(
+        'next.config.js: 找不到 Next 的 _app 全局 CSS 规则，styles/notion.css 无法在 NotionPage 引入'
+      )
+    }
+    cssRules?.oneOf.unshift({
+      ...appGlobalCssRule,
+      issuer: undefined,
+      include: path.resolve(__dirname, 'styles/notion.css')
+    })
+
     if (!isServer) {
       console.log(
         '[ThemeResolver][webpack]',
