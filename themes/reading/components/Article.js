@@ -10,6 +10,23 @@ const samePost = (a, b) => Boolean(a && b) && (a.slug === b.slug || (a.href && a
 const seriesName = p => (Array.isArray(p?.series) ? p.series[0] : p?.series) || ''
 const dotDay = p => String(postDay(p)).replaceAll('-', '.')
 
+/**
+ * 导语：summary 不为空，且不是正文开头的截断（CSDN 迁移来的文章大多是这样，93 篇里 86 篇）才显示。
+ * 加密文章拿不到正文，直接显示
+ */
+export const dekOf = post => {
+  const squash = s => String(s || '').replace(/\s+/g, '')
+  const summary = squash(post?.summary).replace(/[.。…]+$/, '')
+  if (!summary) return ''
+  let body = ''
+  for (const x of Object.values(post?.blockMap?.block || {})) {
+    const b = x?.value?.value || x?.value
+    if (!b || b.type === 'page' || b.type === 'code') continue
+    for (const seg of b.properties?.title || []) body += String(seg[0] || '')
+  }
+  return squash(body).includes(summary.slice(0, 30)) ? '' : post.summary
+}
+
 /** 顶部细进度条：按正文 #article-wrapper 的上下边界算，直接改 transform，不触发 React 渲染 */
 export const ReadingProgress = () => {
   const bar = useRef(null)

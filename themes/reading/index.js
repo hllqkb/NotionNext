@@ -12,7 +12,7 @@ import { LayoutAbout, LayoutBooks, LayoutGallery, LayoutLinks, LayoutProjects, p
 
 const Comment = dynamic(() => import('@/components/Comment'), { ssr: false })
 import Toc, { useActiveHeading } from './components/Toc'
-import { ReadingProgress, RelatedPosts, SeriesBox, getRelatedPosts, getSeries } from './components/Article'
+import { ReadingProgress, RelatedPosts, SeriesBox, dekOf, getRelatedPosts, getSeries } from './components/Article'
 import CONFIG from './config'
 import { Style } from './style'
 
@@ -274,6 +274,7 @@ const LayoutSlug = props => {
   const stats = readingStats(post)
   const isArticle = post.type === 'Post'
   const pageUrl = `${siteConfig('LINK')}/${post.slug}`
+  const dek = dekOf(post)
   const series = isArticle ? getSeries(post, allNavPages) : null
   const related = isArticle && !lock ? getRelatedPosts(post, allNavPages, series) : []
   return (
@@ -297,7 +298,7 @@ const LayoutSlug = props => {
             {day && <time dateTime={day}>{String(day).replaceAll('-', ' / ')}</time>}
           </p>
           <h1>{post.title}</h1>
-          {post.summary && <p className='dek'>{post.summary}</p>}
+          {dek && <p className='dek'>{dek}</p>}
           <div className='byline'>
             {stats.chars > 0 && !lock && (
               <span>
