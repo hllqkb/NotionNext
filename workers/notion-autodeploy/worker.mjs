@@ -14,9 +14,21 @@ let dataSourceCache
 
 export default {
   async scheduled(controller, env, ctx) {
+    const at = new Date(controller.scheduledTime).toISOString()
+    const configError = checkConfig(env)
+    if (configError) {
+      console.error(JSON.stringify({ at, action: 'config-error', error: configError }))
+      return
+    }
     ctx.waitUntil(
-      check(env, controller.scheduledTime).then(result =>
-        console.log(JSON.stringify(result))
+      check(env, controller.scheduledTime).then(
+        result => console.log(JSON.stringify(result)),
+        error => {
+          // Errors can carry request URLs or response bodies; never log them raw.
+          const message = redact(env, error)
+          console.error(JSON.stringify({ at, action: 'error', error: message }))
+          throw new Error(message)
+        }
       )
     )
   },
@@ -29,6 +41,7 @@ export default {
     const state = await env.STATE.get(STATE_KEY, 'json')
     // Page ids and dates stay private: unpublished drafts may be among them.
     return Response.json({
+      configError: checkConfig(env),
       state: state && {
         cutoff: state.cutoff,
         lastBuildAt: state.lastBuildAt,
@@ -152,11 +165,45 @@ export async function check(env, nowMs) {
 }
 
 async function postHook(env) {
-  const res = await fetch(env.DEPLOY_HOOK_URL, { method: 'POST' })
+  let res
+  try {
+    res = await fetch(env.DEPLOY_HOOK_URL, { method: 'POST' })
+  } catch (error) {
+    throw new Error(
+      error instanceof TypeError && /invalid url/i.test(error.message)
+        ? 'invalid DEPLOY_HOOK_URL (not an https URL)'
+        : 'Deploy hook request failed'
+    )
+  }
   if (!res.ok) {
     // Throwing leaves state alone, so the next tick retries.
     throw new Error(`Deploy hook failed: ${res.status} ${await res.text()}`)
   }
+}
+
+// Shape checks only, so a secret pasted into the wrong slot is caught before
+// it is sent anywhere. Messages never include the values.
+function checkConfig(env) {
+  const errors = []
+  if (!env.DEPLOY_HOOK_URL?.startsWith('https://api.cloudflare.com/')) {
+    errors.push('DEPLOY_HOOK_URL must start with https://api.cloudflare.com/')
+  }
+  if (!/^(ntn_|secret_)/.test(env.NOTION_TOKEN ?? '')) {
+    errors.push('NOTION_TOKEN must start with ntn_ or secret_')
+  }
+  return errors.length ? errors.join('; ') : null
+}
+
+// Error text with every secret value, and anything shaped like one, removed.
+function redact(env, error) {
+  let text = String(error?.message ?? error)
+  if (/invalid url/i.test(text)) return 'invalid URL (value not logged)'
+  for (const secret of [env.NOTION_TOKEN, env.DEPLOY_HOOK_URL]) {
+    if (secret) text = text.split(secret).join('[redacted]')
+  }
+  return text
+    .replace(/\b(ntn_|secret_)\w+/g, '$1[redacted]')
+    .replace(/deploy_hooks\/[\w-]+/g, 'deploy_hooks/[redacted]')
 }
 
 function todayCount(state, now) {
