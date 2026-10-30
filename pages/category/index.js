@@ -1,6 +1,7 @@
 import BLOG from '@/blog.config'
 import { siteConfig } from '@/lib/config'
 import { fetchGlobalAllData } from '@/lib/db/SiteDataApi'
+import { trimListProps } from '@/lib/utils/trimListProps'
 import { DynamicLayout } from '@/themes/theme'
 
 /**
@@ -18,6 +19,7 @@ export default function Category(props) {
 export async function getStaticProps({ locale }) {
   const props = await fetchGlobalAllData({ from: 'category-index-props', locale })
   delete props.allPages
+  trimListProps(props)
   return {
     props,
     revalidate: process.env.EXPORT

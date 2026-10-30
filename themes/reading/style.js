@@ -21,7 +21,20 @@ const Style = () => {
         --font: 'LXGW WenKai', 'Kaiti SC', STKaiti, KaiTi, 'Songti SC', SimSun, serif;
         /* 动效统一用这条曲线，只动 transform / opacity */
         --ease: cubic-bezier(.22, 1, .36, 1);
-        background: var(--paper);
+        /* 纸面：两侧页边略深一层，左侧两道渐隐的裁口细线，像摊开的书页；纯 CSS 渐变，随页面滚动，不动 */
+        --paper-edge: #f2f0e8;
+        --edge-rule: #ded8ca;
+        --edge-rule-soft: #e8e3d7;
+        --edge-width: clamp(16px, calc(50vw - 540px), 112px);
+        background-color: var(--paper);
+        background-image:
+          linear-gradient(to bottom, var(--edge-rule), transparent 90%),
+          linear-gradient(to bottom, var(--edge-rule-soft), transparent 90%),
+          radial-gradient(ellipse at left top, var(--paper-edge) 0%, var(--paper) 72%),
+          radial-gradient(ellipse at right top, var(--paper-edge) 0%, var(--paper) 72%);
+        background-position: 7px 16px, 11px 16px, left top, right top;
+        background-size: 1px 340px, 1px 300px, var(--edge-width) 480px, var(--edge-width) 480px;
+        background-repeat: no-repeat;
         color: var(--ink);
         font: 400 18px/1.8 var(--font);
         min-height: 100vh;
@@ -36,7 +49,18 @@ const Style = () => {
         --accent: #e0896e;
         --quote-bg: #26241f;
         --code-bg: #2a2823;
+        --paper-edge: #25231e;
+        --edge-rule: #39352c;
+        --edge-rule-soft: #2e2b24;
       }
+      @media (max-width: 520px) {
+        #theme-reading {
+          --edge-width: 16px;
+          background-position: 5px 12px, 9px 12px, left top, right top;
+          background-size: 1px 220px, 1px 180px, 16px 280px, 16px 280px;
+        }
+      }
+      @media print { #theme-reading { background-image: none; } }
       .dark body { background: #1c1b18; }
       body { background: #f7f6f0; }
       /* 一直留出滚动条的位置：页面从短变长出现滚动条时，居中的版心不会整体横移 */
@@ -590,9 +614,15 @@ const Style = () => {
       #theme-reading .related-title { font-size: 17px; line-height: 1.6; overflow-wrap: anywhere; }
       #theme-reading .related-cat { font-size: 13px; color: var(--accent); white-space: nowrap; }
 
-      /* 邮件订阅：一句说明 + 输入框 + 朱红按钮，线框跟正文同色系，不弹窗 */
-      #theme-reading .post-subscribe { margin-top: 44px; padding-top: 14px; border-top: 1px solid var(--ink); }
-      #theme-reading .post-subscribe h2 { font-size: 15px; font-weight: 400; color: var(--muted); letter-spacing: .12em; margin: 0 0 10px; }
+      /* 邮件订阅：/subscribe 页是一句说明 + 输入框 + 朱红按钮；文末是页尾前一行小字，按钮只描边，不抢正文收尾 */
+      #theme-reading .post-subscribe { margin-top: 48px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; font-size: 14px; color: var(--muted); }
+      #theme-reading .post-subscribe .subscribe-form { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; flex: 1 1 340px; max-width: 460px; }
+      #theme-reading .post-subscribe .subscribe-form label { margin: 0; font-size: 14px; color: var(--muted); white-space: nowrap; }
+      #theme-reading .post-subscribe .subscribe-form div { flex: 1 1 220px; gap: 8px; }
+      #theme-reading .post-subscribe .subscribe-form input { padding: 4px 10px; }
+      #theme-reading .post-subscribe .subscribe-form button { padding: 4px 14px; font-size: 14px; color: var(--accent); background: transparent; border: 1px solid var(--line); }
+      #theme-reading .post-subscribe .subscribe-form button:hover { opacity: 1; border-color: var(--accent); }
+      #theme-reading .post-subscribe .subscribe-alt { margin: 0; color: var(--accent); }
       #theme-reading .subscribe-form { max-width: 460px; }
       #theme-reading .subscribe-form label { display: block; margin: 0 0 10px; font-size: 16px; }
       #theme-reading .subscribe-form div { display: flex; gap: 10px; }

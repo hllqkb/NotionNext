@@ -25,8 +25,15 @@ const LEGACY_CSS = '/fonts/lxgw-wenkai/lxgwwenkai.css'
 const FAMILY = 'LXGW WenKai'
 const SYNTH_BOLD = process.env.READING_FONT_SYNTH_BOLD === 'true'
 const STYLE_ID = 'wenkai-font'
-// 首页不一定出现、但几乎每篇都会用到的标点
-const EXTRA_CORE = '，。、；：？！“”‘’（）《》〈〉「」『』【】—…·～￥％'
+// 首页不一定出现、但几乎每篇都会用到的标点，加上只在客户端渲染、静态 HTML 里没有的界面文字（深浅色切换、分享按钮）
+const EXTRA_CORE = '，。、；：？！“”‘’（）《》〈〉「」『』【】—…·～￥％浅色深色分享'
+// 有评论区的页面（静态 HTML 里有 comments-hint 占位），评论组件在客户端才渲染：
+// Waline 3.16 zh-CN 界面文案（@waline/client dist 里的 locale 原文）；
+// 粗体部分是评论源标签和 waline.css 里加粗的反应标题、评论数、投票数（昵称是读者输入，没法预知）
+const COMMENT_MARK = 'comments-hint'
+const COMMENT_TEXT =
+  '昵称,昵称不能少于3个字符,邮箱,请填写正确的邮件地址,网址,可选,欢迎评论,来发评论吧~,提交,喜欢,取消喜欢,回复,取消回复,评论,刷新,加载更多...,预览,表情,上传图片,秒前,分钟前,小时前,天前,刚刚,正在上传,登录,退出,博主,置顶,字,评论字数应在 $0 到 $1 字之间！当前字数：$2,匿名,潜水,冒泡,吐槽,活跃,话痨,传说,表情包,搜索表情包,个人资料,通过,待审核,垃圾,取消置顶,按倒序,按正序,按热度,你认为这篇文章怎么样？,评论正在审核中，当前仅自己可见，审核通过后公开可见。,订阅本文评论,订阅本站评论,订阅你的评论回复0123456789'
+const COMMENT_BOLD = 'Waline你认为这篇文章怎么样？评论0123456789'
 
 const WEIGHTS = [
   { key: 'r', weight: 400, file: 'LXGWWenKai-Regular.woff2', local: ['LXGW WenKai', 'LXGWWenKai-Regular'] },
@@ -58,7 +65,10 @@ const decode = text =>
   })
 
 const SKIP_TAGS = new Set(['script', 'style', 'noscript', 'template', 'svg', 'textarea'])
-const BOLD_TAGS = new Set(['b', 'strong'])
+const VOID_TAGS = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'source', 'track', 'wbr'])
+// 渲染成 600 以上字重的元素：加粗标签、表头、Tailwind 加粗类、notion.css 里加粗的几个标题类
+const BOLD_TAGS = new Set(['b', 'strong', 'th'])
+const BOLD_CLASS = /(?:^|\s)(?:font-(?:semibold|bold|extrabold|black)|notion-title|notion-collection-header-title|notion-tabs-tab)(?:\s|$)/
 
 /** 取 <body> 里渲染出来的文字，返回全部码位和加粗文字码位 */
 const collectText = html => {
@@ -66,17 +76,19 @@ const collectText = html => {
   const bold = new Set()
   const start = html.search(/<body[\s>]/i)
   const body = start >= 0 ? html.slice(start) : html
-  const tag = /<(\/?)([a-zA-Z][a-zA-Z0-9-]*)[^>]*?(\/?)>|<!--[\s\S]*?-->/g
+  const tag = /<(\/?)([a-zA-Z][a-zA-Z0-9-]*)((?:[^>"']|"[^"]*"|'[^']*')*)>|<!--[\s\S]*?-->/g
+  // 打开中的元素：{ name, bold }；skip 记录正在跳过的 script/style 等
+  const stack = []
   let skip = null
-  let boldDepth = 0
   let last = 0
   const addText = text => {
     if (skip || !text) return
+    const isBold = stack.some(e => e.bold)
     for (const ch of decode(text)) {
       const cp = ch.codePointAt(0)
       if (cp < 0x20 || /\s/.test(ch)) continue
       all.add(cp)
-      if (boldDepth > 0) bold.add(cp)
+      if (isBold) bold.add(cp)
     }
   }
   for (const m of body.matchAll(tag)) {
@@ -84,17 +96,19 @@ const collectText = html => {
     last = m.index + m[0].length
     if (!m[2]) continue
     const name = m[2].toLowerCase()
-    const closing = m[1] === '/'
+    const selfClosing = /\/\s*$/.test(m[3])
     if (skip) {
-      if (closing && name === skip) skip = null
+      if (m[1] && name === skip) skip = null
       continue
     }
-    if (closing) {
-      if (BOLD_TAGS.has(name)) boldDepth = Math.max(0, boldDepth - 1)
-    } else if (SKIP_TAGS.has(name) && !m[3]) {
-      skip = name
-    } else if (BOLD_TAGS.has(name) && !m[3]) {
-      boldDepth++
+    if (m[1]) {
+      const i = stack.map(e => e.name).lastIndexOf(name)
+      if (i >= 0) stack.length = i
+    } else if (SKIP_TAGS.has(name)) {
+      if (!selfClosing) skip = name
+    } else if (!VOID_TAGS.has(name) && !selfClosing) {
+      const cls = m[3].match(/\sclass\s*=\s*(?:"([^"]*)"|'([^']*)')/)
+      stack.push({ name, bold: BOLD_TAGS.has(name) || BOLD_CLASS.test(cls ? cls[1] ?? cls[2] : '') })
     }
   }
   addText(body.slice(last))
@@ -213,7 +227,12 @@ const run = async () => {
 
   const coreCss = await face(regular, core)
   let pageCssCount = 0
+  const codepoints = text => [...text].map(ch => ch.codePointAt(0))
   for (const page of pages) {
+    if (page.html.includes(COMMENT_MARK)) {
+      codepoints(COMMENT_TEXT).forEach(cp => page.all.add(cp))
+      codepoints(COMMENT_BOLD).forEach(cp => page.bold.add(cp))
+    }
     const rest = new Set([...cover(page.all, regular)].filter(cp => !core.has(cp)))
     let pageCss = await face(regular, rest)
     if (bold) pageCss += await face(bold, cover(page.bold, bold))

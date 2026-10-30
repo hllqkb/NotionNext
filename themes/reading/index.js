@@ -7,7 +7,7 @@ import { siteConfig } from '@/lib/config'
 import { isBrowser } from '@/lib/utils'
 import { useRouter } from 'next/router'
 import { useEffect, useRef, useState } from 'react'
-import { CategoryChips, LockIcon, Masthead, PageLink, Seal, SiteFooter, WritingStreak, YearGroups, filterByCategory, hasCover, postDay, useReveal } from './components/Frame'
+import { CategoryChips, LockIcon, Masthead, PageLink, SiteFooter, WritingStreak, YearGroups, filterByCategory, hasCover, postDay, useReveal } from './components/Frame'
 import Gallery, { galleryImages } from './components/Gallery'
 import { LayoutAbout, LayoutBooks, LayoutGallery, LayoutLinks, LayoutProjects, pageLayoutFor } from './components/Pages'
 import { SkillsBoard } from './components/Skills'
@@ -66,9 +66,21 @@ const LayoutBase = props => {
       {post && <main id='content'>{children}</main>}
       <SiteFooter siteInfo={siteInfo} />
       <BookmarkCord />
+      <script type='speculationrules' dangerouslySetInnerHTML={{ __html: SPECULATION_RULES }} />
     </div>
   )
 }
+
+// 站内链接是整页跳转（PageLink 用原生 a）。分类、标签页在悬停或进入视口停留时先取 HTML，点下去不用再等网络；
+// 只 prefetch 不 prerender，不支持的浏览器忽略这段
+const SPECULATION_RULES = JSON.stringify({
+  prefetch: [
+    {
+      where: { or: ['/category', '/category/*', '/tag', '/tag/*'].map(href_matches => ({ href_matches })) },
+      eagerness: 'moderate'
+    }
+  ]
+})
 
 /** 搜索框：原生 GET 表单，回车到 /search?s=关键词，结果页的地址可以直接分享 */
 const SearchBox = ({ keyword = '' }) => (
@@ -163,7 +175,6 @@ const LayoutIndex = props => {
                 <span key={line}>{line}</span>
               ))}
           </p>
-          <Seal text={siteConfig('READING_SEAL', null, CONFIG) || siteConfig('AUTHOR')} />
         </div>
       </header>
       {siteConfig('READING_STREAK', true, CONFIG) && <WritingStreak pages={props.allNavPages || posts} buildTime={props.buildTime} />}
@@ -525,7 +536,6 @@ const LayoutSlug = props => {
           </aside>
         )}
         <RelatedPosts posts={related} />
-        {!lock && isArticle && <PostSubscribe />}
         {isArticle && (prev || next) && (
           <nav className='post-around reveal' aria-label='上一篇和下一篇'>
             {prev ? (
@@ -548,6 +558,8 @@ const LayoutSlug = props => {
           </section>
         )}
         {!lock && isArticle && siteConfig('READING_RECENT_COMMENTS', false, CONFIG) && <RecentComments path={path} />}
+        {/* 订阅放在评论之后、页尾之前：读完先看相关文章和上下篇，最后才是订阅 */}
+        {!lock && isArticle && <PostSubscribe />}
         <footer className='article-footer'>
           <PageLink href='/'>返回文章列表</PageLink>
           <a href='#content' onClick={e => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>
