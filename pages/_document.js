@@ -9,8 +9,9 @@ const isLocalFontAwesome = BLOG.FONT_AWESOME?.startsWith(
 // reading 主题不用 Font Awesome 图标，字体只用自托管的霞鹜文楷
 const isReadingTheme = BLOG.THEME === 'reading'
 const READING_FONT_CSS = '/fonts/lxgw-wenkai/lxgwwenkai.css'
-// 静态导出时字体由 scripts/font-subset.mjs 按页切子集、内联进 HTML；开发环境仍用整套 unicode-range 切片
-const useLegacyReadingFont = isReadingTheme && !process.env.EXPORT
+// yarn export 会在 next build 之后跑 scripts/font-subset.mjs，按页切子集、内联进 HTML（FONT_SUBSET=true）；
+// 其他入口（开发环境、单独 next build）仍用整套 unicode-range 切片
+const useLegacyReadingFont = isReadingTheme && process.env.FONT_SUBSET !== 'true'
 
 // 预先设置深色模式的脚本内容
 const darkModeScript = `
