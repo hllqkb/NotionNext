@@ -57,7 +57,7 @@ const BookmarkCord = () => {
     if (!e.isPrimary || e.button !== 0 || gesture.current) return
     suppressClick.current = false
     if (window.innerWidth <= 800) return
-    gesture.current = { pointerId: e.pointerId, startY: e.clientY, maxDistance: 0 }
+    gesture.current = { pointerId: e.pointerId, startX: e.clientX, startY: e.clientY, maxDistance: 0 }
     e.currentTarget.setPointerCapture(e.pointerId)
     setPulled(false)
     setReturning(false)
@@ -69,7 +69,7 @@ const BookmarkCord = () => {
     const current = gesture.current
     if (!current || current.pointerId !== e.pointerId) return
     const distance = e.clientY - current.startY
-    current.maxDistance = Math.max(current.maxDistance, Math.abs(distance))
+    current.maxDistance = Math.max(current.maxDistance, Math.abs(e.clientX - current.startX), Math.abs(distance))
     setDragOffset(Math.min(44, Math.max(0, distance)))
   }
 
@@ -77,7 +77,7 @@ const BookmarkCord = () => {
     const current = gesture.current
     if (!current || current.pointerId !== e.pointerId) return
     const distance = Math.min(44, Math.max(0, e.clientY - current.startY))
-    const moved = Math.max(current.maxDistance, Math.abs(e.clientY - current.startY)) >= 4
+    const moved = Math.max(current.maxDistance, Math.abs(e.clientX - current.startX), Math.abs(e.clientY - current.startY)) >= 4
     // 先结束手势，再释放捕获；随后产生的 click 不能重复回顶
     gesture.current = null
     suppressClick.current = cancelled || moved
