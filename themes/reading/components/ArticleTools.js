@@ -355,12 +355,15 @@ export const useMermaidInk = key => {
     // 代码块（Mermaid）可能比正文晚挂载，所以不看现在有没有图，只要正文在就装观察器
     if (!key || !root) return
     // mermaid 先插 SVG、后补节点的行内样式，所以每次变动都重扫一遍；去掉后不再匹配，不会循环
-    const ink = () =>
+    const ink = () => {
       root.querySelectorAll('.mermaid svg :is(.node, .cluster) :is([style*="fill"], [style*="stroke"])').forEach(el => {
         el.style.removeProperty('fill')
         el.style.removeProperty('stroke')
         el.setAttribute('data-ink-emph', '')
       })
+      // `style X color:#fff` 写在标签上；底色换成淡纸后白字看不见，一并交给主题的墨色
+      root.querySelectorAll('.mermaid svg :is(.node, .cluster) [style*="color"]').forEach(el => el.style.removeProperty('color'))
+    }
     ink()
     const observer = new MutationObserver(ink)
     observer.observe(root, { childList: true, subtree: true, attributes: true, attributeFilter: ['style'] })
