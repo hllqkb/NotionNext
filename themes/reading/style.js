@@ -871,6 +871,24 @@ const Style = () => {
       #theme-reading .prose .has-broken-img > div::after,
       #theme-reading .photo-frame.has-broken-img::after { content: '图片加载失败'; position: absolute; inset: 0; display: grid; place-items: center; font-size: 14px; color: var(--muted); }
       #theme-reading .photo-frame.has-broken-img { cursor: default; }
+
+      /* Notion 原生颜色收进三色：文字色暖的归赭、冷的归墨、灰归 muted；所有底色归一层淡纸（带一点赭） */
+      #theme-reading {
+        --notion-red: var(--accent); --notion-pink: var(--accent); --notion-orange: var(--accent); --notion-yellow: var(--accent); --notion-brown: var(--accent);
+        --notion-blue: var(--ink); --notion-purple: var(--ink); --notion-teal: var(--ink); --notion-green: var(--ink); --notion-gray: var(--muted);
+        --ink-tint: color-mix(in srgb, var(--accent) 13%, var(--paper));
+        --notion-red_background: var(--ink-tint); --notion-pink_background: var(--ink-tint); --notion-blue_background: var(--ink-tint);
+        --notion-purple_background: var(--ink-tint); --notion-teal_background: var(--ink-tint); --notion-yellow_background: var(--ink-tint);
+        --notion-orange_background: var(--ink-tint); --notion-brown_background: var(--ink-tint); --notion-gray_background: var(--ink-tint);
+        --notion-green_background: var(--ink-tint); --notion-default_background: var(--ink-tint);
+      }
+      /* notion.css 在深色下给这些底色强制黑字（dark:text-black），底色换成主题淡纸后要跟着用正文色 */
+      #theme-reading .prose [class*='notion-'][class*='_background'] { color: var(--ink); }
+      #theme-reading .prose span[class*='_background'] { padding: 0 2px; border-radius: 0; }
+      /* 附件：方角，悬停只变色 */
+      #theme-reading .prose .notion-file-link { border-radius: 0; }
+      #theme-reading .prose .notion-file-link:hover { background: none; color: var(--accent); }
+
     `}</style>
   )
 }
