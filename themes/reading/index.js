@@ -16,6 +16,7 @@ import { RandomPost, ReadingPicks, RecentlyUpdated, wholeSentences } from './com
 
 const Comment = dynamic(() => import('@/components/Comment'), { ssr: false })
 import Toc, { useActiveHeading } from './components/Toc'
+import BookmarkCord from './components/BookmarkCord'
 import { ReadingProgress, RelatedPosts, SeriesBox, dekOf, getRelatedPosts, getSeries } from './components/Article'
 import { FontSizeControl, FontSizeScript, PageViews, RecentComments, ShareLink, SourceNote, StaleNote, sourceOf, useFootnotes, useImageFallback, useZoomKeyboard } from './components/ArticleTools'
 import CONFIG from './config'
@@ -64,6 +65,7 @@ const LayoutBase = props => {
       </div>
       {post && <main id='content'>{children}</main>}
       <SiteFooter siteInfo={siteInfo} />
+      <BookmarkCord />
       <script type='speculationrules' dangerouslySetInnerHTML={{ __html: SPECULATION_RULES }} />
     </div>
   )
