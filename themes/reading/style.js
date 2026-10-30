@@ -893,11 +893,11 @@ const Style = () => {
       #theme-reading .mermaid svg .node :is(rect, polygon, circle, ellipse, path) { fill: var(--paper) !important; stroke: var(--ink) !important; stroke-width: 1px !important; }
       #theme-reading .mermaid svg .node rect { rx: 0; ry: 0; }
       #theme-reading .mermaid svg .cluster rect { fill: transparent !important; stroke: var(--line) !important; stroke-dasharray: 4 3; }
-      #theme-reading .mermaid svg [data-ink-emph] { fill: var(--ink-tint) !important; stroke: var(--accent) !important; }
+      #theme-reading .mermaid svg :is(.node, .cluster) [data-ink-emph] { fill: var(--ink-tint) !important; stroke: var(--accent) !important; }
       #theme-reading .mermaid svg :is(.flowchart-link, .edgePath path, .messageLine0, .messageLine1, .actor-line, .loopLine) { stroke: var(--muted) !important; }
       #theme-reading .mermaid svg :is(.arrowMarkerPath, marker path, #arrowhead path, .arrowheadPath) { fill: var(--muted) !important; stroke: var(--muted) !important; }
       #theme-reading .mermaid svg :is(.nodeLabel, .edgeLabel, .cluster-label, .label) { color: var(--ink) !important; }
-      #theme-reading .mermaid svg :is(text, .messageText, .loopText, .actor, .labelText) { fill: var(--ink) !important; }
+      #theme-reading .mermaid svg :is(text, text tspan, .messageText, .loopText, .labelText) { fill: var(--ink) !important; }
       #theme-reading .mermaid svg :is(.edgeLabel, .labelBkg, .edgeLabel p, .edgeLabel span) { background: var(--code-block-bg) !important; background-color: var(--code-block-bg) !important; color: var(--muted) !important; }
       #theme-reading .mermaid svg .edgeLabel rect { fill: var(--code-block-bg) !important; }
       #theme-reading .mermaid svg :is(rect.actor, .labelBox) { fill: var(--paper) !important; stroke: var(--ink) !important; }

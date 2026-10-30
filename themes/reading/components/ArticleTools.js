@@ -352,7 +352,8 @@ export const useImageFallback = key => {
 export const useMermaidInk = key => {
   useEffect(() => {
     const root = document.getElementById('article-wrapper')
-    if (!key || !root || !root.querySelector('.language-mermaid')) return
+    // 代码块（Mermaid）可能比正文晚挂载，所以不看现在有没有图，只要正文在就装观察器
+    if (!key || !root) return
     // mermaid 先插 SVG、后补节点的行内样式，所以每次变动都重扫一遍；去掉后不再匹配，不会循环
     const ink = () =>
       root.querySelectorAll('.mermaid svg :is(.node, .cluster) :is([style*="fill"], [style*="stroke"])').forEach(el => {
