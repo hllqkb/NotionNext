@@ -309,7 +309,7 @@ export const SourceNote = ({ source }) =>
       首发于 {source.label}
       <span aria-hidden='true'>·</span>
       <a href={source.url} target='_blank' rel='noopener noreferrer'>
-        原文链接<span aria-hidden='true'> ↗</span>
+        原文链接
       </a>
     </p>
   ) : null

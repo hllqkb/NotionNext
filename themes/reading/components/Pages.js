@@ -156,7 +156,7 @@ export const LayoutAbout = ({ post }) => {
   return (
     <Wrap name='about'>
       <PageHead
-        eyebrow='About'
+        eyebrow='自述'
         title={post.title}
         side={<Seal text={siteConfig('READING_SEAL', null, CONFIG) || siteConfig('AUTHOR')} />}
       />
@@ -198,7 +198,7 @@ export const LayoutProjects = ({ post }) => {
   const [intro, ...cards] = splitBy(topBlocks(post), ['sub_sub_header', 'sub_header', 'header'])
   return (
     <Wrap name='projects'>
-      <PageHead eyebrow='Projects' title={post.title} lede={intro.blocks.length > 0 && <div className='intro-text page-lede'><Blocks blocks={intro.blocks} /></div>} />
+      <PageHead eyebrow='所作' title={post.title} lede={intro.blocks.length > 0 && <div className='intro-text page-lede'><Blocks blocks={intro.blocks} /></div>} />
       {/* GitHub 数据构建时同步：自己的仓库按 star 排，再是参与贡献的置顶；两份都没有时才用 Notion 里写的项目卡片 */}
       <MyRepos />
       <PinnedRepos />
@@ -216,7 +216,7 @@ export const LayoutProjects = ({ post }) => {
                 <p className='card-links'>
                   {c.links.map(l => (
                     <PageLink key={l.href} href={l.href}>
-                      {l.label}<span aria-hidden='true'>↗</span>
+                      {l.label}
                     </PageLink>
                   ))}
                 </p>
@@ -234,13 +234,12 @@ export const LayoutLinks = ({ post }) => {
   const [intro, ...cards] = splitBy(topBlocks(post), ['sub_sub_header', 'sub_header', 'header'])
   return (
     <Wrap name='links'>
-      <PageHead eyebrow='Links' title={post.title} lede={intro.blocks.length > 0 && <div className='intro-text page-lede'><Blocks blocks={intro.blocks} /></div>} />
+      <PageHead eyebrow='友朋' title={post.title} lede={intro.blocks.length > 0 && <div className='intro-text page-lede'><Blocks blocks={intro.blocks} /></div>} />
       <ul className='card-grid link-grid'>
         {cards.map(toCard).map(c => {
           const href = c.links[0]?.href
           const body = (
             <>
-              <span className='link-avatar' aria-hidden='true'>{c.name.replace(/^[\s（(【\[《「]+/, '').slice(0, 1)}</span>
               <span className='link-text'>
                 <strong>{c.name}</strong>
                 <span className='card-desc'>{c.desc.map(plain).join(' ')}</span>
@@ -275,7 +274,7 @@ export const LayoutBooks = ({ post }) => {
   const [intro, ...shelves] = splitBy(topBlocks(post), ['header', 'sub_header', 'sub_sub_header'])
   return (
     <Wrap name='books'>
-      <PageHead eyebrow='Books & Films' title={post.title} lede={intro.blocks.length > 0 && <div className='intro-text page-lede'><Blocks blocks={intro.blocks} /></div>} />
+      <PageHead eyebrow='书影' title={post.title} lede={intro.blocks.length > 0 && <div className='intro-text page-lede'><Blocks blocks={intro.blocks} /></div>} />
       {shelves.map(s => {
         const items = s.blocks.filter(b => ['bulleted_list', 'numbered_list', 'to_do'].includes(b.type) && plain(b)).map(splitItem)
         const notes = s.blocks.filter(b => b.type === 'text')
@@ -335,7 +334,7 @@ export const LayoutGallery = props => {
   return (
     <Wrap name='gallery'>
       <PageHead
-        eyebrow='Photos'
+        eyebrow='影集'
         title={post.title}
         lede={intro.length > 0 && <div className='intro-text page-lede'><Blocks blocks={intro} /></div>}
       />

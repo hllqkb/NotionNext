@@ -92,7 +92,10 @@ const Style = () => {
       #theme-reading .collection-bar { display: flex; align-items: flex-start; justify-content: space-between; gap: 32px; padding: 18px 0; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--line); font-size: 14px; color: var(--muted); }
       #theme-reading .collection-bar p { margin: 0; padding-top: 3px; }
       #theme-reading .search-box { max-width: 340px; flex: 1; }
-      #theme-reading .search-box input { width: 100%; padding: 9px 14px; border: 1px solid var(--line); border-radius: 6px; background: transparent; font: 400 16px/1.5 var(--font); color: var(--ink); }
+      #theme-reading .search-box input { width: 100%; padding: 8px 2px; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: transparent; font: 400 16px/1.5 var(--font); color: var(--ink); }
+      #theme-reading .search-box input::placeholder { color: var(--muted); opacity: 1; }
+      #theme-reading .search-box input:focus { outline: none; border-bottom-color: var(--accent); }
+      #theme-reading .search-box input:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
 
       /* 最近一篇 */
       #theme-reading .lead-story { padding: 28px 0 32px; border-bottom: 1px solid var(--line); }
@@ -102,10 +105,6 @@ const Style = () => {
       #theme-reading .lead-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 36px; align-items: end; }
       #theme-reading .lead-story p { font-size: 17px; line-height: 1.9; color: var(--muted); margin: 0; }
       #theme-reading .read-link { font-size: 14px; white-space: nowrap; display: flex; align-items: center; gap: 20px; }
-      #theme-reading .read-link > span { font-family: Georgia, serif; font-size: 23px; color: var(--accent); transition: transform 160ms var(--ease); }
-      #theme-reading .read-link:hover > span,
-      #theme-reading .read-link:focus-visible > span { transform: translate(2px, -2px); }
-      #theme-reading .read-link:active > span { transform: translate(1px, -1px) scale(.94); transition-duration: 100ms; }
 
       /* 按年分组 */
       #theme-reading .year-group { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 24px; padding: 30px 0 22px; border-bottom: 1px solid var(--line); }
@@ -212,7 +211,8 @@ const Style = () => {
       #theme-reading .comments .wl-empty::before { content: '还没有人留言。'; font-size: 15px; color: var(--muted); }
 
       /* 文末版权 + 上一篇下一篇 */
-      #theme-reading .post-license { margin-top: 48px; padding: 16px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); font-size: 15px; color: var(--muted); }
+      /* 牌记：方角双线框（外墨内赭），和印章同一种 inset 手法，全站只这一处 */
+      #theme-reading .post-license { margin-top: 48px; padding: 18px 24px; border: 1px solid var(--ink); box-shadow: inset 0 0 0 3px var(--paper), inset 0 0 0 4px color-mix(in srgb, var(--accent) 70%, transparent); font-size: 15px; color: var(--muted); }
       #theme-reading .post-license p { margin: 4px 0; overflow-wrap: anywhere; }
       #theme-reading .post-license span { display: inline-block; min-width: 3em; color: var(--ink); margin-right: 10px; }
       #theme-reading .post-license a { color: var(--accent); }
@@ -314,7 +314,6 @@ const Style = () => {
         #theme-reading.reveal-ready .year-group.reveal li { opacity: 1; transform: none; transition: none; }
         #theme-reading .essay-row a,
         #theme-reading .essay-row::before,
-        #theme-reading .read-link > span,
         #theme-reading .photo-frame,
         #theme-reading .lead-cover img,
         #theme-reading .lightbox img { transform: none !important; transition: none; animation: none; }
@@ -355,6 +354,8 @@ const Style = () => {
       #theme-reading .byline { display: flex; flex-wrap: wrap; gap: 10px; color: var(--muted); font-size: 15px; }
       /* 手机上标签固定另起一行：回退字体和文楷宽度不同，挤在同一行时字体一换就折行，把正文整体往下推 */
       #theme-reading .byline-tags { display: contents; }
+      #theme-reading .byline-tags a { border-bottom: 1px solid var(--line); }
+      #theme-reading .byline-tags a:hover { border-bottom-color: currentColor; }
       @media (max-width: 520px) {
         #theme-reading .byline-tags { display: flex; flex-wrap: wrap; gap: 10px; flex-basis: 100%; }
       }
@@ -374,7 +375,7 @@ const Style = () => {
       #theme-reading .prose .notion-h2 { font-size: 28px; margin: 1.7em 0 .8em; }
       #theme-reading .prose .notion-h3 { font-size: 24px; margin: 1.5em 0 .7em; }
       #theme-reading .prose .notion-quote { border: 0; margin: 0 0 1.6em; padding: 20px 24px; background: var(--quote-bg); border-radius: 8px; color: var(--muted); font-size: inherit; }
-      #theme-reading .prose b, #theme-reading .prose strong { font-weight: 600; color: var(--accent); }
+      #theme-reading .prose b, #theme-reading .prose strong { font-weight: 600; color: inherit; }
       #theme-reading .prose .notion-link { color: var(--accent); border-bottom: 1px solid currentColor; opacity: 1; }
       #theme-reading .prose .notion-list { padding-left: 1.5em; margin: 0 0 1.2em; }
       /* Notion 每个列表项是一个单独的 ul/ol，连续的项之间只留项内段落的间距，不按段落间距拉开 */
@@ -509,17 +510,16 @@ const Style = () => {
       #theme-reading .project-card { display: flex; flex-direction: column; padding: 20px 0 18px; }
       #theme-reading .card-top { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; }
       #theme-reading .card-top h2 { margin: 0; font-size: 23px; font-weight: 500; line-height: 1.4; }
-      #theme-reading .status-tag { flex: none; font-size: 12px; line-height: 1; padding: 5px 9px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
-      #theme-reading .status-tag.live { border-color: var(--accent); color: var(--accent); }
+      #theme-reading .status-tag { flex: none; font-size: 13px; line-height: 1.4; color: var(--muted); }
+      #theme-reading .status-tag.live { color: var(--accent); }
       #theme-reading .card-desc { margin-top: 8px; font-size: 16px; line-height: 1.8; color: var(--muted); }
       #theme-reading .card-desc p { margin: 0; }
+      #theme-reading .card-desc { overflow-wrap: anywhere; }
       #theme-reading .card-meta { margin: 12px 0 0; font-size: 13px; color: var(--muted); letter-spacing: .02em; }
       #theme-reading .card-links { margin: auto 0 0; padding-top: 16px; display: flex; gap: 18px; font-size: 15px; }
       #theme-reading .card-links a { color: var(--accent); }
-      #theme-reading .card-links span { margin-left: 2px; font-family: Georgia, serif; }
 
       #theme-reading .link-card > a, #theme-reading .link-card > div { display: flex; gap: 16px; align-items: flex-start; padding: 18px 0; height: 100%; }
-            #theme-reading .link-avatar { flex: none; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; font-size: 20px; color: var(--paper); background: var(--accent); opacity: .88; }
       #theme-reading .link-text { display: flex; flex-direction: column; min-width: 0; }
       #theme-reading .link-text strong { font-weight: 500; font-size: 19px; }
       #theme-reading .link-text .card-desc { margin-top: 2px; }
@@ -555,7 +555,7 @@ const Style = () => {
       #theme-reading .album-card:hover .album-frame { transform: rotate(-1deg) translateY(-2px); }
 
       @media (max-width: 800px) {
-        #theme-reading .card-grid { grid-template-columns: 1fr; }
+        #theme-reading .card-grid { grid-template-columns: minmax(0, 1fr); }
         #theme-reading .album-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         #theme-reading .page-section, #theme-reading .shelf { grid-template-columns: 1fr; gap: 10px; }
       }
@@ -568,7 +568,7 @@ const Style = () => {
         #theme-reading .page-head { align-items: flex-start; }
         #theme-reading .about-intro { font-size: 18px; }
         #theme-reading .now-card { padding: 20px 20px 18px; }
-        #theme-reading .project-card { padding: 18px 18px 16px; }
+        #theme-reading .project-card { padding: 18px 0 16px; }
         #theme-reading .card-top h2 { font-size: 21px; }
         #theme-reading .album-grid { gap: 20px 14px; }
       }
@@ -608,7 +608,7 @@ const Style = () => {
       #theme-reading .series-box summary::-webkit-details-marker { display: none; }
       #theme-reading .series-box summary::after { content: '展开'; margin-left: auto; font-size: 13px; color: var(--muted); }
       #theme-reading .series-box details[open] summary::after { content: '收起'; }
-      #theme-reading .series-tag { font-size: 13px; color: var(--paper); background: var(--accent); border-radius: 4px; padding: 0 7px; }
+      #theme-reading .series-tag { font-size: 13px; color: var(--accent); border: 1px solid var(--accent); border-radius: 0; padding: 0 6px; }
       #theme-reading .series-box strong { font-weight: 400; }
       #theme-reading .series-count { font-size: 14px; color: var(--muted); }
       #theme-reading .series-box ol { margin: 0; padding: 4px 0 14px 28px; border-top: 1px solid var(--line-soft); font-size: 15px; line-height: 1.7; color: var(--muted); max-height: 360px; overflow: auto; }
@@ -650,7 +650,7 @@ const Style = () => {
       #theme-reading .subscribe-form input { flex: 1; min-width: 0; font: inherit; font-size: 16px; color: var(--ink); background: transparent; border: 1px solid var(--line); border-radius: 4px; padding: 7px 12px; }
       #theme-reading .subscribe-form input::placeholder { color: var(--muted); opacity: 1; }
       #theme-reading .subscribe-form input:focus { outline: none; border-color: var(--accent); }
-      #theme-reading .subscribe-form button { font: inherit; font-size: 16px; color: var(--paper); background: var(--accent); border: 0; border-radius: 4px; padding: 7px 20px; cursor: pointer; white-space: nowrap; transition: opacity 160ms var(--ease); }
+      #theme-reading .subscribe-form button { font: inherit; font-size: 16px; color: var(--paper); background: var(--accent); border: 0; border-radius: 2px; padding: 7px 20px; cursor: pointer; white-space: nowrap; transition: opacity 160ms var(--ease); }
       #theme-reading .subscribe-form button:hover { opacity: .88; }
       #theme-reading .subscribe-form button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
       #theme-reading .subscribe-alt { margin: 10px 0 0; font-size: 14px; color: var(--muted); }
@@ -703,9 +703,6 @@ const Style = () => {
       #theme-reading .lead-story h2 { text-wrap: balance; }
       /* 随机读一篇：计数旁边一个小链接，404 页也用 */
       #theme-reading .random-post { display: inline-flex; align-items: baseline; gap: 4px; margin-left: 14px; color: var(--accent); }
-      #theme-reading .random-post > span { display: inline-block; transition: transform 160ms var(--ease); }
-      #theme-reading .random-post:hover > span,
-      #theme-reading .random-post:focus-visible > span { transform: translateX(2px); }
       #theme-reading .notfound-random { margin: 18px 0 0; font-size: 16px; color: var(--muted); }
       #theme-reading .notfound-random .random-post { margin-left: 2px; }
       /* 从这里读起：三条荐读目录（一、二、三），视觉重量低于最近一篇和年谱 */
@@ -739,8 +736,7 @@ const Style = () => {
         #theme-reading .reading-picks h2 small { display: none; }
       }
       @media (prefers-reduced-motion: reduce) {
-        #theme-reading .reading-picks a,
-        #theme-reading .random-post > span { transform: none !important; transition: none; }
+        #theme-reading .reading-picks a { transform: none !important; transition: none; }
       }
       /* notes & websites */
       #theme-reading .notes-count { margin: 8px 0 0; font-size: 14px; color: var(--muted); }
@@ -789,18 +785,18 @@ const Style = () => {
       /* 正文字号三档：默认档仍是上面的 20px / 手机 18px，没 JS 时不受影响 */
       html[data-reading-size='s'] #theme-reading .prose { font-size: 18px; }
       html[data-reading-size='l'] #theme-reading .prose { font-size: 22px; }
-      #theme-reading .font-size { display: flex; align-items: center; gap: 6px; border-top: 1px solid var(--line); margin-top: 18px; padding-top: 14px; font-size: 13px; }
+      #theme-reading .font-size { display: flex; align-items: center; gap: 14px; border-top: 1px solid var(--line); margin-top: 18px; padding-top: 14px; font-size: 13px; }
       #theme-reading .font-size > span { margin-right: auto; }
-      #theme-reading .font-size button { min-width: 30px; height: 28px; padding: 0 6px; border: 1px solid var(--line); border-radius: 6px; background: transparent; color: var(--muted); font: inherit; cursor: pointer; }
-      #theme-reading .font-size button:hover { color: var(--accent); border-color: var(--accent); }
-      #theme-reading .font-size button[aria-pressed='true'] { color: var(--paper); background: var(--accent); border-color: var(--accent); }
+      #theme-reading .font-size button { min-width: 24px; height: 28px; padding: 0 2px; border: 0; border-bottom: 1.5px solid transparent; border-radius: 0; background: transparent; color: var(--muted); font: inherit; cursor: pointer; }
+      #theme-reading .font-size button:hover { color: var(--accent); }
+      #theme-reading .font-size button[aria-pressed='true'] { color: var(--accent); border-bottom-color: var(--accent); }
       #theme-reading .font-size-mobile { display: none; }
 
       /* 复制链接 / 分享 */
-      #theme-reading .share-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 12px; }
-      #theme-reading .share-row button { font: inherit; font-size: 14px; color: var(--accent); background: transparent; border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--line)); border-radius: 999px; padding: 3px 14px; cursor: pointer; }
-      #theme-reading .share-row button:hover { background: color-mix(in srgb, var(--accent) 8%, transparent); }
-      #theme-reading .share-row input { flex: 1 1 240px; min-width: 0; font: inherit; font-size: 14px; color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 4px 10px; }
+      #theme-reading .share-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 22px; margin-top: 12px; }
+      #theme-reading .share-row button { font: inherit; font-size: 14px; color: var(--accent); background: transparent; border: 0; border-bottom: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); border-radius: 0; padding: 1px 0; cursor: pointer; }
+      #theme-reading .share-row button:hover { border-bottom-color: var(--accent); }
+      #theme-reading .share-row input { flex: 1 1 240px; min-width: 0; font: inherit; font-size: 14px; color: var(--ink); background: var(--paper); border: 0; border-bottom: 1px solid var(--line); border-radius: 0; padding: 4px 10px; }
 
       /* 阅读量、过时提示 */
       #theme-reading .pageviews { font-variant-numeric: tabular-nums; }
@@ -847,7 +843,6 @@ const Style = () => {
       #theme-reading .repo-owner { display: block; font-size: 13px; color: var(--muted); font-weight: 400; }
       #theme-reading .repo-meta { display: flex; gap: 16px; align-items: center; font-variant-numeric: tabular-nums; }
       #theme-reading .repo-meta span { display: inline-flex; align-items: center; gap: 6px; }
-      #theme-reading .lang-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
       #theme-reading .pinned-grid { list-style: none; }
 
       /* article-page：第三批（首发出处、宽表格和公式、图片占位） */
@@ -857,6 +852,12 @@ const Style = () => {
       /* 宽表格、长公式只在自己的框里横向滚动，不撑宽正文 */
       #theme-reading .prose .notion-simple-table { display: block; width: max-content; max-width: 100%; overflow-x: auto; scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
       #theme-reading .prose .notion-simple-table td { min-width: 6em; }
+      /* 三线表：表头上下、表尾各一道墨线，表头不填色，行间极淡 */
+      #theme-reading .prose .notion-simple-table { border-collapse: collapse; }
+      #theme-reading .prose .notion-simple-table > tbody { border-top: 1.5px solid var(--ink); border-bottom: 1.5px solid var(--ink); }
+      #theme-reading .prose .notion-simple-table td { border: 0 !important; border-bottom: 1px solid var(--line-soft) !important; background: transparent !important; }
+      #theme-reading .prose .notion-simple-table .notion-simple-table-header-row td { border-bottom: 1px solid var(--ink) !important; font-weight: 500; }
+      #theme-reading .prose .notion-simple-table .notion-simple-table-header-cell { font-weight: 500; }
       /* 简单表格原来跟着全局 14px，表里的行内代码再乘 85% 只剩 12px */
       #theme-reading .prose .notion-simple-table { font-size: 16px; line-height: 1.65; }
       #theme-reading .prose .notion-simple-table .notion-inline-code { font-size: .9375em; }

@@ -101,7 +101,7 @@ export const LayoutNotes = ({ post }) => {
   return (
     <Wrap name='notes'>
       <PageHead
-        eyebrow='Notes'
+        eyebrow='随笔'
         title={post.title}
         lede={
           <div className='intro-text page-lede'>
@@ -178,7 +178,7 @@ export const LayoutWebsites = ({ post }) => {
   const all = [...(looseSites.length ? [{ heading: null, sites: looseSites }] : []), ...groups.map(g => ({ heading: g.heading, sites: sitesOf(g.blocks) }))]
   return (
     <Wrap name='websites'>
-      <PageHead eyebrow='Websites' title={post.title} lede={introText.length > 0 && <div className='intro-text page-lede'><Blocks blocks={introText} /></div>} />
+      <PageHead eyebrow='网址' title={post.title} lede={introText.length > 0 && <div className='intro-text page-lede'><Blocks blocks={introText} /></div>} />
       {all.map((g, gi) => (
         <section key={g.heading?.id || gi} className='site-group reveal'>
           <h2 className='section-label'>

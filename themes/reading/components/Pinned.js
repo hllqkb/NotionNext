@@ -27,19 +27,18 @@ const RepoCard = ({ r, tag, live, showOwner }) => (
     <p className='card-meta repo-meta'>
       {r.language && (
         <span>
-          <i className='lang-dot' style={{ background: r.languageColor || 'var(--muted)' }} aria-hidden='true' />
           {r.language}
         </span>
       )}
-      <span aria-label={`${r.stars} 颗星`}>★ {fmtStars(r.stars)}</span>
+      <span aria-label={`${r.stars} 颗星`}>{fmtStars(r.stars)} 星</span>
     </p>
     <p className='card-links'>
       <PageLink href={r.url}>
-        仓库<span aria-hidden='true'>↗</span>
+        仓库
       </PageLink>
       {r.homepage && (
         <PageLink href={r.homepage}>
-          主页<span aria-hidden='true'>↗</span>
+          主页
         </PageLink>
       )}
     </p>
