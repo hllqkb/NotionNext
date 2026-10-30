@@ -437,7 +437,7 @@ const LayoutSlug = props => {
       <a className='skip-link' href='#article-wrapper'>
         跳到正文
       </a>
-      <ReadingProgress />
+      <ReadingProgress ready={bodyReady} />
       <aside className='sidebar' aria-label='阅读导航'>
         <PageLink className='all-articles' href='/'>
           全部文章
