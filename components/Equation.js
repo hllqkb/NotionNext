@@ -1,6 +1,8 @@
 import * as React from 'react'
 
 import Katex from '@/components/KatexReact'
+// 化学方程式宏（\ce、\pu），要在渲染公式前注册
+import '@/lib/plugins/mhchem'
 import { getBlockTitle } from 'notion-utils'
 
 const katexSettings = {

@@ -28,7 +28,8 @@ export const dekOf = post => {
 }
 
 /** 顶部细进度条：按正文 #article-wrapper 的上下边界算，直接改 transform，不触发 React 渲染 */
-export const ReadingProgress = () => {
+// ready：正文（动态分包）挂载后变 true，重新测一次高度，免得先按空正文算成读完
+export const ReadingProgress = ({ ready = true }) => {
   const bar = useRef(null)
   useEffect(() => {
     let frame = 0
@@ -57,7 +58,7 @@ export const ReadingProgress = () => {
       window.removeEventListener('resize', schedule)
       if (frame) cancelAnimationFrame(frame)
     }
-  }, [])
+  }, [ready])
   return (
     <div className='read-progress' aria-hidden='true'>
       <span ref={bar} />

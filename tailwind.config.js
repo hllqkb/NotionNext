@@ -2,11 +2,12 @@ const BLOG = require('./blog.config')
 const { fontFamilies } = require('./lib/utils/font')
 
 module.exports = {
+  // 站点固定用 reading 主题（blog.config.js THEME），只扫它和共享代码，其他主题的类名不再进全局 CSS
   content: [
     './pages/**/*.js',
     './components/**/*.js',
-    './layouts/**/*.js',
-    './themes/**/*.js'
+    './themes/theme.js',
+    './themes/reading/**/*.js'
   ],
   darkMode: BLOG.APPEARANCE === 'class' ? 'media' : 'class', // or 'media' or 'class'
   theme: {

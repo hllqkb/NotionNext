@@ -1,6 +1,5 @@
 'use client'
 
-import NotionPage from '@/components/NotionPage'
 import { ownImageSources } from '@/lib/db/notion/ownImages'
 import dynamic from 'next/dynamic'
 import { siteConfig } from '@/lib/config'
@@ -15,6 +14,20 @@ import { PostSubscribe, SubscribePage } from './components/Subscribe'
 import { RandomPost, ReadingPicks, RecentlyUpdated, wholeSentences } from './components/Home'
 
 const Comment = dynamic(() => import('@/components/Comment'), { ssr: false })
+// 正文组件动态引入（SSR 照常输出），它带的 Notion/KaTeX 样式就只进文章页，不进全站 CSS。
+// 客户端跳转或解锁时分包可能晚到，挂载后回调 onMount，正文相关的 DOM 增强等它再初始化
+const NotionPage = dynamic(() =>
+  import('@/components/NotionPage').then(m => {
+    const Body = m.default
+    const NotionBody = ({ onMount, ...props }) => {
+      useEffect(() => {
+        onMount?.()
+      }, [])
+      return <Body {...props} />
+    }
+    return NotionBody
+  })
+)
 import Toc, { useActiveHeading } from './components/Toc'
 import BookmarkCord from './components/BookmarkCord'
 import { ReadingProgress, RelatedPosts, SeriesBox, dekOf, getRelatedPosts, getSeries } from './components/Article'
@@ -389,10 +402,14 @@ const LayoutSlug = props => {
   const router = useRouter()
   const [password, setPassword] = useState('')
   const [rejected, setRejected] = useState(false)
-  const activeHeading = useActiveHeading(lock ? null : post?.toc)
-  useFootnotes(lock ? null : post?.id)
-  useImageFallback(lock ? null : post?.id)
-  useZoomKeyboard(lock ? null : post?.id)
+  const [bodyMounted, setBodyMounted] = useState(false)
+  // 画廊文章渲染的是同步的 Gallery，不经过动态正文，直接就绪
+  const galleryBody = (post?.tags || []).includes(siteConfig('READING_GALLERY_TAG', null, CONFIG))
+  const bodyReady = !lock && (galleryBody || bodyMounted)
+  const activeHeading = useActiveHeading(bodyReady ? post?.toc : null)
+  useFootnotes(bodyReady ? post?.id : null)
+  useImageFallback(bodyReady ? post?.id : null)
+  useZoomKeyboard(bodyReady ? post?.id : null)
 
   useEffect(() => {
     if (!post) {
@@ -420,7 +437,7 @@ const LayoutSlug = props => {
       <a className='skip-link' href='#article-wrapper'>
         跳到正文
       </a>
-      <ReadingProgress />
+      <ReadingProgress ready={bodyReady} />
       <aside className='sidebar' aria-label='阅读导航'>
         <PageLink className='all-articles' href='/'>
           全部文章
@@ -511,7 +528,7 @@ const LayoutSlug = props => {
         ) : (
           // 全文索引只收已发布文章的正文：隐藏（Invisible）不收；加密文章静态 HTML 里本来没有正文，这里再兜一层
           <article id='article-wrapper' className='prose' {...(isArticle && post.status === 'Published' && !post.password ? { 'data-pagefind-body': '' } : {})}>
-            <NotionPage post={post} />
+            <NotionPage post={post} onMount={() => setBodyMounted(true)} />
           </article>
         )}
         {!lock && isArticle && (

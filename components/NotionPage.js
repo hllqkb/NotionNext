@@ -5,7 +5,8 @@ import NotionImage from '@/components/NotionImage'
 import NotionLink from '@/components/NotionLink'
 import { isBrowser, loadExternalResource } from '@/lib/utils'
 import mediumZoom from '@fisch0920/medium-zoom'
-import 'katex/dist/katex.min.css'
+// Notion 正文样式（含 react-notion-x 原版和 KaTeX）只在渲染正文的页面加载，本组件由主题动态引入
+import '@/styles/notion.css'
 import dynamic from 'next/dynamic'
 import { useEffect, useId, useRef } from 'react'
 import { NotionRenderer } from 'react-notion-x'
@@ -304,13 +305,9 @@ const CodeWithId = props => (
 )
 
 // 公式
+// loader 里只放一个 import()：多套一层 import 时 SSR 不登记这个 chunk，静态 HTML 里缺公式样式，水合前公式组件也没就绪
 const Equation = dynamic(
-  () =>
-    import('@/components/Equation').then(async m => {
-      // 化学方程式
-      await import('@/lib/plugins/mhchem')
-      return m.Equation
-    }),
+  () => import('@/components/Equation').then(m => m.Equation),
   { ssr: true }
 )
 
