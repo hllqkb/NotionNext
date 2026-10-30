@@ -10,7 +10,7 @@ import { CategoryChips, LockIcon, Masthead, PageLink, SiteFooter, WritingStreak,
 import Gallery, { galleryImages } from './components/Gallery'
 import { LayoutAbout, LayoutBooks, LayoutGallery, LayoutLinks, LayoutProjects, pageLayoutFor } from './components/Pages'
 import { SkillsBoard } from './components/Skills'
-import { PostSubscribe, SubscribePage } from './components/Subscribe'
+import { SubscribePage } from './components/Subscribe'
 import { RandomPost, ReadingPicks, RecentlyUpdated, wholeSentences } from './components/Home'
 
 const Comment = dynamic(() => import('@/components/Comment'), { ssr: false })
@@ -575,8 +575,6 @@ const LayoutSlug = props => {
           </section>
         )}
         {!lock && isArticle && siteConfig('READING_RECENT_COMMENTS', false, CONFIG) && <RecentComments path={path} />}
-        {/* 订阅放在评论之后、页尾之前：读完先看相关文章和上下篇，最后才是订阅 */}
-        {!lock && isArticle && <PostSubscribe />}
         <footer className='article-footer'>
           <PageLink href='/'>返回文章列表</PageLink>
           <a href='#content' onClick={e => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>

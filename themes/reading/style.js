@@ -632,15 +632,7 @@ const Style = () => {
       #theme-reading .related-title { font-size: 17px; line-height: 1.6; overflow-wrap: anywhere; }
       #theme-reading .related-cat { font-size: 13px; color: var(--accent); white-space: nowrap; }
 
-      /* 邮件订阅：/subscribe 页是一句说明 + 输入框 + 朱红按钮；文末是页尾前一行小字，按钮只描边，不抢正文收尾 */
-      #theme-reading .post-subscribe { margin-top: 48px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; font-size: 14px; color: var(--muted); }
-      #theme-reading .post-subscribe .subscribe-form { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; flex: 1 1 340px; max-width: 460px; }
-      #theme-reading .post-subscribe .subscribe-form label { margin: 0; font-size: 14px; color: var(--muted); white-space: nowrap; }
-      #theme-reading .post-subscribe .subscribe-form div { flex: 1 1 220px; gap: 8px; }
-      #theme-reading .post-subscribe .subscribe-form input { padding: 4px 10px; }
-      #theme-reading .post-subscribe .subscribe-form button { padding: 4px 14px; font-size: 14px; color: var(--accent); background: transparent; border: 1px solid var(--line); }
-      #theme-reading .post-subscribe .subscribe-form button:hover { opacity: 1; border-color: var(--accent); }
-      #theme-reading .post-subscribe .subscribe-alt { margin: 0; color: var(--accent); }
+      /* 邮件订阅：/subscribe 页是一句说明 + 输入框 + 朱红按钮；入口只在页脚「邮件订阅」，文末不再放订阅框 */
       #theme-reading .subscribe-form { max-width: 460px; }
       #theme-reading .subscribe-form label { display: block; margin: 0 0 10px; font-size: 16px; }
       #theme-reading .subscribe-form div { display: flex; gap: 10px; }

@@ -19,21 +19,6 @@ export const SubscribeForm = ({ id = 'subscribe-email', note = '有新文章时�
   )
 }
 
-/** 文末：一行紧凑的邮件订阅，旁边是 RSS，放在页尾之前 */
-export const PostSubscribe = () => {
-  if (!siteConfig('READING_FOLLOWIT_ACTION', null, CONFIG)) return null
-  return (
-    <section className='post-subscribe' aria-label='订阅'>
-      <SubscribeForm id='post-subscribe-email' note='订阅新文章' />
-      {siteConfig('ENABLE_RSS') && (
-        <a className='subscribe-alt' href='/rss/feed.xml' type='application/rss+xml'>
-          RSS
-        </a>
-      )}
-    </section>
-  )
-}
-
 /** /subscribe 页：RSS 和邮件两种方式 */
 export const SubscribePage = () => {
   const feed = `${siteConfig('LINK')}/rss/feed.xml`
