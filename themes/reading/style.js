@@ -871,6 +871,37 @@ const Style = () => {
       #theme-reading .prose .has-broken-img > div::after,
       #theme-reading .photo-frame.has-broken-img::after { content: '图片加载失败'; position: absolute; inset: 0; display: grid; place-items: center; font-size: 14px; color: var(--muted); }
       #theme-reading .photo-frame.has-broken-img { cursor: default; }
+
+      /* Notion 原生颜色收进三色：文字色暖的归赭、冷的归墨、灰归 muted；所有底色归一层淡纸（带一点赭） */
+      #theme-reading {
+        --notion-red: var(--accent); --notion-pink: var(--accent); --notion-orange: var(--accent); --notion-yellow: var(--accent); --notion-brown: var(--accent);
+        --notion-blue: var(--ink); --notion-purple: var(--ink); --notion-teal: var(--ink); --notion-green: var(--ink); --notion-gray: var(--muted);
+        --ink-tint: color-mix(in srgb, var(--accent) 13%, var(--paper));
+        --notion-red_background: var(--ink-tint); --notion-pink_background: var(--ink-tint); --notion-blue_background: var(--ink-tint);
+        --notion-purple_background: var(--ink-tint); --notion-teal_background: var(--ink-tint); --notion-yellow_background: var(--ink-tint);
+        --notion-orange_background: var(--ink-tint); --notion-brown_background: var(--ink-tint); --notion-gray_background: var(--ink-tint);
+        --notion-green_background: var(--ink-tint); --notion-default_background: var(--ink-tint);
+      }
+      #theme-reading .prose span[class*='_background'] { padding: 0 2px; border-radius: 0; }
+      /* 附件：方角，悬停只变色 */
+      #theme-reading .prose .notion-file-link { border-radius: 0; }
+      #theme-reading .prose .notion-file-link:hover { background: none; color: var(--accent); }
+
+      /* Mermaid：纸色衬底、墨线、方框，节点字用正文色；作者标了颜色的节点（data-ink-emph）画成淡纸底赭色边 */
+      #theme-reading .prose pre.notion-code[class*='language-mermaid'] { background: var(--code-block-bg) !important; border-radius: 0; }
+      #theme-reading .mermaid svg { color: var(--ink); }
+      #theme-reading .mermaid svg .node :is(rect, polygon, circle, ellipse, path) { fill: var(--paper) !important; stroke: var(--ink) !important; stroke-width: 1px !important; }
+      #theme-reading .mermaid svg .node rect { rx: 0; ry: 0; }
+      #theme-reading .mermaid svg .cluster rect { fill: transparent !important; stroke: var(--line) !important; stroke-dasharray: 4 3; }
+      #theme-reading .mermaid svg [data-ink-emph] { fill: var(--ink-tint) !important; stroke: var(--accent) !important; }
+      #theme-reading .mermaid svg :is(.flowchart-link, .edgePath path, .messageLine0, .messageLine1, .actor-line, .loopLine) { stroke: var(--muted) !important; }
+      #theme-reading .mermaid svg :is(.arrowMarkerPath, marker path, #arrowhead path, .arrowheadPath) { fill: var(--muted) !important; stroke: var(--muted) !important; }
+      #theme-reading .mermaid svg :is(.nodeLabel, .edgeLabel, .cluster-label, .label) { color: var(--ink) !important; }
+      #theme-reading .mermaid svg :is(text, .messageText, .loopText, .actor, .labelText) { fill: var(--ink) !important; }
+      #theme-reading .mermaid svg :is(.edgeLabel, .labelBkg, .edgeLabel p, .edgeLabel span) { background: var(--code-block-bg) !important; background-color: var(--code-block-bg) !important; color: var(--muted) !important; }
+      #theme-reading .mermaid svg .edgeLabel rect { fill: var(--code-block-bg) !important; }
+      #theme-reading .mermaid svg :is(rect.actor, .labelBox) { fill: var(--paper) !important; stroke: var(--ink) !important; }
+      #theme-reading .code-toolbar:has(pre[class*='language-mermaid']) > .toolbar { background: none !important; box-shadow: none !important; border-radius: 0 !important; }
     `}</style>
   )
 }
