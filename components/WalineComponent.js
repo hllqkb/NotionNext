@@ -1,4 +1,4 @@
-import  { createRef, useEffect } from 'react'
+import  { createRef, useEffect, useState } from 'react'
 import { init } from '@waline/client'
 import { useRouter } from 'next/router'
 import '@waline/client/style'
@@ -6,6 +6,8 @@ import { siteConfig } from '@/lib/config'
 
 const path = ''
 let waline = null
+// 评论服务在国内可能连不上；Waline 失败时只显示空表单，像是「没人评论」，这里探一下给句提示
+const PROBE_TIMEOUT = 8000
 /**
  * @see https://waline.js.org/guide/get-started.html
  * @param {*} props
@@ -14,6 +16,31 @@ let waline = null
 const WalineComponent = (props) => {
   const containerRef = createRef()
   const router = useRouter()
+  const [unreachable, setUnreachable] = useState(false)
+
+  useEffect(() => {
+    const server = String(siteConfig('COMMENT_WALINE_SERVER_URL') || '').replace(/\/$/, '')
+    if (!server) return
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), PROBE_TIMEOUT)
+    fetch(`${server}/api/comment?type=count&url=${encodeURIComponent(window.location.pathname)}`, {
+      signal: controller.signal
+    })
+      .then(res => (res.ok ? res.json() : Promise.reject(new Error(String(res.status)))))
+      .then(json => {
+        // Waline 出错时也可能是 HTTP 200，错误码在 errno
+        if (json?.errno !== 0) throw new Error(String(json?.errno))
+      })
+      .catch(() => {
+        // 组件卸载时的 abort 不算连不上
+        if (!controller.signal.reason?.unmounted) setUnreachable(true)
+      })
+      .finally(() => clearTimeout(timer))
+    return () => {
+      clearTimeout(timer)
+      controller.abort({ unmounted: true })
+    }
+  }, [])
 
   const updateWaline = url => {
     if (url !== path && waline) {
@@ -84,7 +111,16 @@ const WalineComponent = (props) => {
     }
   }, [])
 
-  return <div ref={containerRef} />
+  return (
+    <>
+      {unreachable && (
+        <p role='status' className='text-sm text-center opacity-70 my-2'>
+          评论服务暂时连不上，稍后刷新再试；正文不受影响。
+        </p>
+      )}
+      <div ref={containerRef} />
+    </>
+  )
 }
 
 export default WalineComponent

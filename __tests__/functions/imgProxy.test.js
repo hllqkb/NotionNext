@@ -8,6 +8,7 @@ const BLOCK_ID = '3ab487c8-7fd8-80df-b976-e74078232d32'
 const OTHER_ID = '11111111-2222-3333-4444-555555555555'
 const ATTACHMENT = 'attachment:89da7f2e-0215-4515-8cc8-204d6646257f:a.png'
 const ORIGIN = 'https://blog.example.com'
+const EXTERNAL = 'https://img2024.cnblogs.com/blog/1/a.png?x=1&y=2'
 
 const store = new Map()
 const waits = []
@@ -37,7 +38,10 @@ beforeEach(() => {
 
 const env = {
   ASSETS: {
-    fetch: jest.fn(async () => new Response(JSON.stringify([BLOCK_ID])))
+    fetch: jest.fn(
+      async () =>
+        new Response(JSON.stringify([BLOCK_ID, `${OTHER_ID} ${EXTERNAL}`]))
+    )
   }
 }
 
@@ -84,14 +88,46 @@ describe('functions/img 图片代理', () => {
 
   it.each([
     ['非法 id', imgPath('not-a-uuid')],
-    ['外站图片', imgPath(BLOCK_ID, 'https://evil.example.com/a.png')],
     ['不认识的 table', imgPath(BLOCK_ID, ATTACHMENT, 'space')],
     ['缺 src', `/img/block/${BLOCK_ID}`],
-    ['不在白名单的 blockId', imgPath(OTHER_ID)]
+    ['非 http 的 src', imgPath(BLOCK_ID, 'javascript:alert(1)')]
   ])('%s 返回 403 且不回源', async (_, path) => {
     const res = await call(path)
     expect(res.status).toBe(403)
     expect(global.fetch).not.toHaveBeenCalled()
+  })
+
+  it.each([
+    ['不在白名单的 blockId', OTHER_ID, ATTACHMENT],
+    ['名单外的外链图', OTHER_ID, 'https://evil.example.com/a.png'],
+    ['外链图换到别的 blockId', BLOCK_ID, EXTERNAL],
+    ['名单里的外链改了 query', OTHER_ID, `${EXTERNAL}&z=3`]
+  ])('%s 302 回 Notion 原中转，不回源不缓存', async (_, id, src) => {
+    const res = await call(imgPath(id, src))
+    expect(res.status).toBe(302)
+    expect(res.headers.get('location')).toBe(
+      `https://www.notion.so/image/${encodeURIComponent(src)}?table=block&id=${id}&cache=v2`
+    )
+    expect(res.headers.get('cache-control')).toBe('no-store')
+    expect(global.fetch).not.toHaveBeenCalled()
+    expect(store.size).toBe(0)
+  })
+
+  it('名单里的外链图经 Notion /image/ 回源', async () => {
+    const res = await call(imgPath(OTHER_ID, EXTERNAL))
+    expect(res.status).toBe(200)
+    expect(global.fetch.mock.calls[0][0]).toBe(
+      `https://www.notion.so/image/${encodeURIComponent(EXTERNAL)}?table=block&id=${OTHER_ID}&cache=v2`
+    )
+  })
+
+  it('已缓存但不在当前白名单的组合也不从缓存出图', async () => {
+    store.set(
+      `${ORIGIN}/img/block/${BLOCK_ID}?k=${encodeURIComponent('https://evil.example.com/a.png')}`,
+      new Response('old', { headers: { 'content-type': 'image/png' } })
+    )
+    const res = await call(imgPath(BLOCK_ID, 'https://evil.example.com/a.png'))
+    expect(res.status).toBe(302)
   })
 
   it('上游失败返回 502 且不缓存', async () => {
