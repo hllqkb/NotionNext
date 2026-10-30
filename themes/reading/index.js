@@ -64,9 +64,21 @@ const LayoutBase = props => {
       </div>
       {post && <main id='content'>{children}</main>}
       <SiteFooter siteInfo={siteInfo} />
+      <script type='speculationrules' dangerouslySetInnerHTML={{ __html: SPECULATION_RULES }} />
     </div>
   )
 }
+
+// 站内链接是整页跳转（PageLink 用原生 a）。分类、标签页在悬停或进入视口停留时先取 HTML，点下去不用再等网络；
+// 只 prefetch 不 prerender，不支持的浏览器忽略这段
+const SPECULATION_RULES = JSON.stringify({
+  prefetch: [
+    {
+      where: { or: ['/category', '/category/*', '/tag', '/tag/*'].map(href_matches => ({ href_matches })) },
+      eagerness: 'moderate'
+    }
+  ]
+})
 
 /** 搜索框：原生 GET 表单，回车到 /search?s=关键词，结果页的地址可以直接分享 */
 const SearchBox = ({ keyword = '' }) => (
