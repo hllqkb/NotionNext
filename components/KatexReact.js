@@ -1,11 +1,13 @@
 import KaTeX from 'katex'
-import { memo, useMemo } from 'react'
+import { memo, useMemo, useState, useSyncExternalStore } from 'react'
 
 const escapeHtml = text =>
   String(text).replace(
     /[&<>"']/g,
     c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]
   )
+
+const noopSubscribe = () => () => {}
 
 /**
  * 数学公式
@@ -26,7 +28,16 @@ const TeX = ({
   const Component = asComponent || (block ? 'div' : 'span')
   const content = (children ?? math)
 
+  // 首次水合时直接沿用服务端已输出的公式 DOM，不在客户端重算（长文几十个公式会拖长水合）；
+  // 水合之后才挂载的（客户端跳转进来的页面）或公式内容变了，照常计算
+  const hydrating = useSyncExternalStore(noopSubscribe, () => false, () => true)
+  const [serverContent] = useState(() =>
+    hydrating && typeof window !== 'undefined' && !renderError ? content : null
+  )
+  const reuseServerHtml = serverContent !== null && serverContent === content
+
   const state = useMemo(() => {
+    if (reuseServerHtml) return null
     try {
       const innerHtml = KaTeX.renderToString(content, {
         displayMode: true,
@@ -46,7 +57,18 @@ const TeX = ({
         : error?.message || String(error)
       return { innerHtml: escapeHtml(message) }
     }
-  }, [content, errorColor, renderError, settings])
+  }, [reuseServerHtml, content, errorColor, renderError, settings])
+
+  if (!state) {
+    // 水合时 React 不会改写 dangerouslySetInnerHTML 节点的服务端内容，这里留空即可
+    return (
+      <Component
+        {...props}
+        dangerouslySetInnerHTML={{ __html: '' }}
+        suppressHydrationWarning
+      />
+    )
+  }
 
   if ('errorElement' in state) {
     return state.errorElement

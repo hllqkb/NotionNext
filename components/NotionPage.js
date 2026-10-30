@@ -5,8 +5,7 @@ import NotionImage from '@/components/NotionImage'
 import NotionLink from '@/components/NotionLink'
 import { isBrowser, loadExternalResource } from '@/lib/utils'
 import mediumZoom from '@fisch0920/medium-zoom'
-// Notion 正文样式只在渲染正文的页面加载（本组件由主题动态引入）；顺序不能换：notion.css 覆盖 react-notion-x 原版
-import 'react-notion-x/src/styles.css'
+// Notion 正文样式（含 react-notion-x 原版和 KaTeX）只在渲染正文的页面加载，本组件由主题动态引入
 import '@/styles/notion.css'
 import dynamic from 'next/dynamic'
 import { useEffect, useId, useRef } from 'react'

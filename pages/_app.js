@@ -1,7 +1,7 @@
 // import '@/styles/animate.css' // @see https://animate.style/
 import '@/styles/globals.css'
 import '@/styles/utility-patterns.css'
-// react-notion-x 和 styles/notion.css 跟着 components/NotionPage.js 按页加载
+// Notion 正文样式（styles/notion.css，含 react-notion-x 和 KaTeX）跟着 components/NotionPage.js 按页加载
 
 import useAdjustStyle from '@/hooks/useAdjustStyle'
 import { GlobalContextProvider } from '@/lib/global'
