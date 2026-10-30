@@ -45,19 +45,21 @@ const BookmarkCord = () => {
       <svg
         className={pulled ? 'is-pulled' : undefined}
         onAnimationEnd={() => setPulled(false)}
-        viewBox='0 0 24 116'
+        viewBox='0 0 24 270'
+        preserveAspectRatio='xMidYMax slice'
         width='24'
-        height='116'
+        height='270'
         aria-hidden='true'
         focusable='false'>
-        <path className='cord-line' d='M12 0V58M12 66V71M12 87V91' />
-        <path className='cord-knot' d='M12 58l4 4-4 4-4-4z' />
-        <circle className='cord-bi' cx='12' cy='79' r='8' />
-        <circle className='cord-bi' cx='12' cy='79' r='2.6' />
-        <path className='cord-cap' d='M10 91h4l.8 3.2h-5.6z' />
+        {/* 只加长上段细线，下端装饰整体下移 154，保持形状和大小 */}
+        <path className='cord-line' d='M12 0V212M12 220V225M12 241V245' />
+        <path className='cord-knot' d='M12 212l4 4-4 4-4-4z' />
+        <circle className='cord-bi' cx='12' cy='233' r='8' />
+        <circle className='cord-bi' cx='12' cy='233' r='2.6' />
+        <path className='cord-cap' d='M10 245h4l.8 3.2h-5.6z' />
         <path
           className='cord-tassel'
-          d='M10.2 94.2L8.4 112M11.1 94.2L10.4 112.8M12 94.2V113M12.9 94.2L13.6 112.8M13.8 94.2L15.6 112'
+          d='M10.2 248.2L8.4 266M11.1 248.2L10.4 266.8M12 248.2V267M12.9 248.2L13.6 266.8M13.8 248.2L15.6 266'
         />
       </svg>
       <style jsx global>{`
@@ -94,7 +96,8 @@ const BookmarkCord = () => {
         }
         @media (max-width: 800px) {
           #theme-reading .bookmark-cord { width: 20px; }
-          #theme-reading .bookmark-cord svg { width: 20px; height: 97px; }
+          /* 按宽度等比缩放、底部对齐：顶部多出的细线伸出视口，装饰不变形 */
+          #theme-reading .bookmark-cord svg { width: 20px; height: 180px; }
         }
         @media (max-width: 520px) {
           #theme-reading .bookmark-cord { right: 0; }
