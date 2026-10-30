@@ -437,7 +437,7 @@ const LayoutSlug = props => {
           <p className='kicker'>
             {post.category && <span>{post.category}</span>}
             {post.category && day && <span>·</span>}
-            {day && <time dateTime={day}>{String(day).replaceAll('-', ' / ')}</time>}
+            {day && <time dateTime={day}>{String(day).replaceAll('-', '.')}</time>}
           </p>
           <h1 data-pagefind-meta='title'>{post.title}</h1>
           {dek && <p className='dek'>{dek}</p>}
