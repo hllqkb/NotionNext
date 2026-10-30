@@ -184,7 +184,7 @@ export const getThemeConfig = async themeQuery => {
 /**
  * 获取当前主题（query 主题优先，且做合法性校验）
  */
-const getCurrentTheme = (router, fallbackTheme) => {
+export const getCurrentTheme = (router, fallbackTheme) => {
   const queryTheme = getQueryParam(router?.asPath, 'theme')
   if (queryTheme) {
     return normalizeThemeName(queryTheme)
