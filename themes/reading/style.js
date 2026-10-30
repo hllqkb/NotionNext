@@ -380,7 +380,10 @@ const Style = () => {
         #theme-reading .page { padding: 0 24px; }
         #theme-reading .intro h1 { font-size: 60px; }
         #theme-reading .collection-note { display: none; }
-        #theme-reading .vertical-title { display: none; }
+        /* 竖排诗句是首页的题签，窄屏也保留：字号略收，两列靠右 */
+        #theme-reading .intro { gap: 24px; }
+        #theme-reading .intro-side { flex: none; }
+        #theme-reading .vertical-title { font-size: 16px; gap: 12px; }
         #theme-reading .seal { width: 46px; height: 46px; font-size: 18px; }
         #theme-reading .seal-latin { width: auto; height: 30px; font-size: 15px; }
         #theme-reading .reading-shell { display: flex; flex-direction: column; margin-top: 26px; gap: 30px; padding: 0 24px; }
@@ -412,7 +415,9 @@ const Style = () => {
         #theme-reading .essay-row::before { top: 26px; }
         #theme-reading .row-cat { display: none; }
         #theme-reading .row-cover { width: 48px; height: 34px; }
-        #theme-reading .intro-side { display: none; }
+        #theme-reading .intro { gap: 16px; }
+        #theme-reading .vertical-title { font-size: 15px; gap: 10px; }
+        #theme-reading .vertical-title span { letter-spacing: .22em; }
         #theme-reading .dot { width: 9px; height: 9px; }
         #theme-reading .dots { width: 100%; flex-wrap: nowrap; gap: 0; justify-content: space-between; }
         #theme-reading .photo-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
