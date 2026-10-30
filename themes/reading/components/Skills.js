@@ -142,7 +142,7 @@ const SkillsStyle = () => (
     #theme-reading .sk-bar-actions button,
     #theme-reading .sk-clear { background: none; border: 0; padding: 0; font: inherit; color: var(--accent); cursor: pointer; }
     #theme-reading .sk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr)); gap: 28px; padding: 30px 0 10px; }
-    #theme-reading .sk-card { display: flex; flex-direction: column; gap: 14px; min-width: 0; padding: 22px 24px; border: 1px solid var(--line); border-radius: 8px; transition: border-color .3s var(--ease); }
+    #theme-reading .sk-card { display: flex; flex-direction: column; gap: 14px; min-width: 0; padding: 22px 24px; border: 1px solid var(--line); border-radius: 2px; transition: border-color .3s var(--ease); }
     #theme-reading .sk-card.selected { border-color: var(--accent); }
     #theme-reading .sk-card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
     #theme-reading .sk-card h2 { font-size: 26px; font-weight: 400; margin: 0 0 4px; }
@@ -151,7 +151,8 @@ const SkillsStyle = () => (
     #theme-reading .sk-pick input { accent-color: var(--accent); width: 16px; height: 16px; }
     #theme-reading .sk-summary { margin: 0; line-height: 1.8; }
     #theme-reading .sk-scenes { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
-    #theme-reading .sk-scenes li { border: 1px solid var(--line); border-radius: 999px; padding: 2px 12px; font-size: 13px; color: var(--muted); }
+    #theme-reading .sk-scenes li { font-size: 13px; color: var(--muted); }
+    #theme-reading .sk-scenes li + li::before { content: '·'; margin-right: 8px; }
     #theme-reading .sk-shot { width: 100%; border: 1px solid var(--line-soft); border-radius: 6px; }
     #theme-reading .sk-example { margin: 0; font-size: 15px; color: var(--muted); }
     #theme-reading .sk-example::before { content: '例 '; color: var(--accent); }
@@ -169,7 +170,7 @@ const SkillsStyle = () => (
     #theme-reading .sk-howto dt { color: var(--ink); }
     #theme-reading .sk-howto dd { margin: 0; color: var(--muted); line-height: 1.8; }
     #theme-reading .sk-howto dd a { color: var(--accent); margin-left: 8px; }
-    #theme-reading .sk-tray { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: var(--paper); border-top: 1px solid var(--ink); box-shadow: 0 -8px 24px rgba(0, 0, 0, .06); }
+    #theme-reading .sk-tray { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: var(--paper); border-top: 1px solid var(--ink); box-shadow: none; }
     #theme-reading .sk-tray-inner { max-width: 1080px; margin: 0 auto; padding: 14px 56px; display: flex; align-items: center; gap: 24px; font-size: 14px; color: var(--muted); }
     #theme-reading .sk-tray-inner > span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     #theme-reading .sk-download { border: 1px solid var(--accent); border-radius: 2px; background: var(--accent); color: var(--paper); font: 14px/1.4 var(--font); padding: 6px 14px; cursor: pointer; white-space: nowrap; }

@@ -312,12 +312,6 @@ export const LayoutBooks = ({ post }) => {
 /** 空相框：还没有摄影集时显示 */
 const EmptyFrames = () => (
   <div className='gallery-empty reveal'>
-    <svg viewBox='0 0 120 84' width='120' height='84' aria-hidden='true'>
-      <rect x='26' y='8' width='70' height='56' rx='3' transform='rotate(6 61 36)' fill='none' stroke='currentColor' strokeWidth='1.2' opacity='.45' />
-      <rect x='18' y='14' width='72' height='58' rx='3' fill='var(--paper)' stroke='currentColor' strokeWidth='1.4' />
-      <path d='M26 62l16-18 10 10 12-14 18 22z' fill='currentColor' opacity='.18' />
-      <circle cx='70' cy='30' r='5' fill='var(--accent)' opacity='.75' />
-    </svg>
     <p>相册还空着。</p>
     <small>第一组照片还在路上，先去读读<PageLink href='/'>文章</PageLink>吧。</small>
   </div>
