@@ -882,6 +882,8 @@ const Style = () => {
         --notion-orange_background: var(--ink-tint); --notion-brown_background: var(--ink-tint); --notion-gray_background: var(--ink-tint);
         --notion-green_background: var(--ink-tint); --notion-default_background: var(--ink-tint);
       }
+      /* notion.css 在深色下给这些底色强制黑字（dark:text-black），底色换成主题淡纸后要跟着用正文色 */
+      #theme-reading .prose [class*='notion-'][class*='_background'] { color: var(--ink); }
       #theme-reading .prose span[class*='_background'] { padding: 0 2px; border-radius: 0; }
       /* 附件：方角，悬停只变色 */
       #theme-reading .prose .notion-file-link { border-radius: 0; }
