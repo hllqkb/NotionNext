@@ -694,7 +694,7 @@ const Style = () => {
       #theme-reading .reading-picks a:hover,
       #theme-reading .reading-picks a:focus-visible { color: var(--accent); }
       #theme-reading .pick-text { display: flex; align-items: baseline; justify-content: space-between; gap: 6px 18px; flex: 1; min-width: 0; flex-wrap: wrap; }
-      #theme-reading .pick-title { font-size: 17px; line-height: 1.6; }
+      #theme-reading .pick-title { min-width: 0; font-size: 17px; line-height: 1.6; overflow-wrap: anywhere; }
       #theme-reading .pick-meta { display: flex; gap: 10px; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
       #theme-reading .pick-meta > span { color: var(--accent); }
       /* 无封面文章：右侧用一枚淡印章占住封面的位置 */
