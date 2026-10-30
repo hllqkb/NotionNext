@@ -31,7 +31,7 @@ const NotionPage = dynamic(() =>
 import Toc, { useActiveHeading } from './components/Toc'
 import BookmarkCord from './components/BookmarkCord'
 import { ReadingProgress, RelatedPosts, SeriesBox, dekOf, getRelatedPosts, getSeries } from './components/Article'
-import { FontSizeControl, FontSizeScript, PageViews, RecentComments, ShareLink, SourceNote, StaleNote, sourceOf, useFootnotes, useImageFallback, useMermaidInk, useZoomKeyboard } from './components/ArticleTools'
+import { FontSizeControl, FontSizeScript, PageViews, RecentComments, ShareLink, SourceNote, StaleNote, sourceOf, useFootnotes, useImageFallback, useZoomKeyboard } from './components/ArticleTools'
 import CONFIG from './config'
 import { usePageFont } from './components/PageFont'
 import { Style } from './style'
@@ -409,7 +409,6 @@ const LayoutSlug = props => {
   const activeHeading = useActiveHeading(bodyReady ? post?.toc : null)
   useFootnotes(bodyReady ? post?.id : null)
   useImageFallback(bodyReady ? post?.id : null)
-  useMermaidInk(bodyReady ? post?.id : null)
   useZoomKeyboard(bodyReady ? post?.id : null)
 
   useEffect(() => {

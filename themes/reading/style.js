@@ -887,23 +887,6 @@ const Style = () => {
       #theme-reading .prose .notion-file-link { border-radius: 0; }
       #theme-reading .prose .notion-file-link:hover { background: none; color: var(--accent); }
 
-      /* Mermaid：纸色衬底、墨线、方框，节点字用正文色；作者标了颜色的节点（data-ink-emph）画成淡纸底赭色边 */
-      #theme-reading .prose pre.notion-code[class*='language-mermaid'] { background: var(--code-block-bg) !important; border-radius: 0; }
-      #theme-reading .mermaid svg { color: var(--ink); }
-      #theme-reading .mermaid svg .node :is(rect, polygon, circle, ellipse, path) { fill: var(--paper) !important; stroke: var(--ink) !important; stroke-width: 1px !important; }
-      #theme-reading .mermaid svg .node rect { rx: 0; ry: 0; }
-      #theme-reading .mermaid svg .cluster rect { fill: transparent !important; stroke: var(--line) !important; stroke-dasharray: 4 3; }
-      #theme-reading .mermaid svg :is(.node, .cluster) [data-ink-emph] { fill: var(--ink-tint) !important; stroke: var(--accent) !important; }
-      #theme-reading .mermaid svg :is(.flowchart-link, .edgePath path, .messageLine0, .messageLine1, .actor-line, .loopLine) { stroke: var(--muted) !important; }
-      /* 只改流程图、时序图的箭头；类图聚合（空心）和组合（实心）菱形保持原样，不改含义 */
-      #theme-reading .mermaid svg :is(.arrowMarkerPath, marker.flowchart-v2 path, #arrowhead path, .arrowheadPath) { fill: var(--muted) !important; stroke: var(--muted) !important; }
-      #theme-reading .mermaid svg :is(.nodeLabel, .edgeLabel, .cluster-label, .label) { color: var(--ink) !important; }
-      #theme-reading .mermaid svg :is(text, text tspan, .messageText, .loopText, .labelText) { fill: var(--ink) !important; }
-      #theme-reading .mermaid svg :is(.edgeLabel, .labelBkg, .edgeLabel p, .edgeLabel span) { background: var(--code-block-bg) !important; background-color: var(--code-block-bg) !important; color: var(--muted) !important; }
-      #theme-reading .mermaid svg .edgeLabel rect { fill: var(--code-block-bg) !important; }
-      #theme-reading .mermaid svg :is(rect.actor, .labelBox) { fill: var(--paper) !important; stroke: var(--ink) !important; }
-      #theme-reading .mermaid svg .note { fill: var(--ink-tint) !important; stroke: var(--accent) !important; }
-      #theme-reading .code-toolbar:has(pre[class*='language-mermaid']) > .toolbar { background: none !important; box-shadow: none !important; border-radius: 0 !important; }
     `}</style>
   )
 }

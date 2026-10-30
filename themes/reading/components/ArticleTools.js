@@ -346,32 +346,6 @@ export const useImageFallback = key => {
 }
 
 /**
- * Mermaid 图（全局 PrismMac 在客户端渲染）收进纸墨色：作者在图里写的 `style X fill:…` 会变成节点上的行内颜色，
- * 这里去掉行内的 fill / stroke，改打 data-ink-emph，由 style.js 统一画成淡纸底、赭色边；其余颜色全靠 CSS 变量，深浅色跟着主题走
- */
-export const useMermaidInk = key => {
-  useEffect(() => {
-    const root = document.getElementById('article-wrapper')
-    // 代码块（Mermaid）可能比正文晚挂载，所以不看现在有没有图，只要正文在就装观察器
-    if (!key || !root) return
-    // mermaid 先插 SVG、后补节点的行内样式，所以每次变动都重扫一遍；去掉后不再匹配，不会循环
-    const ink = () => {
-      root.querySelectorAll('.mermaid svg :is(.node, .cluster) :is([style*="fill"], [style*="stroke"])').forEach(el => {
-        el.style.removeProperty('fill')
-        el.style.removeProperty('stroke')
-        el.setAttribute('data-ink-emph', '')
-      })
-      // `style X color:#fff` 写在标签上；底色换成淡纸后白字看不见，一并交给主题的墨色
-      root.querySelectorAll('.mermaid svg :is(.node, .cluster) [style*="color"]').forEach(el => el.style.removeProperty('color'))
-    }
-    ink()
-    const observer = new MutationObserver(ink)
-    observer.observe(root, { childList: true, subtree: true, attributes: true, attributeFilter: ['style'] })
-    return () => observer.disconnect()
-  }, [key])
-}
-
-/**
  * 正文图片放大（medium-zoom）的键盘支持：
  * - 图片能 Tab 到，回车 / 空格打开；
  * - 打开后焦点移到放大的那张图上（原图会被设成 visibility: hidden，焦点不移走就掉到 body）；
