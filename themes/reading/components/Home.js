@@ -77,7 +77,6 @@ export const RandomPost = ({ posts, className = '', children = '随便读一篇'
   return (
     <a href='/archive' className={`random-post ${className}`} onClick={go}>
       {children}
-      <span aria-hidden='true'>↝</span>
     </a>
   )
 }

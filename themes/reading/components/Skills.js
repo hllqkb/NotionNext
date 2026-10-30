@@ -42,7 +42,7 @@ const SkillCard = ({ skill, selected, onToggle }) => (
       <p className='sk-credit'>
         第三方 skill，原作者 {skill.credit.author}，{skill.credit.license} 许可证。
         <a href={skill.credit.url} target='_blank' rel='noopener noreferrer'>
-          原仓库<span aria-hidden='true'>↗</span>
+          原仓库
         </a>
         <br />
         zip 里附原许可证和修改说明。
@@ -56,7 +56,7 @@ const SkillCard = ({ skill, selected, onToggle }) => (
         下载 zip
       </a>
       <a href={skill.skillMd} target='_blank' rel='noopener noreferrer'>
-        查看 SKILL.md<span aria-hidden='true'>↗</span>
+        查看 SKILL.md
       </a>
     </footer>
   </article>
@@ -172,7 +172,7 @@ const SkillsStyle = () => (
     #theme-reading .sk-tray { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: var(--paper); border-top: 1px solid var(--ink); box-shadow: 0 -8px 24px rgba(0, 0, 0, .06); }
     #theme-reading .sk-tray-inner { max-width: 1080px; margin: 0 auto; padding: 14px 56px; display: flex; align-items: center; gap: 24px; font-size: 14px; color: var(--muted); }
     #theme-reading .sk-tray-inner > span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    #theme-reading .sk-download { border: 1px solid var(--accent); border-radius: 4px; background: var(--accent); color: var(--paper); font: 14px/1.4 var(--font); padding: 6px 14px; cursor: pointer; white-space: nowrap; }
+    #theme-reading .sk-download { border: 1px solid var(--accent); border-radius: 2px; background: var(--accent); color: var(--paper); font: 14px/1.4 var(--font); padding: 6px 14px; cursor: pointer; white-space: nowrap; }
     #theme-reading .sk-download:disabled { opacity: .6; cursor: default; }
     @media (max-width: 520px) {
       #theme-reading .sk-card { padding: 18px 16px; }

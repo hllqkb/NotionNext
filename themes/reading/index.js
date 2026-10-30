@@ -147,7 +147,7 @@ const LeadStory = ({ post }) => (
     <div className='lead-row'>
       <p>{wholeSentences(post.summary)}</p>
       <PageLink className='read-link' href={post.href} aria-label={`阅读：${post.title}`}>
-        阅读全文<span aria-hidden='true'>↗</span>
+        阅读全文
       </PageLink>
     </div>
     {hasCover(post) && (
@@ -205,7 +205,7 @@ const LayoutIndex = props => {
       {postCount > posts.length && (
         <div className='pager'>
           <span />
-          <PageLink href='/archive'>查看全部文章 →</PageLink>
+          <PageLink href='/archive'>查看全部文章</PageLink>
         </div>
       )}
     </>
@@ -218,7 +218,7 @@ const LayoutPostList = props => {
   const perPage = siteConfig('POSTS_PER_PAGE') || 12
   const totalPage = Math.ceil((postCount || posts.length) / perPage)
   const base = category ? `/category/${category}` : tag ? `/tag/${encodeURIComponent(tag)}` : ''
-  const title = category ? `分类：${category}` : tag ? `#${tag}` : '文章'
+  const title = category ? `分类：${category}` : tag ? `标签：${tag}` : '文章'
   return (
     <>
       <header className='list-head'>
@@ -230,8 +230,8 @@ const LayoutPostList = props => {
       <YearGroups posts={posts} />
       {totalPage > 1 && (
         <div className='pager'>
-          {page > 1 ? <PageLink href={page - 1 === 1 ? base || '/' : `${base}/page/${page - 1}`}>← 上一页</PageLink> : <span />}
-          {page < totalPage ? <PageLink href={`${base}/page/${page + 1}`}>下一页 →</PageLink> : <span />}
+          {page > 1 ? <PageLink href={page - 1 === 1 ? base || '/' : `${base}/page/${page - 1}`}>上一页</PageLink> : <span />}
+          {page < totalPage ? <PageLink href={`${base}/page/${page + 1}`}>下一页</PageLink> : <span />}
         </div>
       )}
     </>
@@ -469,7 +469,7 @@ const LayoutSlug = props => {
               <span className='byline-tags'>
                 {post.tags.map(t => (
                   <PageLink key={t} href={`/tag/${encodeURIComponent(t)}`}>
-                    #{t}
+                    {t}
                   </PageLink>
                 ))}
               </span>
@@ -539,7 +539,7 @@ const LayoutSlug = props => {
             </p>
             <p>
               <span>链接</span>
-              <a href={pageUrl}>{pageUrl}</a>
+              <a href={pageUrl}>{post.title}</a>
             </p>
             <p>
               <span>许可</span>
@@ -623,7 +623,7 @@ const LayoutTagIndex = props => {
       <div className='chips'>
         {tagOptions.map(t => (
           <PageLink key={t.name} className='chip' href={`/tag/${encodeURIComponent(t.name)}`}>
-            #{t.name}
+            {t.name}
             {t.count ? <span>{t.count}</span> : null}
           </PageLink>
         ))}
