@@ -7,7 +7,7 @@ import { siteConfig } from '@/lib/config'
 import { isBrowser } from '@/lib/utils'
 import { useRouter } from 'next/router'
 import { useEffect, useRef, useState } from 'react'
-import { CategoryChips, LockIcon, Masthead, PageLink, Seal, SiteFooter, WritingStreak, YearGroups, filterByCategory, hasCover, postDay, useReveal } from './components/Frame'
+import { CategoryChips, LockIcon, Masthead, PageLink, SiteFooter, WritingStreak, YearGroups, filterByCategory, hasCover, postDay, useReveal } from './components/Frame'
 import Gallery, { galleryImages } from './components/Gallery'
 import { LayoutAbout, LayoutBooks, LayoutGallery, LayoutLinks, LayoutProjects, pageLayoutFor } from './components/Pages'
 import { SkillsBoard } from './components/Skills'
@@ -173,7 +173,6 @@ const LayoutIndex = props => {
                 <span key={line}>{line}</span>
               ))}
           </p>
-          <Seal text={siteConfig('READING_SEAL', null, CONFIG) || siteConfig('AUTHOR')} />
         </div>
       </header>
       {siteConfig('READING_STREAK', true, CONFIG) && <WritingStreak pages={props.allNavPages || posts} buildTime={props.buildTime} />}
