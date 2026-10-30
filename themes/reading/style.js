@@ -188,7 +188,28 @@ const Style = () => {
         --waline-bg-color-hover: var(--sidebar); --waline-border-color: var(--line); --waline-disable-bg-color: var(--sidebar);
         --waline-info-bg-color: var(--sidebar); --waline-info-color: var(--muted); --waline-badge-color: var(--accent);
         font-family: var(--font);
+        --waline-box-shadow: none;
       }
+      /* 像书页上的留言：不要文章表情反应、品牌字样和评论 RSS；只有一个评论服务时不显示切换标签 */
+      #theme-reading .comments :is(.wl-reaction, .wl-power, .wl-rss) { display: none; }
+      #theme-reading .comments .comment > div > ul:first-child:has(> li:only-child) { display: none; }
+      /* 全局评论组件的英文「Loading...」和转圈图标换成中文 */
+      #theme-reading .comments .comment > .text-center { font-size: 0; color: var(--muted); }
+      #theme-reading .comments .comment > .text-center i { display: none; }
+      #theme-reading .comments .comment > .text-center::before { content: '评论加载中…'; font-size: 15px; }
+      /* 留言框像稿纸：去圆角和外框，上下各一道细线，字段之间用细实线 */
+      #theme-reading .comments .wl-panel { margin: .5em 0; border: 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); border-radius: 0; }
+      #theme-reading .comments .wl-header { border-bottom: 1px solid var(--line-soft); border-radius: 0; }
+      @media (max-width: 580px) {
+        #theme-reading .comments .wl-header-item:not(:last-child) { border-bottom: 1px solid var(--line-soft); }
+      }
+      #theme-reading .comments .wl-editor { border-radius: 0; }
+      #theme-reading .comments .wl-btn { border-radius: 2px; font-family: var(--font); }
+      #theme-reading .comments .wl-btn.primary { background: transparent; color: var(--accent); border-color: var(--accent); }
+      #theme-reading .comments .wl-btn.primary:hover { background: color-mix(in srgb, var(--accent) 8%, transparent); }
+      /* 空状态「来发评论吧~」换成平实的一句 */
+      #theme-reading .comments .wl-empty { font-size: 0; }
+      #theme-reading .comments .wl-empty::before { content: '还没有人留言。'; font-size: 15px; color: var(--muted); }
 
       /* 文末版权 + 上一篇下一篇 */
       #theme-reading .post-license { margin-top: 48px; padding: 16px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); font-size: 15px; color: var(--muted); }
