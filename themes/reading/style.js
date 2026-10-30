@@ -236,6 +236,9 @@ const Style = () => {
       #theme-reading .prose .token:is(.function, .function-variable, .class-name, .namespace, .url, .builtin, .maybe-class-name) { color: #3f5f6e; }
       #theme-reading .prose .token:is(.string, .char, .attr-value, .regex, .inserted, .template-string, .code-snippet) { color: #5b6838; }
       #theme-reading .prose .token:is(.number, .boolean, .constant, .property, .attr-name, .entity, .unit, .hexcode) { color: #8a611b; }
+      /* Markdown 里粗体、斜体、删除线、链接的文字是嵌套的 .token.content，跟随外层颜色；命名空间不再降透明度 */
+      #theme-reading .prose .token .token.content { color: inherit; }
+      #theme-reading .prose .token.namespace { opacity: 1; }
       .dark #theme-reading .prose .token:is(.comment, .prolog, .cdata, .doctype) { color: #a29d91; }
       .dark #theme-reading .prose .token:is(.punctuation, .operator, .variable, .parameter, .interpolation-punctuation) { color: #c4bfb3; }
       .dark #theme-reading .prose .token:is(.keyword, .atrule, .important, .rule, .selector, .null, .nil) { color: #e0896e; }
