@@ -992,6 +992,12 @@ const getReadingMermaidConfig = darkMode => {
 }
 
 // reading 去掉作者配色，避免深色模式下浅底节点配浅色文字；保留标签和标题中的普通文本。
+// 清理示例（输入 -> 输出）：
+// A:::red-->B -> A-->B；A:::red---B -> A---B。
+// style A fill:red;A-->B -> A-->B；A-->B;style A fill:red;B-->C -> A-->B;B-->C。
+// classDef red fill:red;A-->B -> A-->B；class A red;A-->B -> A-->B。
+// linkStyle 0 stroke:red;A-->B -> A-->B；A["style classDef class linkStyle"] -> 原样保留。
+// style A fill:red -> 空字符串；class A red -> 空字符串。
 const stripReadingMermaidStyles = chart => {
   const brackets = []
   let quoted = false
@@ -1009,19 +1015,28 @@ const stripReadingMermaidStyles = chart => {
         !edgeLabel &&
         /^[ \t]*subgraph\b/.test(line)
       if (!quoted && brackets.length === 0 && !edgeLabel) {
-        if (
-          /^[ \t]*(?:style|classDef|linkStyle)[ \t]+/.test(line) ||
-          /^[ \t]*class[ \t]+[\w\u0080-\uffff-]+(?:[ \t]*,[ \t]*[\w\u0080-\uffff-]+)*[ \t]+[\w\u0080-\uffff-]+[ \t]*;?[ \t]*(?:%%[^\r\n]*)?\r?$/.test(line)
-        ) {
-          return []
-        }
         if (/^[ \t]*%%/.test(line)) return [line]
       }
 
       let result = ''
       let nodeShapeEnd = -1
+      let statementStart = 0
       for (let i = 0; i < line.length; i++) {
         const char = line[i]
+        if (!quoted && brackets.length === 0 && !edgeLabel) {
+          // 只删当前样式语句，分号后的连线等语句继续处理。
+          if (i === statementStart) {
+            const styleStatement = line.slice(i).match(
+              /^[ \t]*(?:(?:style|classDef|linkStyle)[ \t]+[^;]*|class[ \t]+[\w\u0080-\uffff-]+(?:[ \t]*,[ \t]*[\w\u0080-\uffff-]+)*[ \t]+[\w\u0080-\uffff-]+[ \t]*(?:%%[^;]*)?)(?:;|\r?$)/
+            )
+            if (styleStatement) {
+              i += styleStatement[0].length - 1
+              statementStart = i + 1
+              continue
+            }
+          }
+          if (char === ';') statementStart = i + 1
+        }
         if (
           !quoted &&
           brackets.length === 0 &&
@@ -1060,7 +1075,7 @@ const stripReadingMermaidStyles = chart => {
               (nodeShapeEnd === i - 1 || nodeIdAtEnd.test(result))
             ) {
               const shorthand = line.slice(i).match(
-                /^:::[\w\u0080-\uffff-]+(?:,[\w\u0080-\uffff-]+)*/
+                /^:::[A-Za-z0-9_]+(?:,[A-Za-z0-9_]+)*/
               )
               if (shorthand) {
                 i += shorthand[0].length - 1
@@ -1076,8 +1091,8 @@ const stripReadingMermaidStyles = chart => {
     .join('\n')
 }
 
-// 串行处理 reading 的异步渲染，快速切换深浅色时旧任务先结束再应用新配色。
-let readingMermaidRender = Promise.resolve()
+// 串行处理异步渲染，切换主题或深浅色时旧任务先结束再应用新配置。
+let mermaidRender = Promise.resolve()
 
 /**
  * 将mermaid语言 渲染成图片
@@ -1088,7 +1103,7 @@ const renderMermaid = mermaidCDN => {
 
   // 用实际正文所属主题判断，避免配置或 URL 的主题名与已渲染布局不一致。
   const isReading = articles.every(article => article.closest('#theme-reading'))
-  const readingCharts = []
+  const charts = []
   let isDisposed = false
   let hasMermaidBlocks = false
 
@@ -1104,12 +1119,12 @@ const renderMermaid = mermaidCDN => {
       let mermaidChart = codeBlock.querySelector('.mermaid, .mermaid-pending')
       if (!mermaidChart) {
         mermaidChart = document.createElement('pre')
-        // reading 等 initialize 后才加入 .mermaid，避免 CDN 的 load 事件抢先渲染。
-        mermaidChart.className = isReading ? 'mermaid-pending' : 'mermaid'
+        // 等 initialize 后才加入 .mermaid，避免 CDN 的 load 事件抢先渲染。
+        mermaidChart.className = 'mermaid-pending'
         mermaidChart.textContent = chart
         codeBlock.appendChild(mermaidChart)
       }
-      if (isReading) readingCharts.push({ element: mermaidChart, chart })
+      charts.push({ element: mermaidChart, chart })
     }
   }
 
@@ -1121,30 +1136,31 @@ const renderMermaid = mermaidCDN => {
         try {
           const mermaid = window.mermaid
           if (!mermaid) return
-          if (isReading) {
-            readingMermaidRender = readingMermaidRender
-              .then(async () => {
-                if (isDisposed) return
-                const darkMode =
-                  document.documentElement.classList.contains('dark')
-                mermaid.initialize(getReadingMermaidConfig(darkMode))
-                // 切换深浅色时恢复清理后的源码并清除标记，才能重新渲染。
-                readingCharts.forEach(({ element, chart }) => {
-                  element.textContent = chart
-                  element.removeAttribute('data-processed')
-                  element.classList.remove('mermaid-pending')
-                  element.classList.add('mermaid')
-                })
-                await mermaid.run({
-                  nodes: readingCharts.map(({ element }) => element)
-                })
+          mermaidRender = mermaidRender
+            .then(async () => {
+              if (isDisposed) return
+              const darkMode =
+                document.documentElement.classList.contains('dark')
+              // 离开 reading 后恢复默认配置，包括原来的自动加载行为。
+              mermaid.initialize(
+                isReading
+                  ? getReadingMermaidConfig(darkMode)
+                  : { theme: 'default', startOnLoad: true }
+              )
+              // 切换主题或深浅色时恢复对应源码并清除标记，才能重新渲染。
+              charts.forEach(({ element, chart }) => {
+                element.textContent = chart
+                element.removeAttribute('data-processed')
+                element.classList.remove('mermaid-pending')
+                element.classList.add('mermaid')
               })
-              .catch(err => {
-                console.warn('[PrismMac] mermaid render failed:', err)
+              await mermaid.run({
+                nodes: charts.map(({ element }) => element)
               })
-            return
-          }
-          mermaid?.contentLoaded()
+            })
+            .catch(err => {
+              console.warn('[PrismMac] mermaid render failed:', err)
+            })
         } catch (err) {
           console.warn('[PrismMac] mermaid render failed:', err)
         }

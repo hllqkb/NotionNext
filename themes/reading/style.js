@@ -270,7 +270,8 @@ const Style = () => {
       #theme-reading div.code-toolbar > pre.notion-code { margin: 0 !important; padding: 14px 18px !important; border: 0 !important; border-radius: 0 !important; max-width: 100%; overflow-x: auto; font-size: 14px; line-height: 1.6; scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
       #theme-reading div.code-frame > pre.notion-code { overflow-y: hidden; transition: max-height .35s var(--ease), padding .35s var(--ease); }
       #theme-reading div.code-frame.is-hidden > pre.notion-code { padding-top: 0 !important; padding-bottom: 0 !important; }
-      /* Mermaid 图保留 notion.css 里给它的浅色衬底 */
+      /* 只覆盖 Mermaid 容器衬底，随纸色切换深浅色，不改 SVG 图元。 */
+      #theme-reading pre.notion-code[class*='language-mermaid'] { background-color: var(--paper) !important; }
       #theme-reading div.code-toolbar > pre.notion-code:not([class*='language-mermaid']) { background: transparent !important; }
       #theme-reading div.code-toolbar > pre.notion-code > code { white-space: pre; word-break: normal; overflow-wrap: normal; }
       #theme-reading .code-frame-more { position: relative; display: flex; justify-content: center; padding: 6px 0 10px; }
