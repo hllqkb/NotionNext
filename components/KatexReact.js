@@ -31,9 +31,13 @@ const TeX = ({
   // 首次水合时直接沿用服务端已输出的公式 DOM，不在客户端重算（长文几十个公式会拖长水合）；
   // 水合之后才挂载的（客户端跳转进来的页面）或公式内容变了，照常计算
   const hydrating = useSyncExternalStore(noopSubscribe, () => false, () => true)
-  const [serverContent] = useState(() =>
+  const [serverContent, setServerContent] = useState(() =>
     hydrating && typeof window !== 'undefined' && !renderError ? content : null
   )
+  // 内容一旦变过就永久改为自己计算（A→B→A 时 DOM 里已是 B，不能再留空）
+  if (serverContent !== null && serverContent !== content) {
+    setServerContent(null)
+  }
   const reuseServerHtml = serverContent !== null && serverContent === content
 
   const state = useMemo(() => {
