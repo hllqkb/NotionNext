@@ -1,14 +1,15 @@
 # notion-autodeploy
 
-更新于 2026-10-29。
+更新于 2026-10-31。
 
-Notion 里的文章改完、下线、删除，或者定时文章到了发布时间，站点都会自动重新构建上线，不用再手动点 Deploy Hook。
+Notion 里的文章改完、下线、删除，定时文章到了发布时间，或者配置表有改动，站点都会自动重新构建上线，不用再手动点 Deploy Hook。
 
-一个 Cloudflare Worker（免费版），每 5 分钟跑一次 Cron。KV 里存着上次成功构建时线上有哪些页面（`status` 是 `Published` 或 `Invisible` 的页面 id 和发布时间，和构建的规则一致）。每次检查以下三种情况，任一成立就 POST 一次 Deploy Hook：
+一个 Cloudflare Worker（免费版），每 5 分钟跑一次 Cron。KV 里存着上次成功构建时线上有哪些页面（`status` 是 `Published` 或 `Invisible` 的页面 id 和发布时间，和构建的规则一致）。每次检查以下四种情况，任一成立就 POST 一次 Deploy Hook：
 
 1. **改动**：上次构建之后编辑过的页面里，有线上状态的页面，或者上次构建时还在线、现在改成了别的状态（`Published` 改 `Draft` 这种撤稿）。最后一次编辑距今不到 10 分钟就先等（防抖，边写边改不会连着发）。从没发布过的草稿怎么改都不触发。
 2. **定时文章到点**：上次构建时 `date` 还在未来、所以被构建过滤掉的文章（见 `lib/db/SiteDataApi.js` 的 `isScheduledInFuture`），现在时间到了。不用等编辑，到点后的第一次检查就发。
 3. **删除**：页面进了回收站，Notion 查询就查不到它了，也不会有编辑记录。所以每小时整点那次检查会全量列一遍线上页面，和上次构建对比，少了就发。
+4. **配置表改动**：直接查「配置中心」页里的内嵌配置表，任何行的编辑都算，包括未启用的行。配置表与文章共用防抖和 cutoff，取两者最新的编辑时间，安静满 10 分钟再触发；改表里的行不需要同时改父页面。
 
 POST 之后不马上算数，而是等站点真的构建完：
 
@@ -41,19 +42,21 @@ Pages 的部署列表接口需要一个带 `Pages Read` 权限的 API Token（[L
 | 项目 | 本 Worker 用量 | 免费版额度 |
 | --- | --- | --- |
 | Cron Triggers | 1 个 | 每账号 5 个 |
-| 每次调用 | 1 次 KV 读，1–2 次 Notion 请求，构建期间 1 次读 RSS；整点和触发构建时多一轮全量列表（每 100 页 1 次请求） | 50 个子请求 |
+| 每次调用 | 常规检查 1 次 KV 读、2 次 Notion 查询（文章、配置各 1 次）；每个 database 的 data source 未缓存时另加 1 次解析请求；构建期间 1 次读 RSS；整点和触发构建时多一轮全量列表（每 100 页 1 次请求） | 50 个子请求 |
 | 每天调用 | 288 次 | 100,000 次 |
 | KV 写 | 每次触发、确认、重试各 1 次，每天最多约 13 次 | 每天 1,000 次 |
-| CPU | 查询只取 `status`、`date` 两列，JSON 很小 | 每次 10 ms（等待网络不算） |
+| CPU | 文章查询只取 `status`、`date` 两列，配置查询只取最新 1 行，JSON 很小 | 每次 10 ms（等待网络不算） |
 
-全量列表只在整点和要触发构建时跑，平时每 5 分钟只查上次构建之后编辑过的页面。
+全量列表只在整点和要触发构建时跑，平时每 5 分钟查上次构建之后编辑过的文章和最新 1 行配置。不设 `CONFIG_DATABASE_ID` 时跳过配置检测，少 1 次查询。
 
 ## 配置项（`wrangler.toml` 的 `[vars]`）
 
 | 变量 | 默认 | 说明 |
 | --- | --- | --- |
-| `NOTION_DATABASE_ID` | 博客数据库 id | Worker 每次用它查出 data source id |
-| `NOTION_DATA_SOURCE_ID` | 不设 | 可选。填上能省掉每次 1 个查询请求 |
+| `NOTION_DATABASE_ID` | 博客数据库 id | 未指定 data source 时用它解析，按 database id 缓存在当前 Worker 实例内 |
+| `NOTION_DATA_SOURCE_ID` | 不设 | 可选。填上能省掉当前实例首次解析主库 data source 的请求 |
+| `CONFIG_DATABASE_ID` | `c41cdaa272b682759c1b818e7b307172` | 「配置中心」页里的内嵌配置表 id；不设就跳过配置检测 |
+| `CONFIG_DATA_SOURCE_ID` | 不设 | 可选。直接指定配置表的 data source id，否则按配置表 database id 单独解析、缓存 |
 | `QUIET_MINUTES` | `10` | 防抖分钟数 |
 | `MAX_BUILDS_PER_DAY` | `6` | 每天最多触发几次构建 |
 | `LIVE_STATUSES` | `Published,Invisible` | 这些状态的页面会上站，逗号分隔，和构建规则保持一致 |
@@ -92,6 +95,8 @@ Pages 的部署列表接口需要一个带 `Pages Read` 权限的 API Token（[L
 3. 如果数据库是嵌在某个父页面里的，在父页面上做同样的操作也行，权限会继承下来。
 
 手机 App 也能做：数据库页面右上 `···` → Connections → 添加。
+
+配置表也要能被 `blog-autodeploy` 集成读到：它是已共享主库下页面里的内嵌表，通常继承权限；查不到时日志会有脱敏的 warn，不影响文章检测。
 
 ### 4. 建 KV、填密钥、部署
 
@@ -141,13 +146,15 @@ npx wrangler secret put DEPLOY_HOOK_URL
    - `no-change`：没有需要上线的变化
    - `waiting`：有改动，但还没安静满 10 分钟
    - `capped`：今天已经发满 `MAX_BUILDS_PER_DAY` 次
-   - `deployed`：已经 POST Deploy Hook，`reasons` 是触发原因：`edited`、`scheduled`、`removed`
+   - `deployed`：已经 POST Deploy Hook，`reasons` 是触发原因：`edited`、`scheduled`、`removed`、`config`（配置表改动）；文章与配置同时改动时可同时有 `edited` 和 `config`
    - `building`：等构建完成
    - `confirmed`：RSS 显示新构建已上线，`builtAt` 是构建时间
    - `retried`：超过 `CONFIRM_MINUTES` 没等到，已经重新 POST
    - `build-timeout`：超时了，但今天已经发满，放弃这一次
    - `config-error`：密钥形状不对，这一轮什么都不做。`DEPLOY_HOOK_URL` 必须以 `https://api.cloudflare.com/` 开头，`NOTION_TOKEN` 必须以 `ntn_` 或 `secret_` 开头。比如把 Notion token 误填进了 `DEPLOY_HOOK_URL`
    - `error`：请求 Notion 或 Hook 出错。报错先清洗再打日志：两个密钥的原值、形如 `ntn_…` / `secret_…` 的字符串、`deploy_hooks/<id>` 都换成 `[redacted]`，URL 解析失败只记 `invalid DEPLOY_HOOK_URL (not an https URL)`，日志里不会出现密钥原文
+
+   常规改动检查的结果还带 `config`：`skipped`（未配置）、`ok`（查询成功，不代表有改动）、`failed`（查询失败）。配置查询失败（包括 404、429、网络错误）会额外打一条 `action: 'config-query-failed'` 的脱敏 warn，当次按没有配置改动继续检测文章，下次检查再尝试。
 
 2. 查当前状态（只有时间、计数和线上页面数，没有密钥和页面 id；`configError` 不是 `null` 就说明密钥填错了，内容是哪一项不对，不含原值）：`https://notion-autodeploy.<你的子域>.workers.dev/status`
 

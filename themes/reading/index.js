@@ -31,7 +31,7 @@ const NotionPage = dynamic(() =>
 import Toc, { useActiveHeading } from './components/Toc'
 import BookmarkCord from './components/BookmarkCord'
 import { ReadingProgress, RelatedPosts, SeriesBox, dekOf, getRelatedPosts, getSeries } from './components/Article'
-import { FontSizeControl, FontSizeScript, PageViews, RecentComments, ShareLink, SourceNote, StaleNote, sourceOf, useFootnotes, useImageFallback, useZoomKeyboard } from './components/ArticleTools'
+import { PageViews, RecentComments, ShareLink, SourceNote, StaleNote, sourceOf, useFootnotes, useImageFallback, useZoomKeyboard } from './components/ArticleTools'
 import CONFIG from './config'
 import { usePageFont } from './components/PageFont'
 import { Style } from './style'
@@ -433,7 +433,6 @@ const LayoutSlug = props => {
   const path = `/${post.slug}`
   return (
     <div className='reading-shell'>
-      <FontSizeScript />
       <a className='skip-link' href='#article-wrapper'>
         跳到正文
       </a>
@@ -443,7 +442,6 @@ const LayoutSlug = props => {
           全部文章
         </PageLink>
         {!lock && <Toc toc={post.toc} active={activeHeading} />}
-        {!lock && !isGallery && <FontSizeControl />}
         <div className='sidebar-note'>
           <p>{siteConfig('READING_SIDEBAR_NOTE', null, CONFIG)}</p>
           <span>{siteConfig('AUTHOR')}</span>
@@ -492,7 +490,6 @@ const LayoutSlug = props => {
         </header>
         <SeriesBox series={series} />
         {!lock && <Toc toc={post.toc} active={activeHeading} mobile />}
-        {!lock && !isGallery && <FontSizeControl className='font-size-mobile' />}
         {lock ? (
           <form
             className='post-lock'

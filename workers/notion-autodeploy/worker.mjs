@@ -1,7 +1,7 @@
 // Poll the blog's Notion database on a cron and POST the Cloudflare Pages
 // Deploy Hook when the live site is out of date: published pages edited and
-// quiet for QUIET_MINUTES, pages unpublished or deleted, or scheduled pages
-// whose date has arrived. A build only counts once the site's RSS
+// quiet for QUIET_MINUTES, config rows edited, pages unpublished or deleted,
+// or scheduled pages whose date has arrived. A build only counts once the site's RSS
 // lastBuildDate shows it finished; otherwise it is retried.
 
 const STATE_KEY = 'state'
@@ -10,7 +10,8 @@ const MINUTE_MS = 60 * 1000
 // Daily build cap counts days in UTC+8, so the reset lands at Beijing midnight.
 const DAY_OFFSET_MS = 8 * 60 * MINUTE_MS
 
-let dataSourceCache
+// Keep each database's data source separate in warm isolates.
+const dataSourcesByDatabase = new Map()
 
 export default {
   async scheduled(controller, env, ctx) {
@@ -116,11 +117,28 @@ export async function check(env, nowMs) {
     if (!liveStatuses.has(page.status) && !(page.id in state.live)) continue
     if (!latest || Date.parse(page.edited) > Date.parse(latest)) latest = page.edited
   }
+  if (latest) reasons.push('edited')
+
+  // Inline database edits do not update the parent page's edit time.
+  let config = 'skipped'
+  if (env.CONFIG_DATABASE_ID) {
+    try {
+      const edited = await configEditedSince(env, state.cutoff)
+      config = 'ok'
+      if (edited) {
+        reasons.push('config')
+        if (!latest || Date.parse(edited) > Date.parse(latest)) latest = edited
+      }
+    } catch (error) {
+      // Config access failures must not block article updates.
+      config = 'failed'
+      console.warn(JSON.stringify({ at, action: 'config-query-failed', error: redact(env, error) }))
+    }
+  }
   const quietMs = Number(env.QUIET_MINUTES || 10) * MINUTE_MS
   if (latest && nowMs - Date.parse(latest) < quietMs) {
-    return { at, action: 'waiting', latest }
+    return { at, action: 'waiting', latest, config }
   }
-  if (latest) reasons.push('edited')
 
   // Scheduled pages that were held back at the last build and are due now.
   if (Object.values(state.live).some(start => start > lastBuildMs && start <= nowMs)) {
@@ -138,10 +156,10 @@ export async function check(env, nowMs) {
     if (removed) reasons.push('removed')
   }
 
-  if (!reasons.length) return { at, action: 'no-change', cutoff: state.cutoff }
+  if (!reasons.length) return { at, action: 'no-change', cutoff: state.cutoff, config }
 
   const { day, count } = todayCount(state, now)
-  if (count >= buildCap(env)) return { at, action: 'capped', reasons, count }
+  if (count >= buildCap(env)) return { at, action: 'capped', reasons, count, config }
 
   // Snapshot before the hook: anything changed after this is newer than the
   // build and gets picked up next time.
@@ -161,7 +179,7 @@ export async function check(env, nowMs) {
   } else {
     await save(env, { ...state, day, count: count + 1, pending })
   }
-  return { at, action: 'deployed', reasons, latest, count: count + 1 }
+  return { at, action: 'deployed', reasons, latest, count: count + 1, config }
 }
 
 async function postHook(env) {
@@ -228,6 +246,30 @@ async function editedSince(env, cutoff) {
   return results
     .map(page => readPage(env, page))
     .filter(page => Date.parse(page.edited) > Date.parse(cutoff))
+}
+
+// Config rows have no status/date columns; every row edit counts.
+async function configEditedSince(env, cutoff) {
+  const dataSourceId = env.CONFIG_DATA_SOURCE_ID ||
+    (await resolveDataSource(env, env.CONFIG_DATABASE_ID))
+  const res = await fetch(`${apiBase(env)}/v1/data_sources/${dataSourceId}/query`, {
+    method: 'POST',
+    headers: notionHeaders(env),
+    body: JSON.stringify({
+      filter: {
+        timestamp: 'last_edited_time',
+        last_edited_time: { after: cutoff }
+      },
+      sorts: [{ timestamp: 'last_edited_time', direction: 'descending' }],
+      page_size: 1
+    })
+  })
+  if (!res.ok) {
+    throw new Error(`Notion config query failed: ${res.status} ${await res.text()}`)
+  }
+  const { results } = await res.json()
+  const edited = results[0]?.last_edited_time
+  return Date.parse(edited) > Date.parse(cutoff) ? edited : null
 }
 
 // Every page with a live status, as { pageId: publishTimeMs }. Trashed pages
@@ -302,10 +344,10 @@ async function siteBuiltAt(env) {
   }
 }
 
-async function resolveDataSource(env) {
-  if (dataSourceCache) return dataSourceCache
+async function resolveDataSource(env, databaseId = env.NOTION_DATABASE_ID) {
+  if (dataSourcesByDatabase.has(databaseId)) return dataSourcesByDatabase.get(databaseId)
   const res = await fetch(
-    `${apiBase(env)}/v1/databases/${env.NOTION_DATABASE_ID}`,
+    `${apiBase(env)}/v1/databases/${databaseId}`,
     { headers: notionHeaders(env) }
   )
   if (!res.ok) {
@@ -313,8 +355,8 @@ async function resolveDataSource(env) {
   }
   const { data_sources: sources } = await res.json()
   if (!sources?.length) throw new Error('Notion database has no data source')
-  dataSourceCache = sources[0].id
-  return dataSourceCache
+  dataSourcesByDatabase.set(databaseId, sources[0].id)
+  return sources[0].id
 }
 
 function save(env, state) {

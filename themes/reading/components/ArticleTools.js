@@ -4,53 +4,9 @@ import CONFIG from '../config'
 import { PageLink, postDay } from './Frame'
 
 /**
- * 文章页的小工具：字号、复制链接、阅读量、过时提示、最近评论、脚注
+ * 文章页的小工具：复制链接、阅读量、过时提示、最近评论、脚注
  * 都只在 effect 里碰 window / localStorage / 网络，渲染结果只看 props，SSR 和首帧一致
  */
-
-const SIZE_KEY = 'reading-font-size'
-const SIZES = [
-  ['s', '小'],
-  ['m', '中'],
-  ['l', '大']
-]
-
-/** 首帧前把保存的字号写到 <html data-reading-size>，免得先按默认字号排一遍再跳 */
-export const FontSizeScript = () => (
-  <script
-    dangerouslySetInnerHTML={{
-      __html: `try{var s=localStorage.getItem('${SIZE_KEY}');if(s==='s'||s==='l')document.documentElement.dataset.readingSize=s}catch(e){}`
-    }}
-  />
-)
-
-/** 正文字号：小 / 中 / 大，存 localStorage；默认档不写属性，没 JS 时就是 CSS 里的默认字号 */
-export const FontSizeControl = ({ className = '' }) => {
-  const [size, setSize] = useState('m')
-  useEffect(() => {
-    setSize(document.documentElement.dataset.readingSize || 'm')
-  }, [])
-  const choose = s => {
-    setSize(s)
-    const root = document.documentElement
-    if (s === 'm') delete root.dataset.readingSize
-    else root.dataset.readingSize = s
-    try {
-      if (s === 'm') localStorage.removeItem(SIZE_KEY)
-      else localStorage.setItem(SIZE_KEY, s)
-    } catch {}
-  }
-  return (
-    <div className={`font-size ${className}`} role='group' aria-label='正文字号'>
-      <span aria-hidden='true'>字号</span>
-      {SIZES.map(([key, label]) => (
-        <button key={key} type='button' aria-pressed={size === key} aria-label={`正文字号：${label}`} onClick={() => choose(key)}>
-          {label}
-        </button>
-      ))}
-    </div>
-  )
-}
 
 /** 复制链接：等剪贴板真的写进去才说「已复制」；被浏览器拒绝时露出地址让人手动复制。支持系统分享时多一个「分享」 */
 export const ShareLink = ({ url, title }) => {
