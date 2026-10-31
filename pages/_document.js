@@ -1,5 +1,6 @@
 // eslint-disable-next-line @next/next/no-document-import-in-page
 import BLOG from '@/blog.config'
+import { getReadingInitScript, resolveReadingDefaults } from '@/lib/readingPreferences'
 import Document, { Head, Html, Main, NextScript } from 'next/document'
 
 const isLocalFontAwesome = BLOG.FONT_AWESOME?.startsWith(
@@ -51,9 +52,13 @@ class MyDocument extends Document {
   }
 
   render() {
+    const readingDefaults = isReadingTheme
+      ? resolveReadingDefaults(this.props.__NEXT_DATA__?.props?.pageProps?.NOTION_CONFIG)
+      : undefined
     return (
-      <Html lang={BLOG.LANG}>
+      <Html lang={BLOG.LANG} data-reading-defaults={readingDefaults ? JSON.stringify(readingDefaults) : undefined}>
         <Head>
+          {isReadingTheme && <script dangerouslySetInnerHTML={{ __html: getReadingInitScript() }} />}
           {!isReadingTheme && (
             <>
               <link rel='preconnect' href='https://images.unsplash.com' />
@@ -135,7 +140,7 @@ class MyDocument extends Document {
           )}
 
           {/* 预先设置深色模式，避免闪烁 */}
-          <script dangerouslySetInnerHTML={{ __html: darkModeScript }} />
+          {!isReadingTheme && <script dangerouslySetInnerHTML={{ __html: darkModeScript }} />}
         </Head>
 
         <body>

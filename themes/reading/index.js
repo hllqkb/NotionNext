@@ -3,6 +3,7 @@
 import { ownImageSources } from '@/lib/db/notion/ownImages'
 import dynamic from 'next/dynamic'
 import { siteConfig } from '@/lib/config'
+import { scrollBehavior } from '@/lib/readingPreferences'
 import { isBrowser } from '@/lib/utils'
 import { useRouter } from 'next/router'
 import { useEffect, useRef, useState } from 'react'
@@ -31,7 +32,7 @@ const NotionPage = dynamic(() =>
 import Toc, { useActiveHeading } from './components/Toc'
 import BookmarkCord from './components/BookmarkCord'
 import { ReadingProgress, RelatedPosts, SeriesBox, dekOf, getRelatedPosts, getSeries } from './components/Article'
-import { FontSizeControl, FontSizeScript, PageViews, RecentComments, ShareLink, SourceNote, StaleNote, sourceOf, useFootnotes, useImageFallback, useZoomKeyboard } from './components/ArticleTools'
+import { PageViews, RecentComments, ShareLink, SourceNote, StaleNote, sourceOf, useFootnotes, useImageFallback, useZoomKeyboard } from './components/ArticleTools'
 import CONFIG from './config'
 import { usePageFont } from './components/PageFont'
 import { Style } from './style'
@@ -433,7 +434,6 @@ const LayoutSlug = props => {
   const path = `/${post.slug}`
   return (
     <div className='reading-shell'>
-      <FontSizeScript />
       <a className='skip-link' href='#article-wrapper'>
         跳到正文
       </a>
@@ -443,7 +443,6 @@ const LayoutSlug = props => {
           全部文章
         </PageLink>
         {!lock && <Toc toc={post.toc} active={activeHeading} />}
-        {!lock && !isGallery && <FontSizeControl />}
         <div className='sidebar-note'>
           <p>{siteConfig('READING_SIDEBAR_NOTE', null, CONFIG)}</p>
           <span>{siteConfig('AUTHOR')}</span>
@@ -492,7 +491,6 @@ const LayoutSlug = props => {
         </header>
         <SeriesBox series={series} />
         {!lock && <Toc toc={post.toc} active={activeHeading} mobile />}
-        {!lock && !isGallery && <FontSizeControl className='font-size-mobile' />}
         {lock ? (
           <form
             className='post-lock'
@@ -577,7 +575,7 @@ const LayoutSlug = props => {
         {!lock && isArticle && siteConfig('READING_RECENT_COMMENTS', false, CONFIG) && <RecentComments path={path} />}
         <footer className='article-footer'>
           <PageLink href='/'>返回文章列表</PageLink>
-          <a href='#content' onClick={e => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>
+          <a href='#content' onClick={e => { e.preventDefault(); window.scrollTo({ top: 0, behavior: scrollBehavior() }) }}>
             回到页首
           </a>
         </footer>

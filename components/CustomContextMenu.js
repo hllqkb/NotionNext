@@ -14,7 +14,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 export default function CustomContextMenu(props) {
   const [position, setPosition] = useState({ x: '0px', y: '0px' })
   const [show, setShow] = useState(false)
-  const { isDarkMode, updateDarkMode, locale } = useGlobal()
+  const { isDarkMode, updateDarkMode, toggleDarkMode, locale } = useGlobal()
   const menuRef = useRef(null)
   const windowSize = useWindowSize()
   const [width, setWidth] = useState(0)
@@ -132,6 +132,10 @@ export default function CustomContextMenu(props) {
   }
 
   function handleChangeDarkMode() {
+    if (document.documentElement.dataset.readingChoice !== undefined) {
+      toggleDarkMode()
+      return
+    }
     const newStatus = !isDarkMode
     saveDarkModeToLocalStorage(newStatus)
     updateDarkMode(newStatus)

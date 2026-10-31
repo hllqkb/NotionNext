@@ -39,7 +39,8 @@ const Style = () => {
         font: 400 18px/1.8 var(--font);
         min-height: 100vh;
       }
-      .dark #theme-reading {
+      .dark #theme-reading,
+      html[data-reading-theme='night'] #theme-reading {
         --paper: #1c1b18;
         --sidebar: #24221e;
         --ink: #e6e2d8;
@@ -53,6 +54,52 @@ const Style = () => {
         --edge-rule: #39352c;
         --edge-rule-soft: #2e2b24;
       }
+      html[data-reading-theme='paper'] #theme-reading {
+        --paper: #f7f6f0; --sidebar: #f0eee7; --ink: #34352e; --muted: #6b6b61;
+        --line: #dfdfd4; --line-soft: #e8e7df; --accent: #aa533b;
+        --quote-bg: #f0ede5; --code-bg: #eeece5;
+        --code-block-bg: #f1efe7; --code-block-head: #f1efe7;
+        --paper-edge: #f2f0e8; --edge-rule: #ded8ca; --edge-rule-soft: #e8e3d7;
+      }
+      html[data-reading-theme='green'] #theme-reading {
+        --paper: #e7efe3; --sidebar: #e0e9dc; --ink: #29372b; --muted: #52644f;
+        --line: #bfcdb9; --line-soft: #cfdbca; --accent: #92462f;
+        --quote-bg: #dce6d8; --code-bg: #dfe7db;
+        --code-block-bg: #dfe7db; --code-block-head: #dfe7db;
+        --code-number: #805817;
+        --ink-tint: var(--quote-bg);
+        --paper-edge: #dfe8d9; --edge-rule: #b6c5af; --edge-rule-soft: #cbd6c4;
+      }
+      html[data-reading-theme='white'] #theme-reading {
+        --paper: #ffffff; --sidebar: #f5f5f5; --ink: #242424; --muted: #666666;
+        --line: #d4d4d4; --line-soft: #e8e8e8; --accent: #aa533b;
+        --quote-bg: #f3f3f3; --code-bg: #f1f1f1;
+        --code-block-bg: #f3f3f3; --code-block-head: #f3f3f3;
+        --ink-tint: var(--quote-bg);
+        --paper-edge: #f7f7f7; --edge-rule: #dedede; --edge-rule-soft: #e8e8e8;
+      }
+      html[data-reading-theme='ink'] #theme-reading {
+        --paper: #ffffff; --sidebar: #ffffff; --ink: #000000; --muted: #333333;
+        --line: #777777; --line-soft: #cccccc; --accent: #000000;
+        --quote-bg: #f5f5f5; --code-bg: #f5f5f5;
+        --code-block-bg: #ffffff; --code-block-head: #ffffff;
+        --ink-tint: var(--quote-bg);
+        --paper-edge: #ffffff; --edge-rule: #ffffff; --edge-rule-soft: #ffffff;
+        background-image: none;
+      }
+      html[data-reading-font='song'] #theme-reading { --font: 'Songti SC', STSong, SimSun, 'Noto Serif CJK SC', 'Source Han Serif SC', serif; }
+      html[data-reading-font='hei'] #theme-reading { --font: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Source Han Sans SC', sans-serif; }
+      html[data-reading-font='system'] #theme-reading { --font: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+      /* body 默认是全站 FONT_SANS（文楷打头），主题外的零星文字也会拉文楷切片；选本机字体时一起换掉 */
+      html[data-reading-font='song'] body { font-family: 'Songti SC', STSong, SimSun, 'Noto Serif CJK SC', 'Source Han Serif SC', serif; }
+      html[data-reading-font='hei'] body { font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Source Han Sans SC', sans-serif; }
+      html[data-reading-font='system'] body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+      html[data-reading-leading='compact'] #theme-reading { --leading: 1.65; }
+      html[data-reading-leading='standard'] #theme-reading { --leading: 1.85; }
+      html[data-reading-leading='loose'] #theme-reading { --leading: 2.05; }
+      html[data-reading-width='narrow'] #theme-reading { --measure: 600px; }
+      html[data-reading-width='standard'] #theme-reading { --measure: 680px; }
+      html[data-reading-width='wide'] #theme-reading { --measure: 760px; }
       @media (max-width: 520px) {
         #theme-reading {
           --edge-width: 16px;
@@ -63,6 +110,13 @@ const Style = () => {
       @media print { #theme-reading { background-image: none; } }
       .dark body { background: #1c1b18; }
       body { background: #f7f6f0; }
+      html[data-reading-theme='paper'] { --reading-paper: #f7f6f0; }
+      html[data-reading-theme='green'] { --reading-paper: #e7efe3; }
+      html[data-reading-theme='night'] { --reading-paper: #1c1b18; }
+      html[data-reading-theme='white'], html[data-reading-theme='ink'] { --reading-paper: #ffffff; }
+      html[data-reading-theme], html[data-reading-theme] body { background: var(--reading-paper); }
+      /* 切配色时不沿用旧控件的颜色过渡 */
+      html[data-reading-theme] #theme-reading :is(.code-frame-head, .code-frame button, .page-card, .toc a, .sort-toggle button, .sk-card) { transition: none; }
       /* 一直留出滚动条的位置：页面从短变长出现滚动条时，居中的版心不会整体横移 */
       html { scrollbar-gutter: stable; }
 
@@ -79,6 +133,42 @@ const Style = () => {
       #theme-reading .masthead nav { display: flex; gap: 28px; font-size: 16px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
       #theme-reading .masthead nav .active { color: var(--accent); }
       #theme-reading .masthead button { background: none; border: 0; color: inherit; font: inherit; cursor: pointer; padding: 0; }
+
+      /* 阅读设置：固定入口尺寸，面板只用系统字体 */
+      #theme-reading .reading-settings-anchor { position: relative; display: flex; flex: none; }
+      #theme-reading .masthead .reading-settings-trigger { display: grid; place-items: center; width: 44px; height: 44px; }
+      #theme-reading .reading-settings {
+        position: absolute; inset: 52px 0 auto auto; z-index: 40;
+        box-sizing: border-box; width: 360px; max-width: calc(100vw - 40px);
+        max-height: calc(100dvh - 140px); overflow-y: auto; overscroll-behavior: contain;
+        margin: 0; padding: 16px; border: 1px solid var(--ink); border-radius: 2px;
+        color: var(--ink); background: var(--paper);
+        font: 400 16px/1.5 system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      }
+      #theme-reading .reading-settings[open] { animation: reading-settings-in 120ms var(--ease); }
+      #theme-reading .reading-settings::backdrop { background: rgb(0 0 0 / .35); }
+      #theme-reading .reading-settings-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 8px; }
+      #theme-reading .reading-settings h2 { font: inherit; font-weight: 600; margin: 0; }
+      #theme-reading .reading-settings button { min-width: 44px; min-height: 44px; padding: 8px; font: inherit; color: var(--ink); }
+      #theme-reading .reading-settings fieldset { min-width: 0; margin: 0 0 12px; padding: 0; border: 0; }
+      #theme-reading .reading-settings legend { padding: 0; margin-bottom: 6px; color: var(--muted); font-size: 14px; }
+      #theme-reading .reading-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+      #theme-reading .reading-options-font, #theme-reading .reading-paragraph { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      #theme-reading .reading-option { position: relative; display: flex; align-items: center; justify-content: center; gap: 5px; min-width: 0; min-height: 44px; padding: 6px; border: 1px solid var(--line); cursor: pointer; }
+      #theme-reading .reading-option:has(input:checked) { border-color: var(--ink); outline: 1px solid var(--ink); outline-offset: -2px; }
+      #theme-reading .reading-option:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+      #theme-reading .reading-option input { flex: none; width: 16px; height: 16px; margin: 0; accent-color: var(--ink); }
+      #theme-reading .reading-option span { font-size: 14px; overflow-wrap: anywhere; }
+      #theme-reading .reading-settings .reading-settings-reset { width: 100%; border: 1px solid var(--ink); margin-top: 4px; }
+      #theme-reading .reading-settings-note, #theme-reading .reading-settings-status { font-size: 13px; line-height: 1.5; margin: 10px 0 0; color: var(--muted); }
+      #theme-reading .reading-settings-status:empty { display: none; }
+      @keyframes reading-settings-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+      @media (max-width: 520px) {
+        #theme-reading .reading-settings { position: fixed; inset: auto 0 0; width: 100%; max-width: none; max-height: 70dvh; padding: 16px 16px calc(16px + env(safe-area-inset-bottom)); border-radius: 8px 8px 0 0; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #theme-reading .reading-settings[open] { animation: none; }
+      }
 
       /* 首页大标题 */
       #theme-reading .intro { display: flex; align-items: flex-end; justify-content: space-between; gap: 40px; padding: 46px 0 36px; }
@@ -247,13 +337,13 @@ const Style = () => {
          浅色对 #f1efe7、深色对 #23211d 都在 4.6:1 以上；注释用 muted 正体，不用斜体 */
       #theme-reading .prose pre.notion-code code, #theme-reading .prose pre.notion-code .token { text-shadow: none; }
       #theme-reading .prose pre.notion-code code { color: var(--ink); }
-      #theme-reading .prose .token:is(.comment, .prolog, .cdata, .doctype) { color: #6b6b61; font-style: normal; }
+      #theme-reading .prose .token:is(.comment, .prolog, .cdata, .doctype) { color: var(--muted); font-style: normal; }
       #theme-reading .prose .token:is(.punctuation, .operator, .variable, .parameter, .interpolation-punctuation) { color: #5a5b52; }
       #theme-reading .prose .token:is(.keyword, .atrule, .important, .rule, .selector, .null, .nil) { color: #8a4a3a; }
       #theme-reading .prose .token:is(.tag, .deleted, .symbol, .title, .regex-delimiter) { color: #94402e; }
       #theme-reading .prose .token:is(.function, .function-variable, .class-name, .namespace, .url, .builtin, .maybe-class-name) { color: #3f5f6e; }
       #theme-reading .prose .token:is(.string, .char, .attr-value, .regex, .inserted, .template-string, .code-snippet) { color: #5b6838; }
-      #theme-reading .prose .token:is(.number, .boolean, .constant, .property, .attr-name, .entity, .unit, .hexcode) { color: #8a611b; }
+      #theme-reading .prose .token:is(.number, .boolean, .constant, .property, .attr-name, .entity, .unit, .hexcode) { color: var(--code-number, #8a611b); }
       /* Markdown 里粗体、斜体、删除线、链接的文字是嵌套的 .token.content，跟随外层颜色；命名空间不再降透明度 */
       #theme-reading .prose .token .token.content { color: inherit; }
       #theme-reading .prose .token.namespace { opacity: 1; }
@@ -577,10 +667,18 @@ const Style = () => {
 
       /* article-page */
       /* 正文栏收到 680px（一行约 34 字），两栏整体居中 */
-      #theme-reading .reading-shell { grid-template-columns: 216px minmax(0, 680px); justify-content: center; }
+      #theme-reading .reading-shell { grid-template-columns: 216px minmax(0, var(--measure, 680px)); justify-content: center; }
       /* 正文节奏：notion.css 的 .notion-text 写死了 margin: 1px 0 !important，这里按主题覆盖回来 */
-      #theme-reading .prose .notion-text { margin: 0 0 1em !important; padding: 0 !important; line-height: 1.85; text-wrap: pretty; }
-      #theme-reading .prose .notion-list li { line-height: 1.85; }
+      #theme-reading .prose .notion-text { margin: 0 0 1em !important; padding: 0 !important; line-height: var(--leading, 1.85); text-wrap: pretty; }
+      #theme-reading .prose .notion-list li { line-height: var(--leading, 1.85); }
+      html[data-reading-indent='on'] #theme-reading .prose .notion-text { text-indent: 2em; }
+      html[data-reading-indent='on'] #theme-reading .prose :is(.notion-text-children, .notion-toggle, .notion-list, li, .notion-quote, blockquote, .notion-callout, .notion-table, table, .notion-simple-table, .notion-asset-wrapper, figcaption, .notion-asset-caption, .fn-def, .notion-h, pre, .notion-code),
+      html[data-reading-indent='on'] #theme-reading .prose :is(.notion-text-children, .notion-toggle, .notion-list, li, .notion-quote, blockquote, .notion-callout, .notion-table, table, .notion-simple-table, .notion-asset-wrapper, figcaption, .notion-asset-caption, .fn-def, .notion-h, pre, .notion-code) .notion-text,
+      html[data-reading-indent='on'] #theme-reading .prose .notion-text.fn-def { text-indent: 0; }
+      html[data-reading-align='justify'] #theme-reading .prose :is(.notion-text, .notion-list li) { text-align: justify; text-align-last: start; text-wrap: wrap; }
+      @supports (text-justify: inter-character) {
+        html[data-reading-align='justify'] #theme-reading .prose :is(.notion-text, .notion-list li) { text-justify: inter-character; }
+      }
       #theme-reading .prose :is(.notion-list, .notion-callout, .notion-quote, .notion-toggle) .notion-text { margin: 0 0 .35em !important; }
       #theme-reading .prose :is(.notion-list, .notion-callout, .notion-quote, .notion-toggle) .notion-text:last-child { margin-bottom: 0 !important; }
       #theme-reading .article-head h1,
@@ -657,7 +755,7 @@ const Style = () => {
       #theme-reading .subscribe-feed { overflow-wrap: anywhere; }
 
       @media (max-width: 1050px) {
-        #theme-reading .reading-shell { grid-template-columns: 190px minmax(0, 680px); }
+        #theme-reading .reading-shell { grid-template-columns: 190px minmax(0, var(--measure, 680px)); }
       }
       /* 手机：侧栏整个藏起来，目录收成标题下面的一条，默认合上 */
       @media (max-width: 800px) {
@@ -806,12 +904,6 @@ const Style = () => {
       /* 正文字号三档：默认档仍是上面的 20px / 手机 18px，没 JS 时不受影响 */
       html[data-reading-size='s'] #theme-reading .prose { font-size: 18px; }
       html[data-reading-size='l'] #theme-reading .prose { font-size: 22px; }
-      #theme-reading .font-size { display: flex; align-items: center; gap: 14px; border-top: 1px solid var(--line); margin-top: 18px; padding-top: 14px; font-size: 13px; }
-      #theme-reading .font-size > span { margin-right: auto; }
-      #theme-reading .font-size button { min-width: 24px; height: 28px; padding: 0 2px; border: 0; border-bottom: 1.5px solid transparent; border-radius: 0; background: transparent; color: var(--muted); font: inherit; cursor: pointer; }
-      #theme-reading .font-size button:hover { color: var(--accent); }
-      #theme-reading .font-size button[aria-pressed='true'] { color: var(--accent); border-bottom-color: var(--accent); }
-      #theme-reading .font-size-mobile { display: none; }
 
       /* 复制链接 / 分享 */
       #theme-reading .share-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 22px; margin-top: 12px; }
@@ -845,9 +937,6 @@ const Style = () => {
       #theme-reading .skip-link:focus { transform: none; color: var(--paper); }
       #theme-reading :is(a, button, summary, input):focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
 
-      @media (max-width: 800px) {
-        #theme-reading .font-size-mobile { display: flex; margin: -14px 0 28px; padding-top: 0; border-top: 0; }
-      }
       @media (max-width: 520px) {
         html[data-reading-size='s'] #theme-reading .prose { font-size: 16px; }
         html[data-reading-size='l'] #theme-reading .prose { font-size: 20px; }
@@ -912,6 +1001,21 @@ const Style = () => {
       /* 附件：方角，悬停只变色 */
       #theme-reading .prose .notion-file-link { border-radius: 0; }
       #theme-reading .prose .notion-file-link:hover { background: none; color: var(--accent); }
+
+      /* 墨水屏只留黑灰高亮，关闭纸面装饰和动效 */
+      html[data-reading-theme='green'] #theme-reading .photo-frame,
+      html[data-reading-theme='white'] #theme-reading .photo-frame,
+      html[data-reading-theme='ink'] #theme-reading .photo-frame { background: var(--sidebar); }
+      html[data-reading-theme='ink'] #theme-reading ::selection { background: #dddddd; color: #000000; }
+      html[data-reading-theme='ink'] #theme-reading .prose .token { color: #333333 !important; background: transparent !important; }
+      html[data-reading-theme='ink'] #theme-reading .prose .token:is(.keyword, .tag, .important) { color: #000000 !important; font-weight: 700; }
+      html[data-reading-theme='ink'],
+      html[data-reading-theme='ink'] #theme-reading,
+      html[data-reading-theme='ink'] #theme-reading *,
+      html[data-reading-theme='ink'] #theme-reading *::before,
+      html[data-reading-theme='ink'] #theme-reading *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+      html[data-reading-theme='ink'] #theme-reading.reveal-ready .reveal,
+      html[data-reading-theme='ink'] #theme-reading.reveal-ready .year-group.reveal li { opacity: 1; transform: none; }
 
     `}</style>
   )
