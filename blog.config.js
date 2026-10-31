@@ -18,7 +18,7 @@ const BLOG = {
 
   AUTHOR: process.env.NEXT_PUBLIC_AUTHOR || '水啊', // 您的昵称 例如 tangly1024
   BIO: process.env.NEXT_PUBLIC_BIO || '软件工程在读，后端开发实习生。喜欢做小工具，也写点生活。', // 作者简介
-  LINK: process.env.NEXT_PUBLIC_LINK || 'https://hllqkb-blog.pages.dev', // 绑定自定义域名后改成域名 // 网站地址
+  LINK: process.env.NEXT_PUBLIC_LINK || 'https://hllqk.cn', // 网站地址（自定义域名；hllqkb-blog.pages.dev 仍可访问）
   KEYWORDS: process.env.NEXT_PUBLIC_KEYWORD || '水啊, 博客, 后端开发, 搜索推荐, AI 编程', // 网站关键词 英文逗号隔开
   SEO_OG_IMAGE: process.env.NEXT_PUBLIC_SEO_OG_IMAGE || '/og-default.png', // 站点默认分享图 1200x630；文章有封面时用文章封面。留空则回退到 Notion 站点封面
   BLOG_FAVICON: process.env.NEXT_PUBLIC_FAVICON || '/favicon.ico', // blog favicon 配置, 默认使用 /public/favicon.ico，支持在线图片，如 https://img.imesong.com/favicon.png
