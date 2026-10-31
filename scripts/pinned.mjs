@@ -14,7 +14,7 @@ const REPOS_FILE = path.join('data', 'repos.json')
 const REPO_COUNT = 6
 // 博客本身的仓库（NotionNext 的 fork）：固定展示，状态「进行中」
 const BLOG_REPO = 'NotionNext'
-const BLOG_HOMEPAGE = 'https://hllqkb-blog.pages.dev'
+const BLOG_HOMEPAGE = 'https://hllqk.cn'
 const BLOG_DESCRIPTION = '就是这个博客：NotionNext 的 fork，自写 reading 主题，文章在 Notion 里写。'
 // 其他博客类仓库（旧博客、Astro 版）也算「进行中」，但只在 star 排进前几名时出现
 const BLOG_LIKE = /^(blog|hllqkblog|hllqkb\.github\.io|notionnext)$/i
