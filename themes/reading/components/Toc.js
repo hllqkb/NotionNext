@@ -1,3 +1,4 @@
+import { scrollBehavior } from '@/lib/readingPreferences'
 import { uuidToId } from 'notion-utils'
 import { useEffect, useRef, useState } from 'react'
 
@@ -64,8 +65,7 @@ const Toc = ({ toc, active, mobile = false }) => {
     const target = document.querySelector(`[data-id="${id}"]`)
     if (target) {
       const top = target.getBoundingClientRect().top + window.scrollY - 24
-      const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-      window.scrollTo({ top, behavior: still ? 'auto' : 'smooth' })
+      window.scrollTo({ top, behavior: scrollBehavior() })
       history.pushState(null, '', `#${id}`)
     }
   }

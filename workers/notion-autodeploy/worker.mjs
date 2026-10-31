@@ -1,6 +1,6 @@
 // Poll the blog's Notion database on a cron and POST the Cloudflare Pages
 // Deploy Hook when the live site is out of date: published pages edited and
-// quiet for QUIET_MINUTES, config rows edited, pages unpublished or deleted,
+// quiet for QUIET_MINUTES, config rows edited/added/deleted, pages unpublished or deleted,
 // or scheduled pages whose date has arrived. A build only counts once the site's RSS
 // lastBuildDate shows it finished; otherwise it is retried.
 
@@ -60,13 +60,49 @@ export default {
 export async function check(env, nowMs) {
   const now = new Date(nowMs)
   const at = now.toISOString()
-  const state = await env.STATE.get(STATE_KEY, 'json')
+  let state = await env.STATE.get(STATE_KEY, 'json')
+
+  // Read every config row so archived/deleted rows can be detected by id.
+  let config = 'skipped'
+  let configSnapshot = null
+  if (env.CONFIG_DATABASE_ID) {
+    try {
+      configSnapshot = await scanConfig(env)
+      config = 'ok'
+    } catch (error) {
+      // Config access failures must not block article updates or erase ids.
+      config = 'failed'
+      console.warn(JSON.stringify({ at, action: 'config-query-failed', error: redact(env, error) }))
+    }
+  }
+
+  // Seed old states and recover from failed queries without treating the
+  // first usable id set as a change. Keep in-flight snapshots in pending.
+  let configStateChanged = false
+  if (configSnapshot) {
+    const snapshot = state?.pending || state
+    if (!Array.isArray(snapshot?.configIds) || state?.configQueryFailed) {
+      const configIds = configSnapshot.ids
+      state = state?.pending
+        ? { ...state, pending: { ...state.pending, configIds } }
+        : { ...state, configIds }
+      configStateChanged = true
+    }
+    if (state.configQueryFailed) {
+      state = { ...state, configQueryFailed: false }
+      configStateChanged = true
+    }
+  } else if (config === 'failed' && !state?.configQueryFailed) {
+    state = { ...state, configQueryFailed: true }
+    configStateChanged = true
+  }
 
   // First run, or state from the version without a live-page snapshot:
   // record what is online now instead of rebuilding for old edits.
   if (!state?.live) {
     const live = await scanLive(env)
     const next = {
+      ...state,
       cutoff: state?.cutoff ?? at,
       lastBuildAt: state?.lastBuildAt ?? state?.cutoff ?? at,
       day: state?.day ?? dayOf(now),
@@ -77,16 +113,21 @@ export async function check(env, nowMs) {
     return { at, action: 'init', cutoff: next.cutoff, live: Object.keys(live).length }
   }
 
+  if (configStateChanged) await save(env, state)
+
   if (state.pending) {
     const { pending } = state
     const builtAt = await siteBuiltAt(env)
     if (builtAt !== null && builtAt >= Date.parse(pending.hookAt)) {
       await save(env, {
+        ...state,
         cutoff: pending.cutoff,
         lastBuildAt: pending.hookAt,
         day: state.day,
         count: state.count,
-        live: pending.live
+        live: pending.live,
+        ...(pending.configIds && { configIds: pending.configIds }),
+        pending: null
       })
       return { at, action: 'confirmed', builtAt: new Date(builtAt).toISOString() }
     }
@@ -120,20 +161,13 @@ export async function check(env, nowMs) {
   if (latest) reasons.push('edited')
 
   // Inline database edits do not update the parent page's edit time.
-  let config = 'skipped'
-  if (env.CONFIG_DATABASE_ID) {
-    try {
-      const edited = await configEditedSince(env, state.cutoff)
-      config = 'ok'
-      if (edited) {
-        reasons.push('config')
-        if (!latest || Date.parse(edited) > Date.parse(latest)) latest = edited
-      }
-    } catch (error) {
-      // Config access failures must not block article updates.
-      config = 'failed'
-      console.warn(JSON.stringify({ at, action: 'config-query-failed', error: redact(env, error) }))
-    }
+  if (configSnapshot) {
+    const { edited, ids } = configSnapshot
+    const configEdited = Date.parse(edited) > Date.parse(state.cutoff)
+    const idsChanged = ids.length !== state.configIds.length ||
+      ids.some((id, index) => id !== state.configIds[index])
+    if (configEdited || idsChanged) reasons.push('config')
+    if (configEdited && (!latest || Date.parse(edited) > Date.parse(latest))) latest = edited
   }
   const quietMs = Number(env.QUIET_MINUTES || 10) * MINUTE_MS
   if (latest && nowMs - Date.parse(latest) < quietMs) {
@@ -166,15 +200,23 @@ export async function check(env, nowMs) {
   live ??= await scanLive(env)
   await postHook(env)
 
-  const pending = { hookAt: at, reasons, cutoff: latest ?? state.cutoff, live }
+  const pending = {
+    hookAt: at,
+    reasons,
+    cutoff: latest ?? state.cutoff,
+    live,
+    ...(configSnapshot && { configIds: configSnapshot.ids })
+  }
   if (!env.SITE_URL) {
     // Nothing to confirm against: treat the accepted hook as the build.
     await save(env, {
+      ...state,
       cutoff: pending.cutoff,
       lastBuildAt: at,
       day,
       count: count + 1,
-      live
+      live,
+      ...(pending.configIds && { configIds: pending.configIds })
     })
   } else {
     await save(env, { ...state, day, count: count + 1, pending })
@@ -248,28 +290,32 @@ async function editedSince(env, cutoff) {
     .filter(page => Date.parse(page.edited) > Date.parse(cutoff))
 }
 
-// Config rows have no status/date columns; every row edit counts.
-async function configEditedSince(env, cutoff) {
+// Config rows have no status/date columns; every row edit or id change counts.
+async function scanConfig(env) {
   const dataSourceId = env.CONFIG_DATA_SOURCE_ID ||
     (await resolveDataSource(env, env.CONFIG_DATABASE_ID))
-  const res = await fetch(`${apiBase(env)}/v1/data_sources/${dataSourceId}/query`, {
-    method: 'POST',
-    headers: notionHeaders(env),
-    body: JSON.stringify({
-      filter: {
-        timestamp: 'last_edited_time',
-        last_edited_time: { after: cutoff }
-      },
-      sorts: [{ timestamp: 'last_edited_time', direction: 'descending' }],
-      page_size: 1
+  const ids = []
+  let edited = null
+  let cursor
+  do {
+    const body = { page_size: 100 }
+    if (cursor) body.start_cursor = cursor
+    const res = await fetch(`${apiBase(env)}/v1/data_sources/${dataSourceId}/query`, {
+      method: 'POST',
+      headers: notionHeaders(env),
+      body: JSON.stringify(body)
     })
-  })
-  if (!res.ok) {
-    throw new Error(`Notion config query failed: ${res.status} ${await res.text()}`)
-  }
-  const { results } = await res.json()
-  const edited = results[0]?.last_edited_time
-  return Date.parse(edited) > Date.parse(cutoff) ? edited : null
+    if (!res.ok) {
+      throw new Error(`Notion config query failed: ${res.status} ${await res.text()}`)
+    }
+    const data = await res.json()
+    for (const page of data.results) {
+      ids.push(page.id)
+      if (!edited || Date.parse(page.last_edited_time) > Date.parse(edited)) edited = page.last_edited_time
+    }
+    cursor = data.has_more ? data.next_cursor : null
+  } while (cursor)
+  return { ids: ids.sort(), edited }
 }
 
 // Every page with a live status, as { pageId: publishTimeMs }. Trashed pages

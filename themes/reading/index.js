@@ -3,6 +3,7 @@
 import { ownImageSources } from '@/lib/db/notion/ownImages'
 import dynamic from 'next/dynamic'
 import { siteConfig } from '@/lib/config'
+import { scrollBehavior } from '@/lib/readingPreferences'
 import { isBrowser } from '@/lib/utils'
 import { useRouter } from 'next/router'
 import { useEffect, useRef, useState } from 'react'
@@ -574,7 +575,7 @@ const LayoutSlug = props => {
         {!lock && isArticle && siteConfig('READING_RECENT_COMMENTS', false, CONFIG) && <RecentComments path={path} />}
         <footer className='article-footer'>
           <PageLink href='/'>返回文章列表</PageLink>
-          <a href='#content' onClick={e => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>
+          <a href='#content' onClick={e => { e.preventDefault(); window.scrollTo({ top: 0, behavior: scrollBehavior() }) }}>
             回到页首
           </a>
         </footer>
