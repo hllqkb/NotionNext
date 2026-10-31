@@ -322,6 +322,11 @@ const Style = () => {
       #theme-reading .chip { padding: 2px 0; font-size: 17px; border-bottom: 1px solid transparent; }
       #theme-reading .chip:hover { border-bottom-color: currentColor; }
       #theme-reading .chip span { color: var(--muted); font-size: 13px; margin-left: 4px; }
+      /* 标签页不按字宽换行：字体替换前后列数、行高和计数占位一致，长标签仍可看 title / 完整链接文字 */
+      #theme-reading .tag-chips { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 12rem), 1fr)); }
+      #theme-reading .tag-chips .chip { display: flex; align-items: center; gap: 8px; min-width: 0; height: 44px; line-height: 30px; }
+      #theme-reading .tag-chips .tag-name { flex: 1; min-width: 0; margin: 0; color: inherit; font-size: inherit; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      #theme-reading .tag-chips .chip > span:not(.tag-name) { flex: none; width: 3em; margin: 0; text-align: right; }
       #theme-reading .list-head { padding: 40px 0 10px; }
       #theme-reading .list-head h1 { font-size: 44px; font-weight: 400; margin: 0; }
 
@@ -709,6 +714,33 @@ const Style = () => {
       #theme-reading .pick-title { min-width: 0; font-size: 17px; line-height: 1.6; overflow-wrap: anywhere; }
       #theme-reading .pick-meta { display: flex; gap: 10px; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
       #theme-reading .pick-meta > span { color: var(--accent); }
+      /* 桌面把封面放到文字右侧，不再额外叠一张约 370px 高的大图；手机仍按原来的顺序竖排 */
+      @media (min-width: 1000px) {
+        #theme-reading .lead-story.has-cover { display: grid; grid-template-columns: minmax(0, 1fr) 240px; grid-template-areas: 'meta cover' 'title cover' 'row cover'; column-gap: 28px; }
+        #theme-reading .lead-story.has-cover .lead-meta { grid-area: meta; }
+        #theme-reading .lead-story.has-cover h2 { grid-area: title; }
+        #theme-reading .lead-story.has-cover .lead-row { grid-area: row; }
+        #theme-reading .lead-story.has-cover .lead-cover { grid-area: cover; align-self: center; margin: 0; height: 160px; max-height: 200px; aspect-ratio: auto; }
+      }
+      /* 800 / 900px 高的桌面首屏：给三条荐读留出空间，摘要最多两行，完整内容仍从「阅读全文」进入 */
+      @media (min-width: 1000px) and (max-height: 900px) {
+        #theme-reading .intro { padding: 16px 0; }
+        #theme-reading .eyebrow { margin-bottom: 6px; }
+        #theme-reading .intro h1 { font-size: 48px; margin-bottom: 8px; }
+        #theme-reading .intro-text { font-size: 18px; }
+        #theme-reading .vertical-title { font-size: 14px; }
+        #theme-reading .vertical-title span { letter-spacing: .2em; }
+        #theme-reading .intro ~ .streak { padding-bottom: 8px; }
+        #theme-reading .intro ~ .collection-bar { padding: 6px 0; }
+        #theme-reading .intro ~ .filter-chips { padding: 10px 0 0; }
+        #theme-reading .lead-story { padding: 16px 0; }
+        #theme-reading .lead-meta { margin-bottom: 8px; }
+        #theme-reading .lead-story h2 { font-size: 26px; }
+        #theme-reading .lead-story p { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+        #theme-reading .reading-picks { padding: 16px 0 18px; }
+        #theme-reading .reading-picks h2 { margin-bottom: 8px; }
+        #theme-reading .reading-picks a { padding: 6px 0; }
+      }
       /* 无封面文章：右侧用一枚淡印章占住封面的位置 */
       /* 归档：按发布 / 最近更新 切换 */
       #theme-reading .archive-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; }

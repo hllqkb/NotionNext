@@ -112,8 +112,8 @@ const SearchBox = ({ keyword = '' }) => (
   </form>
 )
 
-// 最近一篇的大封面：本站图用多尺寸 WebP；首页内容区最宽 1080 - 2×56 = 968px，其余图片照原地址
-const LEAD_COVER_SIZES = '(max-width: 1080px) 100vw, 968px'
+// 最近一篇的封面：桌面是 240px 小图，窄屏占满版心；本站图用多尺寸 WebP，其余图片照原地址
+const LEAD_COVER_SIZES = '(min-width: 1000px) 240px, (max-width: 520px) calc(100vw - 40px), (max-width: 800px) calc(100vw - 48px), calc(100vw - 112px)'
 const LeadCoverImage = ({ src }) => {
   const own = ownImageSources(src)
   return (
@@ -618,10 +618,10 @@ const LayoutTagIndex = props => {
           标签<span className='title-period'>。</span>
         </h1>
       </header>
-      <div className='chips'>
+      <div className='chips tag-chips'>
         {tagOptions.map(t => (
-          <PageLink key={t.name} className='chip' href={`/tag/${encodeURIComponent(t.name)}`}>
-            {t.name}
+          <PageLink key={t.name} className='chip' href={`/tag/${encodeURIComponent(t.name)}`} title={t.name}>
+            <span className='tag-name'>{t.name}</span>
             {t.count ? <span>{t.count}</span> : null}
           </PageLink>
         ))}
