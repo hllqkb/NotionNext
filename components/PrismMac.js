@@ -919,6 +919,190 @@ const renderCodeFrames = ({
   })
 }
 
+// 只用 Mermaid 官方主题变量，避免用 CSS 覆盖生成的 SVG 图元。
+const getReadingMermaidConfig = darkMode => {
+  const paper = darkMode ? '#1c1b18' : '#f7f6f0'
+  const node = darkMode ? '#26241f' : '#f0ede5'
+  const text = darkMode ? '#e6e2d8' : '#34352e'
+  const line = darkMode ? '#a29d91' : '#6b6b61'
+  const accent = darkMode ? '#e0896e' : '#aa533b'
+  const pie = darkMode
+    ? ['#26241f', '#49332c', '#3b352c', '#514038', '#383a2c', '#4b4637']
+    : ['#f0ede5', '#e4cebc', '#e8ddd0', '#d7b9aa', '#ded8be', '#c9c3ad']
+  const fontFamily = 'LXGW WenKai, Kaiti SC, STKaiti, KaiTi, serif'
+
+  // WCAG AA（sRGB）：文字/纸底、节点底，浅色 11.44/10.59:1，深色 13.31/11.99:1；
+  // 饼图文字/六种扇区底色最低为浅色 6.73:1、深色 7.28:1，均 >= 4.5:1。
+  // 序号用纸色字/连线色底：浅色 4.97:1、深色 6.37:1。
+  // 浅色强调色/节点底只有 4.48:1，强调色仅用于边框，不作文字或文字底色。
+  return {
+    theme: 'base',
+    fontFamily,
+    themeVariables: {
+      darkMode,
+      fontFamily,
+      background: paper,
+      primaryColor: node,
+      primaryTextColor: text,
+      primaryBorderColor: line,
+      secondaryColor: paper,
+      secondaryTextColor: text,
+      secondaryBorderColor: line,
+      tertiaryColor: node,
+      tertiaryTextColor: text,
+      tertiaryBorderColor: line,
+      lineColor: line,
+      textColor: text,
+      mainBkg: node,
+      nodeBorder: line,
+      nodeTextColor: text,
+      clusterBkg: paper,
+      clusterBorder: line,
+      titleColor: text,
+      edgeLabelBackground: paper,
+      noteBkgColor: node,
+      noteTextColor: text,
+      noteBorderColor: accent,
+      actorBkg: node,
+      actorBorder: line,
+      actorTextColor: text,
+      actorLineColor: line,
+      signalColor: line,
+      signalTextColor: text,
+      labelBoxBkgColor: node,
+      labelBoxBorderColor: line,
+      labelTextColor: text,
+      loopTextColor: text,
+      activationBkgColor: node,
+      activationBorderColor: accent,
+      sequenceNumberColor: paper,
+      attributeBackgroundColorOdd: paper,
+      attributeBackgroundColorEven: node,
+      // 超过六个扇区时复用配色，避免后六项回落到默认主题的派生色。
+      ...Object.fromEntries(
+        Array.from({ length: 12 }, (_, i) => [`pie${i + 1}`, pie[i % 6]])
+      ),
+      pieTitleTextColor: text,
+      pieSectionTextColor: text,
+      pieLegendTextColor: text,
+      pieStrokeColor: line,
+      pieOuterStrokeColor: accent,
+      pieOpacity: 1
+    }
+  }
+}
+
+// reading 只清理 flowchart / graph 的作者配色，避免深色模式下浅底节点配浅色文字；保留标签和标题中的普通文本。
+// 以下清理示例均在 flowchart / graph 内（输入 -> 输出）：
+// A:::red-->B -> A-->B；A:::red---B -> A---B；A:::my-class-->B -> A-->B。
+// A:::my_class-2==>B -> A==>B；A:::red-.->B -> A-.->B；A:::red~~~B -> A~~~B。
+// style A fill:red;A-->B -> A-->B；A-->B;style A fill:red;B-->C -> A-->B;B-->C。
+// classDef red fill:red;A-->B -> A-->B；class A red;A-->B -> A-->B。
+// linkStyle 0 stroke:red;A-->B -> A-->B；A["style classDef class linkStyle"] -> 原样保留。
+// style A fill:red -> 空字符串；class A red -> 空字符串。
+// 首个非空、非注释行决定图类型；classDiagram 中的 class A red 是节点定义，原样保留。
+const stripReadingMermaidStyles = chart => {
+  const firstLine = chart
+    .split('\n')
+    .find(line => line.trim() && !/^[ \t]*%%/.test(line))
+  if (!/^[ \t]*(?:flowchart|graph)\b/.test(firstLine || '')) return chart
+
+  const brackets = []
+  let quoted = false
+  let edgeLabel = false
+  let nodeShape = false
+  const nodeIdAtEnd =
+    /(?:^|[;&>|]|---|===|-\.-|--[ox])[ \t]*[\w\u0080-\uffff-]+$/
+
+  return chart
+    .split('\n')
+    .flatMap(line => {
+      const isSubgraph =
+        !quoted &&
+        brackets.length === 0 &&
+        !edgeLabel &&
+        /^[ \t]*subgraph\b/.test(line)
+      if (!quoted && brackets.length === 0 && !edgeLabel) {
+        if (/^[ \t]*%%/.test(line)) return [line]
+      }
+
+      let result = ''
+      let nodeShapeEnd = -1
+      let statementStart = 0
+      for (let i = 0; i < line.length; i++) {
+        const char = line[i]
+        if (!quoted && brackets.length === 0 && !edgeLabel) {
+          // 只删当前样式语句，分号后的连线等语句继续处理。
+          if (i === statementStart) {
+            const styleStatement = line.slice(i).match(
+              /^[ \t]*(?:(?:style|classDef|linkStyle)[ \t]+[^;]*|class[ \t]+[\w\u0080-\uffff-]+(?:[ \t]*,[ \t]*[\w\u0080-\uffff-]+)*[ \t]+[\w\u0080-\uffff-]+[ \t]*(?:%%[^;]*)?)(?:;|\r?$)/
+            )
+            if (styleStatement) {
+              i += styleStatement[0].length - 1
+              statementStart = i + 1
+              continue
+            }
+          }
+          if (char === ';') statementStart = i + 1
+        }
+        if (
+          !quoted &&
+          brackets.length === 0 &&
+          !edgeLabel &&
+          line.startsWith('%%', i)
+        ) {
+          result += line.slice(i)
+          break
+        }
+        if (char === '"' && line[i - 1] !== '\\') quoted = !quoted
+        if (!quoted) {
+          if (brackets.length === 0 && char === '|') edgeLabel = !edgeLabel
+          if (!edgeLabel) {
+            if ('[({'.includes(char)) {
+              if (brackets.length === 0) {
+                nodeShape = nodeIdAtEnd.test(result.trimEnd().replace(/@$/, ''))
+              }
+              brackets.push({ '[': ']', '(': ')', '{': '}' }[char])
+            } else if (
+              !isSubgraph &&
+              brackets.length === 0 &&
+              char === '>' &&
+              !/[-=]/.test(line[i - 1] || '') &&
+              nodeIdAtEnd.test(result)
+            ) {
+              nodeShape = true
+              brackets.push(']')
+            } else if (char === brackets[brackets.length - 1]) {
+              brackets.pop()
+              if (brackets.length === 0 && nodeShape) nodeShapeEnd = i
+            }
+            if (
+              !isSubgraph &&
+              brackets.length === 0 &&
+              char === ':' &&
+              (nodeShapeEnd === i - 1 || nodeIdAtEnd.test(result))
+            ) {
+              const shorthand = line.slice(i).match(
+                // 类名允许连字符，但遇到 --、==、-.、~~~ 等连线开头就停止。
+                /^:::(?:(?!--|==|-\.|~~~)[A-Za-z0-9_-])+(?:,(?:(?!--|==|-\.|~~~)[A-Za-z0-9_-])+)*/
+              )
+              if (shorthand) {
+                i += shorthand[0].length - 1
+                continue
+              }
+            }
+          }
+        }
+        result += char
+      }
+      return [result]
+    })
+    .join('\n')
+}
+
+// 串行处理异步渲染，切换主题或深浅色时旧任务先结束再渲染新源码。
+let mermaidRender = Promise.resolve()
+
 /**
  * 将mermaid语言 渲染成图片
  */
@@ -926,6 +1110,10 @@ const renderMermaid = mermaidCDN => {
   const articles = getNotionArticles()
   if (!articles || articles.length === 0) return () => {}
 
+  // 用实际正文所属主题判断，避免配置或 URL 的主题名与已渲染布局不一致。
+  const isReading = articles.every(article => article.closest('#theme-reading'))
+  const charts = []
+  let isDisposed = false
   let hasMermaidBlocks = false
 
   for (const article of articles) {
@@ -933,16 +1121,24 @@ const renderMermaid = mermaidCDN => {
       '.notion-code.language-mermaid'
     )
     for (const codeBlock of mermaidCodeBlocks) {
-      const chart = codeBlock.querySelector('code')?.textContent
-      if (!chart) continue
+      const source = codeBlock.querySelector('code')?.textContent
+      if (!source) continue
+      // 自带 %%{init / %%{initialize 或开头 --- frontmatter 的图保留原文，不清理、不注入 reading 配置。
+      const hasConfig =
+        /%%\{\s*(?:init|initialize)\b/.test(source) ||
+        /^\s*---(?:\s|$)/.test(source)
+      const applyReading = isReading && !hasConfig
+      const chart = applyReading ? stripReadingMermaidStyles(source) : source
       hasMermaidBlocks = true
-      let mermaidChart = codeBlock.querySelector('.mermaid')
+      let mermaidChart = codeBlock.querySelector('.mermaid, .mermaid-pending')
       if (!mermaidChart) {
         mermaidChart = document.createElement('pre')
-        mermaidChart.className = 'mermaid'
+        // 等按图注入配置后才加入 .mermaid，避免 CDN 的 load 事件抢先渲染。
+        mermaidChart.className = 'mermaid-pending'
         mermaidChart.textContent = chart
         codeBlock.appendChild(mermaidChart)
       }
+      charts.push({ element: mermaidChart, chart, applyReading })
     }
   }
 
@@ -954,7 +1150,29 @@ const renderMermaid = mermaidCDN => {
         try {
           const mermaid = window.mermaid
           if (!mermaid) return
-          mermaid?.contentLoaded()
+          mermaidRender = mermaidRender
+            .then(async () => {
+              if (isDisposed) return
+              const darkMode =
+                document.documentElement.classList.contains('dark')
+              // 只按图注入 reading 配置，全局保持 Mermaid 默认配置，无需在离开 reading 后恢复。
+              const readingInit = isReading
+                ? `%%{init: ${JSON.stringify(getReadingMermaidConfig(darkMode))}}%%\n`
+                : ''
+              // 切换主题或深浅色时恢复对应源码并清除标记，才能重新渲染。
+              charts.forEach(({ element, chart, applyReading }) => {
+                element.textContent = applyReading ? readingInit + chart : chart
+                element.removeAttribute('data-processed')
+                element.classList.remove('mermaid-pending')
+                element.classList.add('mermaid')
+              })
+              await mermaid.run({
+                nodes: charts.map(({ element }) => element)
+              })
+            })
+            .catch(err => {
+              console.warn('[PrismMac] mermaid render failed:', err)
+            })
         } catch (err) {
           console.warn('[PrismMac] mermaid render failed:', err)
         }
@@ -964,7 +1182,9 @@ const renderMermaid = mermaidCDN => {
       console.warn('[PrismMac] mermaid load failed:', err)
     })
 
-  return () => {}
+  return () => {
+    isDisposed = true
+  }
 }
 
 function renderPrismMac(codeLineNumbers, codeMacBar) {
