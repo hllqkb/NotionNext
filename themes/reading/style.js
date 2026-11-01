@@ -136,7 +136,7 @@ const Style = () => {
 
       /* 阅读设置：固定入口尺寸，面板只用系统字体 */
       #theme-reading .reading-settings-anchor { position: relative; display: flex; flex: none; }
-      #theme-reading .masthead .reading-settings-trigger { display: grid; place-items: center; width: 44px; height: 44px; }
+      #theme-reading .masthead .reading-settings-trigger { display: inline-flex; align-items: center; min-height: 44px; }
       #theme-reading .reading-settings {
         position: absolute; inset: 52px 0 auto auto; z-index: 40;
         box-sizing: border-box; width: 360px; max-width: calc(100vw - 40px);

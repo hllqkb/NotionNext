@@ -88,10 +88,8 @@ export const Masthead = ({ siteInfo }) => {
           </div>
         </details>
         <div className='reading-settings-anchor'>
-          <button ref={settingsButton} className='reading-settings-trigger' type='button' onClick={() => setSettingsOpen(open => !open)} aria-label='阅读设置' aria-haspopup='dialog' aria-expanded={settingsOpen} aria-controls='reading-settings'>
-            <svg width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
-              <path d='m3 18 5-12 5 12M5 14h6m9-2v6m0-4c0-3-5-3-5 1s5 4 5 0' />
-            </svg>
+          <button ref={settingsButton} className='reading-settings-trigger' type='button' onClick={() => setSettingsOpen(open => !open)} title='阅读设置' aria-haspopup='dialog' aria-expanded={settingsOpen} aria-controls='reading-settings'>
+            设置
           </button>
           {settingsOpen && <ReadingSettings triggerRef={settingsButton} onClose={closeSettings} />}
         </div>
