@@ -1,3 +1,4 @@
+import { scrollBehavior } from '@/lib/readingPreferences'
 import { useEffect, useRef, useState } from 'react'
 
 /**
@@ -46,9 +47,9 @@ const BookmarkCord = () => {
   }, [returning])
 
   const backToTop = (e, fromDrag = false) => {
-    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-    setPulled(!fromDrag && !reduce && window.innerWidth > 800)
-    window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' })
+    const behavior = scrollBehavior()
+    setPulled(!fromDrag && behavior === 'smooth' && window.innerWidth > 800)
+    window.scrollTo({ top: 0, behavior })
     // 键盘或拖动触发后绳子会收起，焦点交给页头第一个链接（不再额外滚动）
     if (fromDrag || e.detail === 0) document.querySelector('#theme-reading .masthead a')?.focus({ preventScroll: true })
   }

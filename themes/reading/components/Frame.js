@@ -1,9 +1,11 @@
 import { siteConfig } from '@/lib/config'
 import { ownThumbnail } from '@/lib/db/notion/ownImages'
-import { useGlobal } from '@/lib/global'
+import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import CONFIG from '../config'
+
+const ReadingSettings = dynamic(() => import('./ReadingSettings'), { ssr: false })
 
 /**
  * 站内链接一律用原生 a 整页跳转：页面都是静态 HTML，Next Link 会在视口内和悬停时
@@ -17,10 +19,12 @@ export const PageLink = ({ href, children, ...rest }) => {
     : <a href={href} {...rest}>{children}</a>
 }
 
-/** 页头：站名 + 导航 + 深浅色切换 */
+/** 页头：站名 + 导航 + 阅读设置 */
 export const Masthead = ({ siteInfo }) => {
   const router = useRouter()
-  const { isDarkMode, toggleDarkMode } = useGlobal()
+  const settingsButton = useRef(null)
+  const [settingsOpen, setSettingsOpen] = useState(false)
+  const closeSettings = useCallback(() => setSettingsOpen(false), [])
   const path = router.asPath || '/'
   const links = [
     { href: '/', label: '文章', match: p => p === '/' || p.startsWith('/page') },
@@ -83,9 +87,14 @@ export const Masthead = ({ siteInfo }) => {
             ))}
           </div>
         </details>
-        <button type='button' onClick={toggleDarkMode} aria-label='切换深浅色'>
-          {isDarkMode ? '浅色' : '深色'}
-        </button>
+        <div className='reading-settings-anchor'>
+          <button ref={settingsButton} className='reading-settings-trigger' type='button' onClick={() => setSettingsOpen(open => !open)} aria-label='阅读设置' aria-haspopup='dialog' aria-expanded={settingsOpen} aria-controls='reading-settings'>
+            <svg width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
+              <path d='m3 18 5-12 5 12M5 14h6m9-2v6m0-4c0-3-5-3-5 1s5 4 5 0' />
+            </svg>
+          </button>
+          {settingsOpen && <ReadingSettings triggerRef={settingsButton} onClose={closeSettings} />}
+        </div>
       </nav>
     </header>
   )

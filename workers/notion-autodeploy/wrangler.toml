@@ -14,6 +14,8 @@ id = "b1a2b1d996754bbab4ee950ed7a7b35f"
 
 [vars]
 NOTION_DATABASE_ID = "aa8cdaa272b682a4904e81214563f827"
+# Watch the inline config database independently of its parent page.
+CONFIG_DATABASE_ID = "c41cdaa272b682759c1b818e7b307172"
 # Rebuild only after this many minutes without new edits.
 QUIET_MINUTES = "10"
 # Hard cap on hook-triggered builds per day (UTC+8), retries included.

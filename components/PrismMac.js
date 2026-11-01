@@ -14,6 +14,7 @@ import { loadExternalResource } from '@/lib/utils'
 import { usePathname } from 'next/navigation'
 import { useGlobal } from '@/lib/global'
 import { siteConfig } from '@/lib/config'
+import { scrollBehavior } from '@/lib/readingPreferences'
 
 const PRISM_MAC_STYLE_PATH = '/css/prism-mac-style.css'
 
@@ -42,6 +43,29 @@ const PrismMac = ({ blockMap } = {}) => {
   const codeCollapseMinLines = Number(siteConfig('CODE_COLLAPSE_MIN_LINES', 20))
   // 统一代码框：mac 圆点、语言名、复制、折叠放在同一条头部，替代 pre-mac + 折叠条
   const codeFrame = siteConfig('CODE_FRAME')
+
+  // 切配色只换样式，不清理代码块和已打开的侧栏
+  useEffect(() => {
+    let disposed = false
+    const load = () => {
+      if (!getNotionArticle()?.querySelector('pre.notion-code')) return
+      observer.disconnect()
+      const ready = loadPrismThemeCSS(isDarkMode, prismThemeSwitch, prismThemeDarkPath, prismThemeLightPath, prismThemePrefixPath)
+      if ((codeMacBar || codeCollapse) && !codeFrame) loadPrismMacStyleCSS()
+      Promise.resolve(ready).catch(err => {
+        console.warn('[PrismMac] prism theme load failed:', err)
+      }).finally(() => {
+        if (!disposed && (codeMacBar || codeCollapse) && !codeFrame) loadPrismMacStyleCSS()
+      })
+    }
+    const observer = new MutationObserver(load)
+    observer.observe(document.body, { childList: true, subtree: true })
+    load()
+    return () => {
+      disposed = true
+      observer.disconnect()
+    }
+  }, [isDarkMode, pathname, blockMap, prismThemeSwitch, prismThemeDarkPath, prismThemeLightPath, prismThemePrefixPath, codeMacBar, codeCollapse, codeFrame])
 
   useEffect(() => {
     let isDisposed = false
@@ -167,27 +191,6 @@ const PrismMac = ({ blockMap } = {}) => {
       })
     }
 
-    const loadCodeStyleSheets = () => {
-      // 加载 Prism 主题后再次移动 Mac 样式到最后，避免刷新时被异步主题 CSS 覆盖。
-      const prismThemeReady = loadPrismThemeCSS(
-        isDarkMode,
-        prismThemeSwitch,
-        prismThemeDarkPath,
-        prismThemeLightPath,
-        prismThemePrefixPath
-      )
-      if ((codeMacBar || codeCollapse) && !codeFrame) {
-        loadPrismMacStyleCSS()
-        Promise.resolve(prismThemeReady)
-          .catch(err => {
-            console.warn('[PrismMac] prism theme load failed:', err)
-          })
-          .finally(() => {
-            loadPrismMacStyleCSS()
-          })
-      }
-    }
-
     const initCodeEnhancements = () => {
       if (isDisposed || hasInitialized) return true
 
@@ -202,8 +205,6 @@ const PrismMac = ({ blockMap } = {}) => {
         clearTimeout(initTimer)
         initTimer = null
       }
-
-      loadCodeStyleSheets()
 
       // 先用打包进来的 Prism 渲染，autoloader 只在有语言缺语法时才加载，不阻塞基础代码增强。
       renderCodeEnhancements()
@@ -227,7 +228,7 @@ const PrismMac = ({ blockMap } = {}) => {
       closeCodeSidePanel()
       cleanupPrism()
     }
-  }, [pathname, isDarkMode, blockMap])
+  }, [pathname, blockMap])
 
   return <></>
 }
@@ -744,20 +745,15 @@ const writeClipboard = async text => {
   return copied
 }
 
-const prefersReducedMotion = () =>
-  typeof window !== 'undefined' &&
-  typeof window.matchMedia === 'function' &&
-  window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
 /**
  * 把 pre 的 max-height 过渡到目标值；target 为 'none' 时展开到内容高度后放开限制
  */
 const animateCodeHeight = (pre, target) => {
-  const reduce = prefersReducedMotion()
   const finish = () => {
     if (target === 'none') pre.style.maxHeight = 'none'
   }
-  if (reduce) {
+  // 墨水屏或减少动态效果时直接到位，避免留下不会触发的过渡监听器
+  if (scrollBehavior() === 'auto') {
     pre.style.maxHeight = target === 'none' ? 'none' : `${target}px`
     return
   }
@@ -906,7 +902,7 @@ const renderCodeFrames = ({
         if (!wasFolded && wrapper.getBoundingClientRect().top < 0) {
           wrapper.scrollIntoView({
             block: 'start',
-            behavior: prefersReducedMotion() ? 'auto' : 'smooth'
+            behavior: scrollBehavior()
           })
         }
       })

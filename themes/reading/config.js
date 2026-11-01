@@ -2,6 +2,13 @@
  * reading 主题配置：仿 hllqkb.github.io/reading/ 的编辑式归档与阅读版式
  */
 const CONFIG = {
+  READING_DEFAULT_FONT: 'wenkai', // 默认字体：wenkai 文楷 / song 本机宋体 / hei 本机黑体 / system 系统
+  READING_DEFAULT_THEME: 'auto', // 默认配色：auto 自动 / paper 纸色 / green 浅绿 / night 夜间 / white 纯白 / ink 墨水屏
+  READING_DEFAULT_SIZE: 'm', // 默认字号：s 小 / m 中 / l 大
+  READING_DEFAULT_LEADING: 'standard', // 默认行距：compact 紧凑 / standard 标准 / loose 宽松
+  READING_DEFAULT_WIDTH: 'standard', // 默认版心：narrow 窄 / standard 标准 / wide 宽
+  READING_DEFAULT_INDENT: 'off', // 默认首行缩进：off 关闭 / on 开启
+  READING_DEFAULT_ALIGN: 'start', // 默认对齐：start 左对齐 / justify 两端对齐
   READING_EYEBROW: '技术 / 阅读 / 生活', // 首页大标题上方的小字
   READING_HOME_TITLE: '文章', // 首页大标题（后面自动加一个红色句号）
   READING_HOME_INTRO: '写下思考，也留下生活。', // 首页标题下的一句话
