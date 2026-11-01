@@ -14,6 +14,7 @@ import { loadExternalResource } from '@/lib/utils'
 import { usePathname } from 'next/navigation'
 import { useGlobal } from '@/lib/global'
 import { siteConfig } from '@/lib/config'
+import { scrollBehavior } from '@/lib/readingPreferences'
 
 const PRISM_MAC_STYLE_PATH = '/css/prism-mac-style.css'
 
@@ -744,20 +745,15 @@ const writeClipboard = async text => {
   return copied
 }
 
-const prefersReducedMotion = () =>
-  typeof window !== 'undefined' &&
-  typeof window.matchMedia === 'function' &&
-  window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
 /**
  * 把 pre 的 max-height 过渡到目标值；target 为 'none' 时展开到内容高度后放开限制
  */
 const animateCodeHeight = (pre, target) => {
-  const reduce = prefersReducedMotion()
   const finish = () => {
     if (target === 'none') pre.style.maxHeight = 'none'
   }
-  if (reduce) {
+  // 墨水屏或减少动态效果时直接到位，避免留下不会触发的过渡监听器
+  if (scrollBehavior() === 'auto') {
     pre.style.maxHeight = target === 'none' ? 'none' : `${target}px`
     return
   }
@@ -906,7 +902,7 @@ const renderCodeFrames = ({
         if (!wasFolded && wrapper.getBoundingClientRect().top < 0) {
           wrapper.scrollIntoView({
             block: 'start',
-            behavior: prefersReducedMotion() ? 'auto' : 'smooth'
+            behavior: scrollBehavior()
           })
         }
       })
