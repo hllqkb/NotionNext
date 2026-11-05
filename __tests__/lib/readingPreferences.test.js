@@ -9,7 +9,7 @@ import {
 import CONFIG from '@/themes/reading/config'
 
 const defaults = {
-  font: 'wenkai', theme: 'auto', size: 'm', leading: 'standard',
+  font: 'wenkai', theme: 'paper', size: 'm', leading: 'standard',
   width: 'standard', indent: 'off', align: 'start'
 }
 

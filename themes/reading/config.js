@@ -3,7 +3,7 @@
  */
 const CONFIG = {
   READING_DEFAULT_FONT: 'wenkai', // 默认字体：wenkai 文楷 / song 本机宋体 / hei 本机黑体 / system 系统
-  READING_DEFAULT_THEME: 'auto', // 默认配色：auto 自动 / paper 纸色 / green 浅绿 / night 夜间 / white 纯白 / ink 墨水屏
+  READING_DEFAULT_THEME: 'paper', // 默认配色：auto 自动 / paper 纸色 / green 浅绿 / night 夜间 / white 纯白 / ink 墨水屏
   READING_DEFAULT_SIZE: 'm', // 默认字号：s 小 / m 中 / l 大
   READING_DEFAULT_LEADING: 'standard', // 默认行距：compact 紧凑 / standard 标准 / loose 宽松
   READING_DEFAULT_WIDTH: 'standard', // 默认版心：narrow 窄 / standard 标准 / wide 宽
