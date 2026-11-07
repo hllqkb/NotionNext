@@ -31,6 +31,8 @@ const EXTRA_CORE = '，。、；：？！“”‘’（）《》〈〉「」『
 // Waline 3.16 zh-CN 界面文案（@waline/client dist 里的 locale 原文）；
 // 粗体部分是评论源标签和 waline.css 里加粗的反应标题、评论数、投票数（昵称是读者输入，没法预知）
 const COMMENT_MARK = 'comments-hint'
+// 加密文章在 __NEXT_DATA__ 里带密文（lib/postAccess 生成），正文要等浏览器解密
+const ENCRYPTED_MARK = '"encryptedPost":{'
 const COMMENT_TEXT =
   '昵称,昵称不能少于3个字符,邮箱,请填写正确的邮件地址,网址,可选,欢迎评论,来发评论吧~,提交,喜欢,取消喜欢,回复,取消回复,评论,刷新,加载更多...,预览,表情,上传图片,秒前,分钟前,小时前,天前,刚刚,正在上传,登录,退出,博主,置顶,字,评论字数应在 $0 到 $1 字之间！当前字数：$2,匿名,潜水,冒泡,吐槽,活跃,话痨,传说,表情包,搜索表情包,个人资料,通过,待审核,垃圾,取消置顶,按倒序,按正序,按热度,你认为这篇文章怎么样？,评论正在审核中，当前仅自己可见，审核通过后公开可见。,订阅本文评论,订阅本站评论,订阅你的评论回复0123456789'
 const COMMENT_BOLD = 'Waline你认为这篇文章怎么样？评论0123456789'
@@ -233,13 +235,22 @@ const run = async () => {
       codepoints(COMMENT_TEXT).forEach(cp => page.all.add(cp))
       codepoints(COMMENT_BOLD).forEach(cp => page.bold.add(cp))
     }
+    const cssFile = path.join(OUT_DIR, PAGE_CSS_DIR, pageCssPath(page.route))
+    fs.mkdirSync(path.dirname(cssFile), { recursive: true })
+    pageCssCount++
+    // 加密文章的正文在浏览器里解密后才出现，静态 HTML 里看不到它用的字：
+    // 按 HTML 切子集会漏掉正文里的字，加粗段落里没切进粗体的字退回常规体，一句话粗细交错。
+    // 这类页面改挂整套 unicode-range 切片（常规 + 粗体），@import 必须写在样式表最前面。
+    if (page.html.includes(ENCRYPTED_MARK)) {
+      const importCss = `@import url('${LEGACY_CSS}');`
+      fs.writeFileSync(cssFile, importCss)
+      inject(page, importCss + coreCss)
+      continue
+    }
     const rest = new Set([...cover(page.all, regular)].filter(cp => !core.has(cp)))
     let pageCss = await face(regular, rest)
     if (bold) pageCss += await face(bold, cover(page.bold, bold))
-    const cssFile = path.join(OUT_DIR, PAGE_CSS_DIR, pageCssPath(page.route))
-    fs.mkdirSync(path.dirname(cssFile), { recursive: true })
     fs.writeFileSync(cssFile, pageCss)
-    pageCssCount++
     inject(page, coreCss + pageCss)
   }
 
