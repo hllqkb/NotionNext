@@ -21,3 +21,9 @@
 
 /skills/*/SKILL.md
   Content-Type: text/plain; charset=utf-8
+
+# 私密加密页：正文在浏览器里用密码解开；不让搜索引擎收录、不缓存、不带来源地址
+/p/*
+  X-Robots-Tag: noindex, nofollow, noarchive
+  Cache-Control: no-store
+  Referrer-Policy: no-referrer
