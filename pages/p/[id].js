@@ -14,7 +14,7 @@ import {
   forgetPostKey
 } from '@/lib/utils/postDecryption'
 import { PageLink } from '@/themes/reading/components/Frame'
-import PostLock from '@/themes/reading/components/PostLock'
+import PasswordForm from '@/themes/reading/components/PasswordForm'
 
 const LOCKED_TITLE = '私密页面'
 const POST_ID = 'private-pages'
@@ -165,7 +165,7 @@ function PrivatePage({ encryptedPost }) {
             dangerouslySetInnerHTML={{ __html: payload.html }}
           />
         ) : (
-          <PostLock
+          <PasswordForm
             password={password}
             disabled={checkingSavedKey}
             unlocking={unlocking}

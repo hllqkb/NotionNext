@@ -1,4 +1,4 @@
-export default function PostLock({
+export default function PasswordForm({
   password,
   onPasswordChange,
   onSubmit,

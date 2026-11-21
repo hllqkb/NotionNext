@@ -31,7 +31,7 @@ const NotionPage = dynamic(() =>
 )
 import Toc, { useActiveHeading } from './components/Toc'
 import BookmarkCord from './components/BookmarkCord'
-import PostLock from './components/PostLock'
+import PasswordForm from './components/PasswordForm'
 import { ReadingProgress, RelatedPosts, SeriesBox, dekOf, getRelatedPosts, getSeries } from './components/Article'
 import { PageViews, RecentComments, ShareLink, SourceNote, StaleNote, sourceOf, useFootnotes, useImageFallback, useZoomKeyboard } from './components/ArticleTools'
 import CONFIG from './config'
@@ -495,7 +495,7 @@ const LayoutSlug = props => {
         <SeriesBox series={series} />
         {!lock && <Toc toc={post.toc} active={activeHeading} mobile />}
         {lock ? (
-          <PostLock
+          <PasswordForm
             password={password}
             unlocking={unlocking}
             rejected={rejected}
