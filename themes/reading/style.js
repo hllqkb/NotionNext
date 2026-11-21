@@ -456,6 +456,9 @@ const Style = () => {
       }
       #theme-reading .post-relock { font: inherit; color: var(--muted); background: none; border: 1px solid var(--line); border-radius: 4px; padding: 0 8px; cursor: pointer; }
       #theme-reading .post-relock:hover, #theme-reading .post-relock:focus-visible { color: var(--accent); border-color: var(--accent); }
+      #theme-reading .private-page-title { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+      #theme-reading .private-page-title h1 { margin: 0; }
+      #theme-reading .private-page-title .post-relock { font-size: 15px; }
       #theme-reading .article-footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 24px; font-size: 16px; }
       /* 分隔线只画在内容宽度上，和页眉的线对齐（border 会画满含内边距的整宽） */
       #theme-reading .site-footer { --fp: 56px; max-width: 1080px; margin: 80px auto 0; padding: 24px var(--fp) 32px; display: flex; justify-content: space-between; gap: 18px; font-size: 13px; color: var(--muted); background: linear-gradient(var(--line), var(--line)) top center / calc(100% - 2 * var(--fp)) 1px no-repeat; }
@@ -465,14 +468,21 @@ const Style = () => {
       #theme-reading .prose .notion,
       #theme-reading .prose .notion-page { font-family: var(--font); color: var(--ink); font-size: inherit; line-height: inherit; width: 100%; padding: 0; }
       #theme-reading .prose .notion-text { padding: 0; margin: 0 0 1.1em; }
-      #theme-reading .prose .notion-h { font-weight: 400; line-height: 1.5; }
-      #theme-reading .prose .notion-h1 { font-size: 32px; margin: 1.8em 0 .8em; padding-top: 20px; border-top: 1px solid var(--line); }
-      #theme-reading .prose .notion-h2 { font-size: 28px; margin: 1.7em 0 .8em; }
-      #theme-reading .prose .notion-h3 { font-size: 24px; margin: 1.5em 0 .7em; }
-      #theme-reading .prose .notion-quote { border: 0; margin: 0 0 1.6em; padding: 20px 24px; background: var(--quote-bg); border-radius: 8px; color: var(--muted); font-size: inherit; }
+      #theme-reading .prose .notion-h,
+      #theme-reading .private-page-body :is(h1, h2, h3, h4, h5, h6) { font-weight: 400; line-height: 1.5; }
+      #theme-reading .prose .notion-h1,
+      #theme-reading .private-page-body h1 { font-size: 32px; margin: 1.8em 0 .8em; padding-top: 20px; border-top: 1px solid var(--line); }
+      #theme-reading .prose .notion-h2,
+      #theme-reading .private-page-body h2 { font-size: 28px; margin: 1.7em 0 .8em; }
+      #theme-reading .prose .notion-h3,
+      #theme-reading .private-page-body :is(h3, h4, h5, h6) { font-size: 24px; margin: 1.5em 0 .7em; }
+      #theme-reading .prose .notion-quote,
+      #theme-reading .private-page-body blockquote { border: 0; margin: 0 0 1.6em; padding: 20px 24px; background: var(--quote-bg); border-radius: 8px; color: var(--muted); font-size: inherit; }
       #theme-reading .prose b, #theme-reading .prose strong { font-weight: 600; color: inherit; }
-      #theme-reading .prose .notion-link { color: var(--accent); border-bottom: 1px solid currentColor; opacity: 1; }
-      #theme-reading .prose .notion-list { padding-left: 1.5em; margin: 0 0 1.2em; }
+      #theme-reading .prose .notion-link,
+      #theme-reading .private-page-body a { color: var(--accent); border-bottom: 1px solid currentColor; opacity: 1; }
+      #theme-reading .prose .notion-list,
+      #theme-reading .private-page-body :is(ul, ol) { padding-left: 1.5em; margin: 0 0 1.2em; }
       /* Notion 每个列表项是一个单独的 ul/ol，连续的项之间只留项内段落的间距，不按段落间距拉开 */
       #theme-reading .prose .notion-list:has(+ .notion-list) { margin-bottom: .35em; }
       #theme-reading .prose .notion-hr { border-top: 1px solid var(--line); margin: 36px 0; }
@@ -539,9 +549,12 @@ const Style = () => {
         #theme-reading .prose { font-size: 18px; }
         #theme-reading .article-head h1 { font-size: 30px; }
         /* 手机上正文标题要比文章标题小一级（原来章节 32px 大过文章标题 30px） */
-        #theme-reading .prose .notion-h1 { font-size: 26px; }
-        #theme-reading .prose .notion-h2 { font-size: 23px; }
-        #theme-reading .prose .notion-h3 { font-size: 20px; }
+        #theme-reading .prose .notion-h1,
+        #theme-reading .private-page-body h1 { font-size: 26px; }
+        #theme-reading .prose .notion-h2,
+        #theme-reading .private-page-body h2 { font-size: 23px; }
+        #theme-reading .prose .notion-h3,
+        #theme-reading .private-page-body :is(h3, h4, h5, h6) { font-size: 20px; }
         #theme-reading .site-footer { flex-direction: column; gap: 4px; --fp: 20px; }
       }
 
@@ -973,6 +986,24 @@ const Style = () => {
       #theme-reading .prose .notion-simple-table .notion-inline-code { font-size: .9375em; }
       #theme-reading .prose :is(.notion-equation-block, .katex-display) { display: block; max-width: 100%; overflow-x: auto; overflow-y: hidden; scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
       #theme-reading .prose :is(.notion-collection, .notion-table) { max-width: 100%; overflow-x: auto; }
+
+      /* 私密页的正文是已渲染的 HTML，用原生标签适配同一套阅读设置 */
+      #theme-reading .private-page-body { line-height: var(--leading, 1.85); overflow-wrap: anywhere; }
+      #theme-reading .private-page-body > :first-child { margin-top: 0; }
+      #theme-reading .private-page-body > h1:first-child { border-top: 0; padding-top: 0; }
+      #theme-reading .private-page-body p { margin: 0 0 1em; text-wrap: pretty; }
+      #theme-reading .private-page-body blockquote > :last-child,
+      #theme-reading .private-page-body li > :last-child { margin-bottom: 0; }
+      html[data-reading-indent='on'] #theme-reading .private-page-body > p { text-indent: 2em; }
+      html[data-reading-align='justify'] #theme-reading .private-page-body :is(p, li) { text-align: justify; text-align-last: start; text-wrap: wrap; }
+      #theme-reading .private-page-body ul { list-style: disc; }
+      #theme-reading .private-page-body ol { list-style: decimal; }
+      #theme-reading .private-page-body pre { max-width: 100%; overflow-x: auto; padding: 12px; background: var(--code-block-bg); }
+      #theme-reading .private-page-body table { display: block; width: max-content; max-width: 100%; overflow-x: auto; margin-bottom: 1.2em; border-collapse: collapse; font-size: 16px; line-height: 1.65; }
+      #theme-reading .private-page-body table > :first-child { border-top: 1.5px solid var(--ink); }
+      #theme-reading .private-page-body table > :last-child { border-bottom: 1.5px solid var(--ink); }
+      #theme-reading .private-page-body :is(th, td) { min-width: 6em; padding: 7px 10px; border-bottom: 1px solid var(--line-soft); }
+      #theme-reading .private-page-body thead th { border-bottom-color: var(--ink); font-weight: 500; }
 
       /* 图片：加载完之前垫纸色底；加载失败换成占位，不再能点开放大 */
       #theme-reading .prose .notion-asset-wrapper-image img:not(.img-ready),

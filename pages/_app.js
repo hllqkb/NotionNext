@@ -76,6 +76,7 @@ const MyApp = ({ Component, pageProps }) => {
   useAdjustStyle()
 
   const route = useRouter()
+  const privatePage = pageProps?.privatePage
   const queryTheme = getQueryParam(route.asPath, 'theme')
   const notionTheme = pageProps?.NOTION_CONFIG?.THEME
   const configTheme = BLOG.THEME
@@ -97,11 +98,11 @@ const MyApp = ({ Component, pageProps }) => {
     <AppErrorBoundary theme={theme}>
       <GlobalContextProvider {...pageProps}>
         <GLayout {...pageProps}>
-          <SEO {...pageProps} />
+          {!privatePage && <SEO {...pageProps} />}
           <Component {...pageProps} />
         </GLayout>
         <PWAInstaller NOTION_CONFIG={pageProps?.NOTION_CONFIG} />
-        <ExternalPlugins {...pageProps} />
+        {!privatePage && <ExternalPlugins {...pageProps} />}
       </GlobalContextProvider>
     </AppErrorBoundary>
   )
