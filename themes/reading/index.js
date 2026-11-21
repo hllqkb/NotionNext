@@ -31,6 +31,7 @@ const NotionPage = dynamic(() =>
 )
 import Toc, { useActiveHeading } from './components/Toc'
 import BookmarkCord from './components/BookmarkCord'
+import PasswordForm from './components/PasswordForm'
 import { ReadingProgress, RelatedPosts, SeriesBox, dekOf, getRelatedPosts, getSeries } from './components/Article'
 import { PageViews, RecentComments, ShareLink, SourceNote, StaleNote, sourceOf, useFootnotes, useImageFallback, useZoomKeyboard } from './components/ArticleTools'
 import CONFIG from './config'
@@ -61,7 +62,8 @@ const LazyComment = ({ post }) => {
  * 基础框架：文章页自己排版（左目录右正文），其余页面放进 .page 版心
  */
 const LayoutBase = props => {
-  const { children, siteInfo, post } = props
+  const { children, siteInfo, post, privatePage } = props
+  const useArticleLayout = post || privatePage
   const revealReady = useReveal()
   usePageFont()
   // data-prismjs-copy*：Prism copy-to-clipboard 插件从祖先元素读这几个属性作为按钮文案
@@ -69,15 +71,16 @@ const LayoutBase = props => {
     <div
       id='theme-reading'
       className={`${siteConfig('FONT_STYLE')} ${revealReady ? 'reveal-ready' : ''}`}
+      data-pagefind-ignore={privatePage ? 'all' : undefined}
       data-prismjs-copy='复制'
       data-prismjs-copy-success='已复制'
       data-prismjs-copy-error='按 Ctrl+C 复制'>
       <Style />
       <div className='page'>
         <Masthead siteInfo={siteInfo} />
-        {!post && <main id='content'>{children}</main>}
+        {!useArticleLayout && <main id='content'>{children}</main>}
       </div>
-      {post && <main id='content'>{children}</main>}
+      {useArticleLayout && <main id='content'>{children}</main>}
       <SiteFooter siteInfo={siteInfo} />
       <BookmarkCord />
       <script type='speculationrules' dangerouslySetInnerHTML={{ __html: SPECULATION_RULES }} />
@@ -492,33 +495,21 @@ const LayoutSlug = props => {
         <SeriesBox series={series} />
         {!lock && <Toc toc={post.toc} active={activeHeading} mobile />}
         {lock ? (
-          <form
-            className='post-lock'
+          <PasswordForm
+            password={password}
+            unlocking={unlocking}
+            rejected={rejected}
+            onPasswordChange={value => {
+              setPassword(value)
+              setRejected(false)
+            }}
             onSubmit={async e => {
               e.preventDefault()
               if (!password || unlocking) return
               setRejected(false)
               setRejected(!(await validPassword(password)))
-            }}>
-            <label htmlFor='post-lock-password'>这篇文章需要密码。</label>
-            <div>
-              <input
-                id='post-lock-password'
-                type='password'
-                autoComplete='current-password'
-                value={password}
-                disabled={unlocking}
-                onChange={e => {
-                  setPassword(e.target.value)
-                  setRejected(false)
-                }}
-              />
-              <button type='submit' disabled={unlocking || !password}>
-                {unlocking ? '解锁中' : '解锁'}
-              </button>
-            </div>
-            {rejected && <p role='alert'>密码不对，再试一次。</p>}
-          </form>
+            }}
+          />
         ) : isGallery ? (
           <article id='article-wrapper' className='prose'>
             <Gallery images={galleryImages(post)} />

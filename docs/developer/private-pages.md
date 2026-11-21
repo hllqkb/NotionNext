@@ -1,19 +1,19 @@
 # Private pages under /p
 
-Password-protected posts in the Notion database are not private: the database is publicly shared and its id is in this repo, so the Notion API returns their body and their `password` property to anyone. Content that must stay private is published as a standalone encrypted page instead, and never stored in Notion.
+Keep private source material outside this repository and the public Notion database. Commit the encrypted JSON for each page to `data/private/<id>.json`.
 
-## How a page is made
+## Add or replace a page
 
-- The source Markdown stays outside this repo.
-- A local script renders it to HTML and encrypts it with AES-GCM-256. The key is derived from a password with PBKDF2-SHA256, 600,000 iterations, and a random salt and IV per page. The password is typed in a terminal and never written anywhere.
-- The output is one self-contained HTML file. It holds only the ciphertext and a small decryptor that runs in the browser.
+1. Choose a random 16-character hexadecimal ID. Reuse the existing ID to keep a page's URL.
+2. Render the source to an HTML fragment and prepare the payload `{ title, html }`. Include only trusted HTML because the browser inserts it directly into the article.
+3. In your local encryption script, call `encryptPostPayload({ title, html }, passwordDigest, 'private-pages')` from `lib/server/postEncryption.js`. The digest is the hexadecimal SHA-256 of the UTF-8 password. Use the same password and the exact post ID `private-pages` for every page. The shared post ID gives all pages the same salt, and the helper generates a fresh IV for each encryption.
+4. Save the helper's output `{ v, iter, salt, iv, data }` to `data/private/<id>.json`. Keep the plaintext, password, and digest out of the repo.
 
-## Where it goes
+`pages/p/[id].js` discovers these files at build time. With `EXPORT=true` it writes `out/p/<id>.html`, served by Cloudflare Pages at `/p/<id>`. A directory containing only `.gitkeep` exports zero private pages. Each migrated URL starts working again when its matching JSON is added and deployed.
 
-- The file goes in `public/p/<random hex>.html`. It is not linked from anywhere, and it is not in the sitemap, RSS or Pagefind index: those are built from Notion posts, and the page sets `data-pagefind-ignore`.
-- `public/_headers` gives `/p/*` the headers `X-Robots-Tag: noindex, nofollow, noarchive`, `Cache-Control: no-store` and `Referrer-Policy: no-referrer`.
+## Unlocking and indexing
 
-## Notes
-
-- The ciphertext is public in this repo forever, so use a long password that is not used anywhere else.
-- To change the password or the content, re-run the script and replace the file.
+- The reading theme shows the lock form until the browser decrypts the title and body. It saves the derived key in localStorage under the shared post ID, so another private page on the same browser can open automatically. **锁上** clears the saved key and locks the current page.
+- Five consecutive rejected passwords trigger a 30-second lockout. Each subsequent failure doubles the delay up to one hour. The count and deadline are shared across private pages via the `private-pages-throttle` localStorage entry. Successful decryption clears both.
+- The lockout only applies to attempts through the form. Anyone who downloads the ciphertext can try passwords offline, so use a long, unique password. Rotating the shared password requires re-encrypting all private pages.
+- Private routes are excluded from sitemap and search indexes. They are outside the Notion article catalog used for RSS and the home and archive lists. The route sends a robots directive in its HTML, and Cloudflare applies the `/p/*` rules in `public/_headers`.
