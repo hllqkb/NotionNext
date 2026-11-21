@@ -146,6 +146,61 @@ describe('functions/img 图片代理', () => {
     expect((await call(imgPath())).status).toBe(502)
   })
 
+  describe('配了 NOTION_TOKEN_V2', () => {
+    const tokenEnv = { ...env, NOTION_TOKEN_V2: 'secret-token' }
+    const callWithToken = path =>
+      onRequest({
+        request: new Request(`${ORIGIN}${path}`),
+        env: tokenEnv,
+        waitUntil: p => waits.push(p)
+      })
+    const image = () =>
+      new Response('png-bytes', { headers: { 'content-type': 'image/png' } })
+
+    it('回源带令牌且不自动跟跳转', async () => {
+      global.fetch = jest.fn(async () => image())
+      const res = await callWithToken(imgPath())
+      expect(res.status).toBe(200)
+      const [, init] = global.fetch.mock.calls[0]
+      expect(init.headers.Cookie).toBe('token_v2=secret-token')
+      expect(init.redirect).toBe('manual')
+    })
+
+    it('跳到非 Notion 域名时不带令牌', async () => {
+      const s3 = 'https://prod-files-secure.s3.us-west-2.amazonaws.com/a/b.png'
+      global.fetch = jest.fn(async target =>
+        target === s3
+          ? image()
+          : new Response(null, { status: 302, headers: { location: s3 } })
+      )
+      const res = await callWithToken(imgPath())
+      expect(res.status).toBe(200)
+      expect(global.fetch).toHaveBeenCalledTimes(2)
+      expect(global.fetch.mock.calls[0][1].headers.Cookie).toBeDefined()
+      expect(global.fetch.mock.calls[1][0]).toBe(s3)
+      expect(global.fetch.mock.calls[1][1].headers.Cookie).toBeUndefined()
+    })
+
+    it('一直跳转按 502 处理', async () => {
+      global.fetch = jest.fn(
+        async () =>
+          new Response(null, {
+            status: 302,
+            headers: { location: 'https://www.notion.so/image/loop' }
+          })
+      )
+      const res = await callWithToken(imgPath())
+      expect(res.status).toBe(502)
+      expect(store.size).toBe(0)
+    })
+
+    it('名单外的组合仍然 302，不带令牌回源', async () => {
+      const res = await callWithToken(imgPath(OTHER_ID, ATTACHMENT))
+      expect(res.status).toBe(302)
+      expect(global.fetch).not.toHaveBeenCalled()
+    })
+  })
+
   it('只接受 GET / HEAD', async () => {
     expect((await call(imgPath(), 'POST')).status).toBe(405)
     const head = await call(imgPath(), 'HEAD')
