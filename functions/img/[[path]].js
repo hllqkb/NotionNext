@@ -9,6 +9,8 @@
  *   Notion 原中转地址，本站不取图、不缓存，别人没法借本站流量转发任意 Notion 公开页面或外链
  * - 缓存键只用 table + blockId + 原图键（Notion 文件去掉签名参数，外链用完整地址），签名过期换新不影响命中
  * - 上游失败返回 502，不缓存
+ * - Notion 数据库不公开分享时，在 Pages 环境变量里配 NOTION_TOKEN_V2（和构建读文章用的是同一个），
+ *   名单内的图带令牌回源；名单外的 302 仍不带令牌，访客匿名取不到，这类图会裂
  */
 import {
   allowlistKey,
@@ -43,6 +45,39 @@ const loadAllowlist = (env, requestUrl) => {
       })
   }
   return allowlistPromise
+}
+
+const ACCEPT = 'image/avif,image/webp,image/apng,image/*,*/*;q=0.8'
+const MAX_REDIRECTS = 3
+// 登录令牌只发给 Notion 自己的域名；/image/ 可能跳到 S3 等文件域名，跳过去时不能带上
+const isNotionHost = hostname => /(^|\.)notion\.(so|com)$/i.test(hostname)
+
+/**
+ * 回源取图。Notion 数据库不公开分享时要带 token_v2 才取得到，所以配了 NOTION_TOKEN_V2 就带上；
+ * 没配时和以前一样匿名取。带令牌时自己跟跳转，逐跳判断域名。
+ * @param {string} upstream
+ * @param {string|undefined} token
+ * @returns {Promise<Response>}
+ */
+async function fetchUpstream(upstream, token) {
+  if (!token) {
+    return fetch(upstream, { headers: { Accept: ACCEPT } })
+  }
+  let target = upstream
+  for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
+    const { protocol, hostname } = new URL(target)
+    const headers = { Accept: ACCEPT }
+    if (protocol === 'https:' && isNotionHost(hostname)) {
+      headers.Cookie = `token_v2=${token}`
+    }
+    const response = await fetch(target, { headers, redirect: 'manual' })
+    const location = response.headers.get('location')
+    if (response.status < 300 || response.status >= 400 || !location) {
+      return response
+    }
+    target = new URL(location, target).toString()
+  }
+  throw new Error('Too many redirects')
 }
 
 export async function onRequest(context) {
@@ -97,9 +132,7 @@ export async function onRequest(context) {
 
   let response = null
   try {
-    response = await fetch(upstream, {
-      headers: { Accept: 'image/avif,image/webp,image/apng,image/*,*/*;q=0.8' }
-    })
+    response = await fetchUpstream(upstream, env.NOTION_TOKEN_V2)
   } catch {}
   const contentType = response?.headers.get('content-type') || ''
   if (!response || !response.ok || !contentType.startsWith('image/')) {
