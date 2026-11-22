@@ -17,3 +17,7 @@ Keep private source material outside this repository and the public Notion datab
 - Five consecutive rejected passwords trigger a 30-second lockout. Each subsequent failure doubles the delay up to one hour. The count and deadline are shared across private pages via the `private-pages-throttle` localStorage entry. Successful decryption clears both.
 - The lockout only applies to attempts through the form. Anyone who downloads the ciphertext can try passwords offline, so use a long, unique password. Rotating the shared password requires re-encrypting all private pages.
 - Private routes are excluded from sitemap and search indexes. They are outside the Notion article catalog used for RSS and the home and archive lists. The route sends a robots directive in its HTML, and Cloudflare applies the `/p/*` rules in `public/_headers`.
+
+## Keep a migrated post in the lists
+
+A post whose body moved to a private page can stay Published in Notion with a one-line stub and no `password`. Add its slug (the last path segment, such as `p-8954b68c`) and the private page ID to `themes/reading/privateLinks.js`. The reading theme then shows the lock mark for that post in the home, archive, series and previous/next lists, links those entries straight to `/p/<id>`, and leaves the post out of related posts and the random pick. The stub at `/article/<slug>` keeps working for old links.
