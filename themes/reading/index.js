@@ -7,7 +7,7 @@ import { scrollBehavior } from '@/lib/readingPreferences'
 import { isBrowser } from '@/lib/utils'
 import { useRouter } from 'next/router'
 import { useEffect, useRef, useState } from 'react'
-import { CategoryChips, LockIcon, Masthead, PageLink, SiteFooter, WritingStreak, YearGroups, filterByCategory, hasCover, postDay, useReveal } from './components/Frame'
+import { CategoryChips, LockIcon, Masthead, PageLink, SiteFooter, WritingStreak, YearGroups, filterByCategory, hasCover, isLocked, postDay, postHref, useReveal } from './components/Frame'
 import Gallery, { galleryImages } from './components/Gallery'
 import { LayoutAbout, LayoutBooks, LayoutGallery, LayoutLinks, LayoutProjects, pageLayoutFor } from './components/Pages'
 import { SkillsBoard } from './components/Skills'
@@ -143,19 +143,19 @@ const LeadStory = ({ post }) => (
       {post.category && <span>{post.category}</span>}
     </div>
     <h2>
-      <PageLink href={post.href}>
-        {post.password && <LockIcon />}
+      <PageLink href={postHref(post)}>
+        {isLocked(post) && <LockIcon />}
         {post.title}
       </PageLink>
     </h2>
     <div className='lead-row'>
       <p>{wholeSentences(post.summary)}</p>
-      <PageLink className='read-link' href={post.href} aria-label={`阅读：${post.title}`}>
+      <PageLink className='read-link' href={postHref(post)} aria-label={`阅读：${post.title}`}>
         阅读全文
       </PageLink>
     </div>
     {hasCover(post) && (
-      <PageLink href={post.href} className='lead-cover' tabIndex={-1} aria-hidden='true'>
+      <PageLink href={postHref(post)} className='lead-cover' tabIndex={-1} aria-hidden='true'>
         <LeadCoverImage src={post.pageCoverThumbnail} />
       </PageLink>
     )}
@@ -545,13 +545,13 @@ const LayoutSlug = props => {
         {isArticle && (prev || next) && (
           <nav className='post-around reveal' aria-label='上一篇和下一篇'>
             {prev ? (
-              <PageLink href={prev.href || `/${prev.slug}`}>
+              <PageLink href={postHref(prev)}>
                 <small>上一篇</small>
                 {prev.title}
               </PageLink>
             ) : <span />}
             {next ? (
-              <PageLink href={next.href || `/${next.slug}`} className='next'>
+              <PageLink href={postHref(next)} className='next'>
                 <small>下一篇</small>
                 {next.title}
               </PageLink>

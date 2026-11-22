@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { LockIcon, PageLink, postDay } from './Frame'
+import { LockIcon, PageLink, isLocked, postDay, postHref } from './Frame'
 
 /**
  * 文章页的附件：阅读进度条、系列目录、相关文章
@@ -99,8 +99,8 @@ export const SeriesBox = ({ series }) => {
               {i === index ? (
                 <span aria-current='page'>{p.title}</span>
               ) : (
-                <PageLink href={p.href || `/${p.slug}`}>
-                  {p.password && <LockIcon />}
+                <PageLink href={postHref(p)}>
+                  {isLocked(p) && <LockIcon />}
                   {p.title}
                 </PageLink>
               )}
@@ -122,7 +122,7 @@ export const getRelatedPosts = (post, pages = [], series, count = 4) => {
   const inSeries = new Set((series?.posts || []).map(p => p.slug))
   const at = post?.publishDate || 0
   return pages
-    .filter(p => !samePost(p, post) && !p.password && !inSeries.has(p.slug))
+    .filter(p => !samePost(p, post) && !isLocked(p) && !inSeries.has(p.slug))
     .map(p => {
       const shared = (p.tags || []).filter(t => tags.has(t)).length
       return { p, score: shared * 2 + (post.category && p.category === post.category ? 1 : 0) }

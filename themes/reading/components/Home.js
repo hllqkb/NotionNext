@@ -1,6 +1,6 @@
 import { siteConfig } from '@/lib/config'
 import CONFIG from '../config'
-import { EssayRow, LockIcon, PageLink, postDay, updatedAt } from './Frame'
+import { EssayRow, LockIcon, PageLink, isLocked, postDay, postHref, updatedAt } from './Frame'
 
 /**
  * 摘要只保留完整的句子：Notion 里的摘要常被截在半句（自动摘要按字数截断），
@@ -39,10 +39,10 @@ export const ReadingPicks = ({ posts = [], exclude }) => {
       <ol>
         {picks.map(p => (
           <li key={p.slug}>
-            <PageLink href={p.href}>
+            <PageLink href={postHref(p)}>
               <span className='pick-text'>
                 <span className='pick-title'>
-                  {p.password && <LockIcon />}
+                  {isLocked(p) && <LockIcon />}
                   {p.title}
                 </span>
                 <span className='pick-meta'>
@@ -60,7 +60,7 @@ export const ReadingPicks = ({ posts = [], exclude }) => {
 
 /** 能被随机抽到的文章：站内、未加密、不是当前页 */
 const randomPool = (posts, current) =>
-  (posts || []).filter(p => p?.href && !p.password && !/^https?:\/\//.test(p.href) && p.href !== current)
+  (posts || []).filter(p => p?.href && !isLocked(p) && !/^https?:\/\//.test(p.href) && p.href !== current)
 
 /**
  * 随便读一篇：全站同一个入口（首页、归档、404），在客户端从全部文章里抽一篇整页跳转，不请求新接口。

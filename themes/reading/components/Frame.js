@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import CONFIG from '../config'
+import PRIVATE_LINKS from '../privateLinks'
 
 const ReadingSettings = dynamic(() => import('./ReadingSettings'), { ssr: false })
 
@@ -222,6 +223,18 @@ export const WritingStreak = ({ pages = [], buildTime }) => {
   )
 }
 
+/** 正文迁到私密页的文章返回 /p 地址，其余返回 null */
+export const privateHref = post => {
+  const id = PRIVATE_LINKS[String(post?.slug || '').split('/').pop()]
+  return id ? `/p/${id}` : null
+}
+
+/** 要密码才能读：Notion 里带 password 的加密文章，或正文在私密页的文章 */
+export const isLocked = post => Boolean(post?.password || privateHref(post))
+
+/** 文章链接：私密页优先，其次 href，最后用 slug 拼 */
+export const postHref = post => privateHref(post) || post?.href || `/${post?.slug}`
+
 /** 加密文章的标记：小「密」字印 */
 export const LockIcon = () => (
   <span className='lock' role='img' aria-label='需要密码'>
@@ -233,9 +246,9 @@ export const LockIcon = () => (
  *  updated 为 true 时日期换成「更新于 年.月.日」 */
 export const EssayRow = ({ post, updated }) => (
   <li className='essay-row'>
-    <PageLink href={post.href}>
+    <PageLink href={postHref(post)}>
       <h3>
-        {post.password && <LockIcon />}
+        {isLocked(post) && <LockIcon />}
         {post.title}
       </h3>
       <span className='row-meta'>
