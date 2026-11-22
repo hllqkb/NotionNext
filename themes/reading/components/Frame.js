@@ -225,8 +225,8 @@ export const WritingStreak = ({ pages = [], buildTime }) => {
 
 /** 正文迁到私密页的文章返回 /p 地址，其余返回 null */
 export const privateHref = post => {
-  const id = PRIVATE_LINKS[String(post?.slug || '').split('/').pop()]
-  return id ? `/p/${id}` : null
+  const key = String(post?.slug || '').split('/').pop()
+  return Object.prototype.hasOwnProperty.call(PRIVATE_LINKS, key) ? `/p/${PRIVATE_LINKS[key]}` : null
 }
 
 /** 要密码才能读：Notion 里带 password 的加密文章，或正文在私密页的文章 */
