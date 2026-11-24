@@ -193,12 +193,29 @@ const StatusTag = ({ value }) => {
   return <span className={`status-tag${live ? ' live' : ''}`}>{live || !/待/.test(value) ? value : '完成'}</span>
 }
 
+const playableGames = [
+  ['冰封平安夜', 'https://www.meshy.ai/3d-games/frozen-silent-night'],
+  ['星核地牢', 'https://xinghe-dungeon-mvp.pages.dev/'],
+  ['两头烧', 'https://hllqkb.github.io/both-ends/'],
+  ['以撒网页版', 'https://hllqkb.github.io/isaac-web-mobile/']
+]
+
 /** 项目：三级标题是项目名，下面一句话 + 「状态：」「技术：」「源码：」「演示：」 */
 export const LayoutProjects = ({ post }) => {
   const [intro, ...cards] = splitBy(topBlocks(post), ['sub_sub_header', 'sub_header', 'header'])
   return (
     <Wrap name='projects'>
       <PageHead eyebrow='所作' title={post.title} lede={intro.blocks.length > 0 && <div className='intro-text page-lede'><Blocks blocks={intro.blocks} /></div>} />
+      <section aria-labelledby='play-games'>
+        <h2 className='section-label' id='play-games'>在线游玩</h2>
+        <ul className='card-grid pinned-grid'>
+          {playableGames.map(([name, url]) => (
+            <li className='page-card project-card' key={url}>
+              <h3><PageLink href={url}>{name}</PageLink></h3>
+            </li>
+          ))}
+        </ul>
+      </section>
       {/* GitHub 数据构建时同步：自己的仓库按 star 排，再是参与贡献的置顶；两份都没有时才用 Notion 里写的项目卡片 */}
       <MyRepos />
       <PinnedRepos />
