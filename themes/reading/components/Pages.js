@@ -194,7 +194,7 @@ const StatusTag = ({ value }) => {
 }
 
 const playableGames = [
-  ['冰封平安夜', 'https://www.meshy.ai/3d-games/frozen-silent-night'],
+  ['冰封平安夜', 'https://frost.hllqk.cn/'],
   ['星核地牢', 'https://xinghe-dungeon-mvp.pages.dev/'],
   ['两头烧', 'https://hllqkb.github.io/both-ends/'],
   ['以撒网页版', 'https://hllqkb.github.io/isaac-web-mobile/']
